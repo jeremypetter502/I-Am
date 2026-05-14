@@ -63,6 +63,9 @@ Note: After export, users may edit the downloaded context file in their preferre
 
 ## Requirements *(mandatory)*
 
+**Normative sections guidance**: Normative requirement sections must not include implementation details (frameworks, libraries, or low-level design). Implementation guidance belongs in "Implementation Notes (Non-normative)" and reference documents. This keeps requirements readable by non-technical stakeholders and prevents accidental coupling of requirements to an implementation approach.
+
+
 ### Functional Requirements
 
 - **FR-001**: The system MUST present the core IPIP question set and clearly indicate estimated completion time (displayed as approximate minutes or as percentage progress).
@@ -77,6 +80,8 @@ Note: After export, users may edit the downloaded context file in their preferre
 - **FR-009**: The system MUST accept an imported ContextFile and perform best-effort ingestion: validate against the canonical schema, import valid modules automatically, and auto-fill reasonable defaults for missing (optional) fields. Any inferred or defaulted values must be clearly flagged in the change summary presented to the user; the user must be able to undo the import or re-import if they reject inferred values.
 - **FR-010**: The system MUST allow users to re-take modules or add new question sets after importing. When new results are produced for a module, they MUST replace any previous values for that module (no per-field merges). The system MUST indicate which modules were updated. Final edits can be made by the user by downloading and editing the exported context file.
 - **FR-012**: The system MUST provide a client-side scorer utility that computes trait scores (including reverse-scoring), applies configured mappings, and emits a versioned ContextFile ready for export and import.
+- **FR-014**: The system MUST provide clear rollback guidance and an undo path when an import or export round-trip produces inconsistent or invalid data. The UI must allow the user to revert to the previous profile state or discard the import and present user-facing warnings describing the inconsistency. [Edge Case]
+- **FR-015**: Consent and opt-in actions (for analytics or server-side persistence) MUST be explicitly recorded and included in exported metadata when enabled; the UI must surface the consent action prior to enabling any server-side storage or analytics. [Privacy, Traceability]
 
 ### Key Entities *(include if feature involves data)*
 
@@ -88,6 +93,9 @@ Note: After export, users may edit the downloaded context file in their preferre
 - **ContextFile**: Compact artifact exported for LLM use (portable machine-readable or plaintext format with key traits).
 
 ## Success Criteria *(mandatory)*
+
+**Measurability note**: Success criteria are normative and must be directly traceable to requirements by ID (e.g., SC-001 → FR-001). Where success criteria use qualitative terms ("fast", "compact"), measurable thresholds are provided alongside the criterion. If a threshold depends on environment (device/network), the spec must document the target environment and measurement method.
+
 
 ### Measurable Outcomes
 
@@ -102,6 +110,8 @@ Note: After export, users may edit the downloaded context file in their preferre
 - Question banks (IPIP, extended, aesthetic, musical) are provided or curated and versioned externally.
 - Compact context files will be human-readable and easily pasted into LLM prompts.
 - Integration with third-party analytics or storage will require explicit consent.
+
+**Traceability & requirement IDs**: This project uses an explicit ID scheme for requirements (FR-###), success criteria (SC-###), and checklist items (CHK###). All artifacts (tasks, checklists, test vectors) should reference these IDs to ensure traceability. Strive for at least 80% of checklist items to reference a spec section or requirement ID. [Traceability]
 
 ## Clarifications
 
@@ -156,6 +166,9 @@ The following recommendations improve completion rates and user engagement; they
 - Visual-driven choices: use images, icons, or visual examples instead of text-heavy options where appropriate to speed comprehension.
 - Smooth, narrative transitions: frame the survey as a journey with animated transitions and progressive storytelling rather than abrupt page reloads.
 - Interactive affordances: employ tactile, responsive elements (animated presses, subtle motion) to make interactions feel satisfying while avoiding motion that causes distraction.
+- Prominent display (measurable): where the spec uses terms like "prominent" or "primary", provide objective criteria. Recommended defaults: primary CTA font-size >= 18px, minimum tap/click target 44x44 CSS pixels, text contrast ratio >= 4.5:1; primary summary card should occupy at least 30% of the content column width on desktop or be placed above the first viewport fold on mobile. [Clarity, Spec §Design & UX Suggestions]
+- Accessibility baseline: define keyboard navigation and focus order requirements for all interactive screens; ensure all interactive controls meet minimum target sizes and ARIA labels where needed. Include guidance for reduced-motion preferences. [Coverage, Spec §Design & UX Suggestions]
+- Measured responsiveness: define perceived-interaction thresholds for in-page updates (e.g., update feedback < 500ms) and end-to-end profile recalculation/display time (<= 5s under typical network conditions) to align with SC-003. [Measurability]
 - Gamified feedback: provide instant, incremental feedback (badges, evolving avatar, short insights) to reward progress and encourage completion.
 - Supportive tone and mobile-first: use conversational language, optimize gestures for touch, and keep the core flow short (recommend 5–10 primary items) to avoid fatigue.
 - Shareable outcomes: offer compact, social-friendly result cards or badges to increase perceived value and virality.

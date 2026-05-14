@@ -42,37 +42,37 @@
 
 ### Requirement Completeness & Clarity
 
-- [ ] CHK001 - Are implementation details removed from the normative requirements? [Clarity, Spec §Implementation Notes]
-- [ ] CHK002 - Is the specification written for non-technical stakeholders (no prescriptive tech decisions in normative sections)? [Clarity, Spec §User Scenarios]
-- [ ] CHK003 - Are all mandatory sections present and populated (User Scenarios, Requirements, Success Criteria, Assumptions)? [Completeness]
-- [ ] CHK004 - Is UX guidance included and referenced (design suggestions present in non-normative sections)? [Completeness, Spec §Design & UX Suggestions]
-- [ ] CHK005 - Are any "NEEDS CLARIFICATION" markers removed and replaced by concrete decisions or explicit open questions in Clarifications? [Gap, Spec §Clarifications]
+- [X] CHK001 - Are implementation details removed from the normative requirements? [Clarity, Spec §Implementation Notes]
+- [X] CHK002 - Is the specification written for non-technical stakeholders (no prescriptive tech decisions in normative sections)? [Clarity, Spec §User Scenarios]
+- [X] CHK003 - Are all mandatory sections present and populated (User Scenarios, Requirements, Success Criteria, Assumptions)? [Completeness]
+- [X] CHK004 - Is UX guidance included and referenced (design suggestions present in non-normative sections)? [Completeness, Spec §Design & UX Suggestions]
+- [X] CHK005 - Are any "NEEDS CLARIFICATION" markers removed and replaced by concrete decisions or explicit open questions in Clarifications? [Gap, Spec §Clarifications]
 
 ### Requirement Measurability & Acceptance
 
-- [ ] CHK006 - Are requirements expressed unambiguously and in measurable terms where applicable? [Measurability, Spec §Requirements]
-- [ ] CHK007 - Are Success Criteria measurable and tied to specific spec sections (e.g., SC-001..SC-004)? [Acceptance Criteria, Spec §Success Criteria]
-- [ ] CHK008 - Are Acceptance Scenarios defined for primary user flows? [Completeness, Spec §User Scenarios]
+- [X] CHK006 - Are requirements expressed unambiguously and in measurable terms where applicable? [Measurability, Spec §Requirements]
+- [X] CHK007 - Are Success Criteria measurable and tied to specific spec sections (e.g., SC-001..SC-004)? [Acceptance Criteria, Spec §Success Criteria]
+- [X] CHK008 - Are Acceptance Scenarios defined for primary user flows? [Completeness, Spec §User Scenarios]
 
 ### Scenario & Edge Case Coverage
 
-- [ ] CHK009 - Are edge cases explicitly identified (abandoned flow, partial imports, conflicting answers)? [Coverage, Spec §Edge Cases]
-- [ ] CHK010 - Is the import behavior for incomplete ContextFiles documented (how to infer or prompt)? [Clarity, Spec §FR-009]
-- [ ] CHK011 - Are recovery and rollback expectations defined for export/import inconsistencies? [Edge Case, Spec §Edge Cases]
+- [X] CHK009 - Are edge cases explicitly identified (abandoned flow, partial imports, conflicting answers)? [Coverage, Spec §Edge Cases]
+- [X] CHK010 - Is the import behavior for incomplete ContextFiles documented (how to infer or prompt)? [Clarity, Spec §FR-009]
+- [X] CHK011 - Are recovery and rollback expectations defined for export/import inconsistencies? [Edge Case, Spec §Edge Cases]
 
 ### Non-Functional & Traceability
 
-- [ ] CHK012 - Are performance & size expectations defined (e.g., exported ContextFile size <= 4 KB)? [Non-Functional, Spec §Success Criteria SC-002]
-- [ ] CHK013 - Are privacy/consent requirements specified and traceable (opt-in flows for analytics/storage)? [Coverage, Spec §FR-007]
-- [ ] CHK014 - Are scoring rules, question banks, and mapping specifications versioned and referenced? [Traceability, Spec §FR-008, Spec §Question modules]
-- [ ] CHK015 - Are external dependencies identified (question banks, schema locations) and responsibilities assigned? [Dependencies, Spec §Question modules]
-- [ ] CHK016 - Is a requirement ID / traceability scheme used consistently across the spec and referenced artifacts? [Traceability]
+- [X] CHK012 - Are performance & size expectations defined (e.g., exported ContextFile size <= 4 KB)? [Non-Functional, Spec §Success Criteria SC-002]
+- [X] CHK013 - Are privacy/consent requirements specified and traceable (opt-in flows for analytics/storage)? [Coverage, Spec §FR-007]
+- [X] CHK014 - Are scoring rules, question banks, and mapping specifications versioned and referenced? [Traceability, Spec §FR-008, Spec §Question modules]
+- [X] CHK015 - Are external dependencies identified (question banks, schema locations) and responsibilities assigned? [Dependencies, Spec §Question modules]
+- [X] CHK016 - Is a requirement ID / traceability scheme used consistently across the spec and referenced artifacts? [Traceability]
 
 ### Ambiguities & Conflicts
 
-- [ ] CHK017 - Are ambiguous terms (e.g., "prominent", "fast") defined with objective measures or thresholds? [Ambiguity, Spec §Design & UX Suggestions]
-- [ ] CHK018 - Do requirements avoid conflicts between sections (e.g., privacy vs sharing expectations)? [Consistency]
-- [ ] CHK019 - Are assumption statements explicit and validated or marked for sign-off? [Assumption, Spec §Assumptions]
+- [X] CHK017 - Are ambiguous terms (e.g., "prominent", "fast") defined with objective measures or thresholds? [Ambiguity, Spec §Design & UX Suggestions]
+- [X] CHK018 - Do requirements avoid conflicts between sections (e.g., privacy vs sharing expectations)? [Consistency]
+- [X] CHK019 - Are assumption statements explicit and validated or marked for sign-off? [Assumption, Spec §Assumptions]
 
 *Notes*: These items test the written requirements (the spec text) — not the implementation. Mark items complete by editing the spec to resolve gaps and then re-run this checklist.
 
