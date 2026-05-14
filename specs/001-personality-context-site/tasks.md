@@ -89,11 +89,11 @@ User Story 4 (UI) — Svelte frontend for survey, progress, and export
 
 - [X] T027 [US4] Implement ExportButtons component: `src/ui/components/ExportButtons.svelte` — provides JSON download and pbtxt download (uses `src/lib/serializer/toPbtxt.js`) and shows generated file names.
 
-- [ ] T028 [US4] [P] Add client-side routing and pages: `src/ui/pages/SurveyPage.svelte`, `src/ui/pages/ReviewPage.svelte` and wire routes in `App.svelte`.
+- [X] T028 [US4] [P] Add client-side routing and pages: `src/ui/pages/SurveyPage.svelte`, `src/ui/pages/ReviewPage.svelte` and wire routes in `App.svelte`.
 
-- [ ] T029 [US4] [P] Add UI dev scripts and documentation: update `package.json` (`dev:ui`, `build:ui`), add `docs/developer/ui.md` with instructions to run and build the Svelte app.
+- [X] T029 [US4] [P] Add UI dev scripts and documentation: update `package.json` (`dev:ui`, `build:ui`), add `docs/developer/ui.md` with instructions to run and build the Svelte app.
 
-- [ ] T030 [US4] [P] Add unit tests for UI services: `tests/unit/ui.profileService.test.js` — test scoring integration and ContextFile structure returned by `profileService` using Vitest.
+- [X] T030 [US4] [P] Add unit tests for UI services: `tests/unit/ui.profileService.test.js` — test scoring integration and ContextFile structure returned by `profileService` using Vitest.
 
 - [ ] T031 [US4] Add basic E2E smoke test against dev server: `tests/e2e/ui-smoke.test.js` — Node test that requests `http://localhost:5173` (or configured UI dev URL), posts responses, asserts example.generated.json is created.
 

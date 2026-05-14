@@ -1,28 +1,40 @@
 <script>
   import { onMount } from 'svelte';
-  import Survey from './components/Survey.svelte';
-  import Summary from './components/Summary.svelte';
-  import { scoreResponses, toContextFile } from './services/profileService.js';
+  import SurveyPage from './pages/SurveyPage.svelte';
+  import ReviewPage from './pages/ReviewPage.svelte';
 
-  let phase = 'survey';
-  let profile = null;
+  let route = 'survey';
 
-  function handleComplete(result) {
-    profile = result;
-    phase = 'summary';
+  function updateRoute() {
+    const h = (location.hash || '#/survey').replace('#/','');
+    route = h || 'survey';
   }
+
+  onMount(() => {
+    updateRoute();
+    window.addEventListener('hashchange', updateRoute);
+  });
 </script>
+
+<nav>
+  <a href="#/survey">Survey</a> |
+  <a href="#/review">Review</a>
+</nav>
 
 <main>
   <h1>Personality Context Generator</h1>
-  {#if phase === 'survey'}
-    <Survey on:complete={(e) => handleComplete(e.detail)} />
+  {#if route === 'survey'}
+    <SurveyPage />
+  {:else if route === 'review'}
+    <ReviewPage />
   {:else}
-    <Summary {profile} />
+    <div>Not found</div>
   {/if}
 </main>
 
 <style>
   main { max-width: 760px; margin: 24px auto; font-family: system-ui, Arial, sans-serif; padding: 0 16px }
   h1 { font-size: 1.4rem; margin-bottom: 12px }
+  nav { margin: 8px 0 }
+  nav a { color: #0366d6; text-decoration: none }
 </style>
