@@ -599,6 +599,35 @@ HIGH INT → direct, bold tone; intense topics welcome
 
 ---
 
+## Security Requirements (Normative): Data protection, import integrity & auditing
+
+This normative section captures required security & privacy requirements that implementations MUST satisfy. These requirements map to CHK001..CHK010 in specs/001-personality-context-site/checklists/security.md and to FR-007, FR-009, FR-015, and FR-014.
+
+### Data protection & consent [Completeness, Traceability]
+
+- Item-level responses and exported ContextFiles are considered personal data. The spec requires explicit handling decisions: masking or omission of raw item-level responses in exported artifacts by default; exports SHOULD contain only derived summaries and consent metadata unless the user explicitly requests item-level export.
+- Consent capture: when optional analytics or server-side persistence is enabled, the UI MUST record user consent with timestamp and include consent metadata in exported ContextFiles (field: metadata.consent = { enabled: boolean, timestamp: ISO8601, scope: string }). [FR-015]
+- Retention & deletion: optional server-side storage MUST define retention windows and deletion APIs; the UI must surface retention duration and provide a deletion request path tied to the recorded consent. [FR-007]
+
+### Import/Export integrity & validation [Acceptance, Edge Case]
+
+- Import validation: all imported ContextFiles MUST be validated against the canonical JSON schema (specs/001-personality-context-site/contextfile.schema.json). Invalid files MUST present a clear error and the UI MUST offer an undo path if partial imports occurred. [FR-009, FR-014]
+- Integrity checks: exported ContextFiles SHOULD include a version field and optional checksum or signature to help detect corruption or tampering during round-trips. Implementations considering server storage MUST include integrity verification on ingest. [FR-009]
+
+### Threat model & incident response [Traceability, Edge Case]
+
+- The spec requires a minimal threat model mapping (tampering, unauthorized access, data exfiltration) and associated requirements: access controls for any optional server-side endpoints, input validation on imports, and schema/version checks prior to applying imported data.
+- Breach/incident expectations: for server-side features, document notification expectations and user-visible mitigation steps (e.g., forced logout, revocation of persisted profiles) and tie them to audit logs. [Security checklist]
+
+### Transport, storage & auditing [Clarity]
+
+- Transport: optional server-side communication MUST use TLS. For persisted storage, at-rest encryption is required. These MUST be documented if server-side storage is enabled. [FR-007]
+- Auditing: actions that materially change profile state (import, export with consent enabled, deletion, consent changes) MUST be logged with actor, timestamp, and action detail. Logs must be retained per the retention policy and be auditable by the feature owner. [FR-015]
+
+### Responsibilities & risk gating [Dependencies]
+
+- External dependencies (question banks, schema hosting) MUST have an assigned owner and an availability/recovery plan documented. Enablement of optional server-side features must be gated by acceptable-risk criteria defined by the product/security owner.
+
 ## Versioning
 
 | Version | Changes                   |
