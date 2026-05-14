@@ -4,8 +4,11 @@
   "private": true,
   "scripts": {
     "validate:json": "node specs/001-personality-context-site/scripts/validate-json.js specs/001-personality-context-site/contextfile.schema.json specs/001-personality-context-site/example.json",
-    "test": "vitest"
+    "test": "vitest",
+    "lint": "eslint . --ext .js,.ts",
+    "format": "prettier --write ."
   },
+
   "devDependencies": {
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
