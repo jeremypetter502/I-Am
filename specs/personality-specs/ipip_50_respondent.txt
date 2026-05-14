@@ -1,0 +1,65 @@
+IPIP-50 (Big Five) — Quick survey (casual)
+
+How to respond:
+For each statement, rate how well it describes you RIGHT NOW:
+1 = Very inaccurate
+2 = Moderately inaccurate
+3 = Neither accurate nor inaccurate
+4 = Moderately accurate
+5 = Very accurate
+
+Answer honestly — there's no right or wrong. Thanks!
+
+Items:
+1. Am the life of the party.
+2. Don't talk a lot.
+3. Feel comfortable around people.
+4. Keep in the background.
+5. Start conversations.
+6. Have little to say.
+7. Talk to a lot of different people at parties.
+8. Don't like to draw attention to myself.
+9. Don't mind being the center of attention.
+10. Am quiet around strangers.
+11. Feel little concern for others.
+12. Am interested in people.
+13. Insult people.
+14. Sympathize with others' feelings.
+15. Am not interested in other people's problems.
+16. Have a soft heart.
+17. Am not really interested in others.
+18. Take time out for others.
+19. Feel others' emotions.
+20. Make people feel at ease.
+21. Am always prepared.
+22. Leave my belongings around.
+23. Pay attention to details.
+24. Make a mess of things.
+25. Get chores done right away.
+26. Often forget to put things back in their proper place.
+27. Like order.
+28. Shirk my duties.
+29. Follow a schedule.
+30. Am exacting in my work.
+31. Get stressed out easily.
+32. Am relaxed most of the time.
+33. Worry about things.
+34. Seldom feel blue.
+35. Am easily disturbed.
+36. Get upset easily.
+37. Change my mood a lot.
+38. Have frequent mood swings.
+39. Get irritated easily.
+40. Often feel blue.
+41. Have a rich vocabulary.
+42. Have difficulty understanding abstract ideas.
+43. Have a vivid imagination.
+44. Am not interested in abstract ideas.
+45. Have excellent ideas.
+46. Do not have a good imagination.
+47. Am quick to understand things.
+48. Use difficult words.
+49. Spend time reflecting on things.
+50. Am full of ideas.
+
+End of survey. Thank you!

@@ -1,0 +1,71 @@
+syntax = "proto3";
+package personality;
+
+import "google/protobuf/timestamp.proto";
+
+// Protobuf mapping for ContextFile (used for pbtxt export/import)
+message ContextFile {
+  string schema_version = 1; // e.g. "1.0"
+  google.protobuf.Timestamp generated_at = 2;
+  Source source = 3;
+  Profile profile = 4;
+}
+
+message Source {
+  string tool = 1;
+  string tool_version = 2;
+  string session_id = 3;
+  string locale = 4;
+}
+
+message Profile {
+  string id = 1;
+  string summary = 2;
+  Scores scores = 3;
+  map<string,double> raw_scores = 4;
+  Modules modules = 5;
+  map<string,bool> tags = 6;
+  map<string,string> preferences = 7;
+  Pctx pctx = 8;
+}
+
+message Scores {
+  double extraversion = 1;
+  double agreeableness = 2;
+  double conscientiousness = 3;
+  double neuroticism = 4;
+  double openness = 5;
+}
+
+message Modules {
+  Ipip ipip = 1;
+  Aesthetics aesthetics = 2;
+  Music music = 3;
+  map<string,string> extended = 4;
+}
+
+message Ipip {
+  repeated int32 responses = 1; // 50 items, 1..5
+  map<string,double> raw_trait_scores = 2; // e.g. "extraversion": 34
+  map<string,double> normalized_trait_scores = 3; // 0..100
+}
+
+message Aesthetics {
+  double minimalism = 1;
+  double colorfulness = 2;
+  double warmth = 3;
+  double texture = 4;
+  double motion = 5;
+  Imagery imagery = 6;
+  Typography typography = 7;
+  Layout layout = 8;
+  double importance = 9;
+}
+
+message Imagery { double photos = 1; double illustrations = 2; }
+message Typography { double prefers_serif = 1; double prefers_sans = 2; double prefers_large_headings = 3; double prioritize_readability = 4; }
+message Layout { double grid_consistency = 1; double experimental_layouts = 2; }
+
+message Music { map<string,double> factors = 1; }
+
+message Pctx { string code = 1; string version = 2; }

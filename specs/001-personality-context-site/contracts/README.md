@@ -1,0 +1,1 @@
+# Contracts\n\nThis folder will contain interface contracts for ContextFile import/export and any public APIs.\n\nCurrent artifacts:\n- contextfile.proto — protobuf contract for ContextFile\n- contextfile.schema.json — JSON schema for ContextFile\n\nGuidance: Use protobufjs to load .proto in the client for pbtxt serialization/deserialization.

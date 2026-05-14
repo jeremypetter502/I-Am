@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Personal Context (ContextFile) Schema",
+  "description": "Versioned schema for exported personal context files (JSON). Supports IPIP, aesthetic, music, extended modules and PCTX mappings.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "generated_at", "profile"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$", "description": "Schema version, e.g. 1.0" },
+    "generated_at": { "type": "string", "format": "date-time", "description": "UTC timestamp when file was produced" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tool": { "type": "string" },
+        "tool_version": { "type": "string" },
+        "session_id": { "type": "string" },
+        "locale": { "type": "string" }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "summary", "scores", "modules"],
+      "properties": {
+        "id": { "type": "string", "description": "Optional profile identifier (client-assigned)" },
+        "summary": { "type": "string", "description": "1-2 sentence natural-language summary, editable by user" },
+        "scores": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["extraversion","agreeableness","conscientiousness","neuroticism","openness"],
+          "properties": {
+            "extraversion": { "type": "number", "minimum": 0, "maximum": 100 },
+            "agreeableness": { "type": "number", "minimum": 0, "maximum": 100 },
+            "conscientiousness": { "type": "number", "minimum": 0, "maximum": 100 },
+            "neuroticism": { "type": "number", "minimum": 0, "maximum": 100 },
+            "openness": { "type": "number", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "raw_scores": {
+          "type": "object",
+          "description": "Optional raw/diagnostic scores per trait (e.g., 10..50)",
+          "additionalProperties": { "type": "number" }
+        },
+        "modules": {
+          "type": "object",
+          "description": "Module-level inputs and computed outputs",
+          "properties": {
+            "ipip": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "responses": {
+                  "type": "array",
+                  "items": { "type": "integer", "minimum": 1, "maximum": 5 },
+                  "minItems": 50,
+                  "maxItems": 50,
+                  "description": "IPIP-50 respondent answers in order"
+                },
+                "raw_trait_scores": {
+                  "type": "object",
+                  "additionalProperties": { "type": "number" },
+                  "description": "Raw trait sums (10..50) mapped by trait name"
+                },
+                "normalized_trait_scores": {
+                  "type": "object",
+                  "additionalProperties": { "type": "number", "minimum": 0, "maximum": 100 },
+                  "description": "Normalized 0..100 trait scores"
+                }
+              }
+            },
+            "aesthetics": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "minimalism": { "type": "number", "minimum": 0, "maximum": 100 },
+                "colorfulness": { "type": "number", "minimum": 0, "maximum": 100 },
+                "warmth": { "type": "number", "minimum": 0, "maximum": 100 },
+                "texture": { "type": "number", "minimum": 0, "maximum": 100 },
+                "motion": { "type": "number", "minimum": 0, "maximum": 100 },
+                "imagery": {
+                  "type": "object",
+                  "properties": {
+                    "photos": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "illustrations": { "type": "number", "minimum": 0, "maximum": 100 }
+                  },
+                  "additionalProperties": false
+                },
+                "typography": {
+                  "type": "object",
+                  "properties": {
+                    "prefers_serif": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "prefers_sans": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "prefers_large_headings": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "prioritize_readability": { "type": "number", "minimum": 0, "maximum": 100 }
+                  },
+                  "additionalProperties": false
+                },
+                "layout": {
+                  "type": "object",
+                  "properties": {
+                    "grid_consistency": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "experimental_layouts": { "type": "number", "minimum": 0, "maximum": 100 }
+                  },
+                  "additionalProperties": false
+                },
+                "importance": { "type": "number", "minimum": 0, "maximum": 100 }
+              }
+            },
+            "music": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "factors": {
+                  "type": "object",
+                  "properties": {
+                    "mellow": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "sophisticated": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "unpretentious": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "intense": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "contemporary": { "type": "number", "minimum": 0, "maximum": 100 }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "extended": {
+              "type": "object",
+              "description": "Optional extended modules; schema may vary",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        },
+        "tags": {
+          "type": "object",
+          "description": "Boolean tags to simplify rule-based LLMs",
+          "additionalProperties": { "type": "boolean" }
+        },
+        "preferences": {
+          "type": "object",
+          "description": "Top-level convenience mapping (mirrors modules.aesthetics)",
+          "additionalProperties": true
+        },
+        "pctx": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "code": { "type": "string", "description": "Personality Context Code (PCTX) string following PCTX specification" },
+            "version": { "type": "string", "description": "PCTX version identifier (optional)" }
+          },
+          "required": ["code"]
+        }
+      }
+    }
+  }
+}

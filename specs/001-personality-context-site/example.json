@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-13T13:58:00Z",
+  "source": { "tool": "personality-site", "tool_version": "0.1" },
+  "profile": {
+    "id": "local-123",
+    "summary": "Quiet, reflective; prefers minimal designs.",
+    "scores": {
+      "extraversion": 30,
+      "agreeableness": 65,
+      "conscientiousness": 70,
+      "neuroticism": 25,
+      "openness": 78
+    },
+    "raw_scores": { "extraversion": 25, "agreeableness": 39 },
+    "modules": {
+      "ipip": {
+        "responses": [
+          1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5
+        ],
+        "raw_trait_scores": { "extraversion": 31, "agreeableness": 38 },
+        "normalized_trait_scores": { "extraversion": 55, "agreeableness": 47 }
+      },
+      "aesthetics": {
+        "minimalism": 82.5,
+        "colorfulness": 30.0,
+        "warmth": 55.0,
+        "texture": 20.0,
+        "motion": 10.0,
+        "imagery": { "photos": 80, "illustrations": 10 },
+        "typography": { "prefers_serif": 10, "prefers_sans": 85, "prefers_large_headings": 75, "prioritize_readability": 95 },
+        "layout": { "grid_consistency": 90, "experimental_layouts": 20 },
+        "importance": 70
+      },
+      "music": {
+        "factors": { "mellow": 60, "sophisticated": 45, "unpretentious": 30, "intense": 10, "contemporary": 40 }
+      },
+      "extended": { "notes": "User provided extras" }
+    },
+    "tags": { "prefers_minimal": true, "prefers_photos": true },
+    "preferences": { "aesthetics": { "minimalism": 82.5 } },
+    "pctx": { "code": "PCTX:v1|E:55|A:47|C:70|N:25|O:78", "version": "1.0" }
+  }
+}

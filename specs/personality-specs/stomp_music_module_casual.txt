@@ -1,0 +1,50 @@
+STOMP Music Preferences — Casual Module
+
+Purpose
+- A short music-preference survey based on the Short Test Of Music Preferences (STOMP).
+- Captures genre tastes that can inform personalization and provide soft signals about personality.
+
+How to answer
+- For each line, pick a number 1–5:
+  1 = Not at all, 2 = A little, 3 = Somewhat, 4 = Mostly, 5 = A lot
+- Answer for your general music tastes (not just one favorite song).
+
+Items (rate 1–5)
+1. Alternative
+2. Blues
+3. Classical
+4. Country
+5. Dance
+6. Easy listening / soft pop
+7. Electronic
+8. Folk
+9. Funk
+10. Gospel
+11. Heavy metal
+12. Hip-hop / Rap
+13. Indie
+14. Jazz
+15. Latin
+16. Oldies (60s–80s pop/rock)
+17. Pop
+18. Punk
+19. R&B / Soul
+20. Reggae
+21. Religious / Worship music
+22. Rock
+23. Soundtracks / Film scores
+
+Quick context questions (optional)
+- Which 3 artists or bands are you listening to most right now? (free text)
+- What music do you usually listen to while working/studying? (free text)
+- What music do you prefer when relaxing or socializing? (free text)
+
+Scoring notes (for implementers)
+- Normalize each response to 0–100: norm = ((resp - 1) / 4) * 100
+- Compute factor composites (see mapping spec) to get MUSIC factor scores (Mellow, Unpretentious, Sophisticated, Intense, Contemporary).
+- Use pairwise or artist lists as higher-confidence signals when available.
+
+Privacy
+- Treat these preferences as personal data. Do not share raw answers externally; summarize when personalizing.
+
+End of module.

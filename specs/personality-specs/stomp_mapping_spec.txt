@@ -1,0 +1,104 @@
+STOMP Mapping Spec — MUSIC factors, scoring, and personality inferences
+
+Overview
+- Uses responses from stomp_music_module_casual.txt (23 genres). Normalizes 1–5 to 0–100.
+- Computes five MUSIC composites: Mellow, Unpretentious, Sophisticated, Intense, Contemporary (Rentfrow et al. framework).
+- Produces boolean tags and soft personality inferences that can be combined with IPIP results.
+
+Normalization helper
+- norm(i) = ((response_i - 1) / 4) * 100  # maps 1..5 → 0..100
+
+Genre → factor mapping (approximate, weighted equally unless noted)
+- Mellow: R&B / Soul (19), Easy listening (6), Soulful/pop ballads (use 6/19), Jazz (14)
+  Mellow_genres = [6, 14, 19]
+
+- Sophisticated: Classical (3), Jazz (14), Blues (2), Soundtracks / Film scores (23)
+  Sophisticated_genres = [3, 14, 2, 23]
+
+- Unpretentious: Country (4), Folk (8), Oldies (16), Religious / Gospel (10,21)
+  Unpretentious_genres = [4,8,16,10,21]
+
+- Intense: Heavy metal (11), Punk (18), Rock (22), Alternative (1)
+  Intense_genres = [11,18,22,1]
+
+- Contemporary: Pop (17), Electronic (7), Dance (5), Hip-hop / Rap (12), Indie (13), Latin (15)
+  Contemporary_genres = [17,7,5,12,13,15]
+
+(Notes: genres can belong to multiple factors; mapping is intentionally broad to capture taste overlaps.)
+
+Composite computation
+- For each factor F:
+  F_score = mean(norm(g) for g in F_genres)  # result 0..100
+
+Boolean tags (thresholds)
+- prefers_mellow = Mellow_score >= 65
+- prefers_sophisticated = Sophisticated_score >= 65
+- prefers_unpretentious = Unpretentious_score >= 65
+- prefers_intense = Intense_score >= 65
+- prefers_contemporary = Contemporary_score >= 65
+
+Personality inference rules (soft evidence)
+- These rules provide recommended adjustments to Big Five scores. Treat as soft signals (do NOT replace validated questionnaire scores). Use as 'suggested_delta' values and combine with survey via weighted average.
+
+Example suggested deltas (range approx -12..+12):
+- If Sophisticated >= 65:
+  suggested_delta.Openness += +10
+  note: strong indicator of Openness and intellectual curiosity.
+
+- If Intense >= 65:
+  suggested_delta.Openness += +6
+  suggested_delta.Agreeableness += -5
+  suggested_delta.Conscientiousness += -5
+  note: Intense listeners often score higher on sensation-seeking & openness, and lower on agreeableness/conscientiousness.
+
+- If Unpretentious >= 65:
+  suggested_delta.Extraversion += +6
+  suggested_delta.Agreeableness += +6
+  suggested_delta.Conscientiousness += +5
+  note: correlated with sociability and conventionality.
+
+- If Contemporary >= 65:
+  suggested_delta.Extraversion += +7
+  note: Contemporary (pop/dance/hip-hop/electronic) often correlates with extraversion.
+
+- If Mellow >= 65:
+  suggested_delta.Agreeableness += +6
+  suggested_delta.Neuroticism += -4  # often associated with calming, agreeable tastes
+
+Combining music signal with IPIP
+- Use music as soft prior. Recommended weighting: final_score = round( survey_score * 0.75 + inferred_score * 0.25 )
+  - Where inferred_score = baseline + suggested_delta (baseline could be population mean or survey_score if not available). Adjust weights per confidence (e.g., increase music weight if many corroborating signals like favorite artists align).
+- Alternative: produce both the raw survey Big Five and a music-informed recommendation object; let downstream apps decide how to merge.
+
+LLM usage guidance
+- Use factor tags to personalize recommendations, e.g.:
+  - prefers_sophisticated -> suggest classical/jazz playlists, complex creative tasks, reading-heavy content
+  - prefers_intense -> provide high-energy options, adventurous social suggestions, more direct language
+  - prefers_mellow -> suggest calming playlists for focus, soft-toned UI themes
+  - prefers_contemporary -> recommend upbeat playlists, short-list social/party options
+  - prefers_unpretentious -> recommend mainstream, crowd-pleasing venues and playlists
+- For messaging: match energy level and familiarity. Example: if prefers_unpretentious and high extraversion, propose social, upbeat suggestions with clear calls-to-action.
+
+Data enrichment
+- If user provides top artists/bands, map artists to genres (simple lookup table) and boost corresponding genre norms (e.g., +10 points to matched genre before computing composites).
+
+Confidence & caveats
+- Music-genres overlap and personal taste is complex; treat inferred personality adjustments as low-to-moderate confidence.
+- Prefer pilot testing for calibration. Use artist-level signals and pairwise A/B picks for higher confidence.
+
+Privacy & consent
+- Music preferences and artist lists are personal data. Store minimally and avoid exposing raw lists when personalizing across users.
+
+Example JSON snippet to attach to personal_context
+{
+  "preferences": {
+    "music": {
+      "raw_genres": {"Alternative": 80, "Blues": 20, ...},
+      "MUSIC_factors": {"mellow": 45, "sophisticated": 72, "unpretentious": 30, "intense": 20, "contemporary": 55},
+      "tags": {"prefers_sophisticated": true, "prefers_mellow": false},
+      "suggested_bigfive_deltas": {"openness": 10, "extraversion": 0, "agreeableness": -5}
+    }
+  }
+}
+
+Need a small Python scorer to compute these composites from a CSV/JSON of responses? Reply yes to have a ready script created.

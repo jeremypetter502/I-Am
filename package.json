@@ -1,0 +1,15 @@
+{
+  "name": "i-am",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "validate:json": "node specs/001-personality-context-site/scripts/validate-json.js specs/001-personality-context-site/contextfile.schema.json specs/001-personality-context-site/example.json",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "protobufjs": "^8.0.0",
+    "vitest": "^1.0.0"
+  }
+}

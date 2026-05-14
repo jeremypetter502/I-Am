@@ -1,0 +1,108 @@
+Aesthetic Mapping Spec — Map survey items → personal_context.preferences.aesthetics
+
+Purpose
+- Provide a reproducible mapping from the "aesthetic_module.txt" survey into the personal_context JSON that LLMs and tooling already use.
+- All scores expressed 0–100 (higher = stronger preference).
+
+Normalization helpers
+- norm(i) = ((response_i - 1) / 4) * 100  # for any 1–5 item
+- inv(x) = 100 - x
+- For pairwise tasks: pair_score(option) = (times_chosen / times_presented) * 100
+
+Item reference (numbers match aesthetic_module.txt)
+1..10 = semantic-differential items (left=1, right=5). 11..32 = Likert statements.
+
+Composite definitions (recommended)
+- minimalism_score = mean([inv(norm(3)), inv(norm(4)), norm(11), norm(12), inv(norm(13)), norm(26)])
+  - Explanation: items 3 & 4 use left=Simple/Minimal; invert them so higher value => more minimal. Item 13 (dense layouts) inverted.
+
+- colorfulness_score = mean([norm(14), inv(norm(15))])
+  - Higher = prefers bold/saturated palettes.
+
+- warmth_score = inv(norm(6))
+  - Higher = prefers warm/cozy tones.
+
+- texture_score = mean([norm(8), inv(norm(8))?])
+  - NOTE: item 8 is Clean (flat) — Textured. Use inv(norm(8)) if you want "prefers clean" as high.
+  - Implementer: pick orientation depending on target trait. For "prefers_clean" use inv(norm(8)); for "prefers_textured" use norm(8).
+
+- motion_score = mean([norm(17), inv(norm(18))])
+  - Higher = more comfortable with motion/animations.
+
+- imagery_pref = {
+    "photos": norm(19),
+    "illustrations": norm(20)
+  }
+
+- typography = {
+    "prefers_serif": norm(21),
+    "prefers_sans": norm(22),
+    "prefers_large_headings": norm(23),
+    "prioritize_readability": norm(26)
+  }
+
+- layout = {
+    "grid_consistency": norm(24),
+    "experimental_layouts": norm(25)
+  }
+
+- modernity_score = mean([norm(5), inv(norm(5))?])
+  - NOTE: If item 5 is Modern — Traditional, use inv(norm(5)) to make higher = more modern if left anchor = Modern.
+
+- aesthetic_importance = norm(29)
+
+Context-specific mapping
+- If separate responses gathered for home/work toggles (items 31–32), compute:
+  - home_style = norm(31)  # higher = playful & expressive
+  - work_style = norm(32)  # higher = prefers minimal & professional
+- Merge with global composites to create context-weighted aesthetics, e.g.:
+  final_aesthetics.home.minimalism = weighted_mean(minimalism_score, 100 - home_style, weights=[0.8,0.2])
+  (choose weights based on how much domain-specific answers should override global ones)
+
+Thresholds & tags
+- Set boolean tags to simplify rule-based LLMs:
+  - prefers_minimal = minimalism_score >= 65
+  - prefers_bold_colors = colorfulness_score >= 65
+  - prefers_photos = imagery_pref.photos >= 65
+  - likes_motion = motion_score >= 60
+  - typography_priority_readability = typography.prioritize_readability >= 70
+
+Example personal_context JSON snippet
+{
+  "preferences": {
+    "aesthetics": {
+      "minimalism": 82.5,
+      "colorfulness": 30.0,
+      "warmth": 55.0,
+      "motion": 20.0,
+      "imagery": {"photos": 80,"illustrations":10},
+      "typography": {"serif": 10, "sans": 85, "large_headings": 75, "readability": 95},
+      "layout": {"grid": 90, "experimental": 20},
+      "importance": 70,
+      "tags": {"prefers_minimal": true, "prefers_photos": true}
+    }
+  }
+}
+
+LLM usage guidance (short)
+- Use continuous scores (0–100) for soft personalization; use boolean tags for hard rules.
+- Example rules:
+  - If prefers_minimal: prefer single-column templates, 2–3 color palette, ample whitespace.
+  - If prefers_photos: show 2–3 real-photo thumbnails when suggesting restaurants.
+  - If likes_motion=false: avoid GIFs/auto-play animations in suggested UIs or messages.
+  - Typography: if readability high & prefers_serif low → choose clean sans-serif and larger size for long text.
+
+Pairwise & rich media
+- Convert pairwise results into 0–100 preference scores (pair_score). Use these as higher-confidence signals — they often outperform text-only ratings.
+
+Open-text processing
+- Free-text answers (favorite brands, 3-words) should be parsed with an LLM into keywords and mapped to `preferences.aesthetics.examples` (e.g., ["Muji", "Aesop", "Apple"]). Save raw free-text separately and don't expose it unless consented.
+
+Privacy & ethics
+- Treat aesthetic profiles as personal preference data. Store minimal identifiers, avoid exposing raw item-level responses in downstream outputs, and honor deletion requests.
+
+Implementation tips
+- Prefer interactive A/B or palette tasks for stronger signal. Use Likert items as fallback.
+- Validate composite reliability on a small pilot before using heavily for UX decisions.
+
+Need a short Python scoring function that reads responses (CSV/JSON) and emits personal_context JSON? Provide yes/no.
