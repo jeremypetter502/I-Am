@@ -2,13 +2,13 @@
 
 Phase 1: Setup
 
-- [ ] T001 Create project skeleton and placeholders: create files `src/lib/scorer/ipipScorer.ts`, `src/lib/scorer/index.ts`, `src/lib/serializer/toContextFile.ts`, `src/lib/serializer/toPbtxt.ts`, `src/lib/types.ts`, `src/lib/importer/index.ts`, `src/lib/changeSummary/index.ts` (one-line placeholder exports in each file).
+- [X] T001 Create project skeleton and placeholders: create files `src/lib/scorer/ipipScorer.ts`, `src/lib/scorer/index.ts`, `src/lib/serializer/toContextFile.ts`, `src/lib/serializer/toPbtxt.ts`, `src/lib/types.ts`, `src/lib/importer/index.ts`, `src/lib/changeSummary/index.ts` (one-line placeholder exports in each file).
 
-- [ ] T002 [P] Add dev tool configs and scripts: ensure `package.json` has `validate:json`, `test`, and `dev` scripts; add `vitest.config.ts` at project root and placeholder `tsconfig.json` with `strict: true`.
+- [X] T002 [P] Add dev tool configs and scripts: ensure `package.json` has `validate:json`, `test`, and `dev` scripts; add `vitest.config.ts` at project root and placeholder `tsconfig.json` with `strict: true`.
 
 Phase 2: Foundational (blocking prerequisites)
 
-- [ ] T003 Install and verify dev dependencies locally: run `npm ci` and confirm `ajv`, `ajv-formats`, `protobufjs`, and `vitest` are installed. (no file change)
+- [X] T003 Install and verify dev dependencies locally: run `npm ci` and confirm `ajv`, `ajv-formats`, `protobufjs`, and `vitest` are installed. (no file change)
 
 - [ ] T004 [P] Add protobufjs workflow support: create `src/lib/serializer/toPbtxt.ts` that loads `specs/001-personality-context-site/contextfile.proto` via protobufjs and exposes `toPbtxt(json): string` and `fromPbtxt(text): json`.
 
@@ -16,15 +16,15 @@ User Story phases
 
 User Story 1 (P1) — Core IPIP flow (MVP)
 
-- [ ] T005 [US1] Implement IPIP scorer: `src/lib/scorer/ipipScorer.ts` — function `scoreIpip(responses: number[50]) => { raw: {O,C,E,A,N}, normalized: {O,C,E,A,N} }`. Use reverse-keying indices from `specs/questions/ipip_50_respondent.txt` and scoring rules in spec.md.
+- [X] T005 [US1] Implement IPIP scorer: `src/lib/scorer/ipipScorer.ts` — function `scoreIpip(responses: number[50]) => { raw: {O,C,E,A,N}, normalized: {O,C,E,A,N} }`. Use reverse-keying indices from `specs/questions/ipip_50_respondent.txt` and scoring rules in spec.md.
 
-- [ ] T006 [US1] [P] Add unit test for IPIP scorer: `tests/unit/ipipScorer.test.ts` — include at least one known-response vector and expected normalized outputs (use example in `specs/001-personality-context-site/example.json`).
+- [X] T006 [US1] [P] Add unit test for IPIP scorer: `tests/unit/ipipScorer.test.ts` — include at least one known-response vector and expected normalized outputs (use example in `specs/001-personality-context-site/example.json`).
 
-- [ ] T007 [US1] Implement ContextFile serializer (JSON): `src/lib/serializer/toContextFile.ts` — function `toContextFile(profile, options?)` that emits canonical JSON object matching `specs/001-personality-context-site/contextfile.schema.json` including `schema_version`, `generated_at`, `profile`, `preferences`, and `modules` metadata.
+- [X] T007 [US1] Implement ContextFile serializer (JSON): `src/lib/serializer/toContextFile.ts` — function `toContextFile(profile, options?)` that emits canonical JSON object matching `specs/001-personality-context-site/contextfile.schema.json` including `schema_version`, `generated_at`, `profile`, `preferences`, and `modules` metadata.
 
-- [ ] T008 [US1] [P] Add unit test for serializer and AJV validation: `tests/unit/serializer.test.ts` — generate a ContextFile from sample scorer output, validate with AJV using `specs/001-personality-context-site/contextfile.schema.json` and assert valid.
+- [X] T008 [US1] [P] Add unit test for serializer and AJV validation: `tests/unit/serializer.test.ts` — generate a ContextFile from sample scorer output, validate with AJV using `specs/001-personality-context-site/contextfile.schema.json` and assert valid.
 
-- [ ] T009 [US1] Create CLI helper script to generate example.json from test responses: `scripts/generate-ipip.js` that imports `ipipScorer` and `toContextFile` and writes `specs/001-personality-context-site/example.generated.json`.
+- [X] T009 [US1] Create CLI helper script to generate example.json from test responses: `scripts/generate-ipip.js` that imports `ipipScorer` and `toContextFile` and writes `specs/001-personality-context-site/example.generated.json`.
 
 User Story 2 (P2) — Progressive modules & import
 
