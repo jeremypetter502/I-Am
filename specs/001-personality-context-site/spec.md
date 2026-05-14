@@ -122,6 +122,29 @@ Note: After export, users may edit the downloaded context file in their preferre
 - The compact context file SHOULD include concise trait labels and normalized scores plus a short natural-language summary.
 - The canonical ContextFile JSON schema is stored at `specs/001-personality-context-site/contextfile.schema.json` and MUST be referenced by this specification; exported JSON files SHOULD validate against it.
 
+## Question modules (specs/questions)
+
+The repository includes canonical question banks under `specs/questions/`. These files are the source of truth for the client scorer and must be versioned alongside the spec. Summaries:
+
+- IPIP-50 — `specs/questions/ipip_50_respondent.txt`:
+  - Purpose: Standard IPIP-50 Big Five items (50 items). Response scale: 1 (Very Inaccurate) → 5 (Very Accurate).
+  - Usage: Apply reverse-keying per IPIP rules, sum trait item values and normalize to 0–100 (Normalized = ((Raw - 10)/40) * 100). Scorer must reference this file for item wording and ordering.
+
+- Aesthetic module — `specs/questions/aesthetic_module.txt`:
+  - Purpose: Multi-part aesthetic preferences (semantic-differential items, Likert items, context toggles, optional interactive tasks, open-text prompts).
+  - Scoring: Normalize all 1–5 items to 0–100 using norm(i) = ((i - 1) / 4) * 100. Semantic-differential items may require inversion per the aesthetic mapping spec (`specs/001-personality-context-site/aesthetic_mapping_spec.txt` or `personality-specs/aesthetic_mapping_spec.txt`).
+  - Privacy: Treat item-level responses as personal data; downstream exports and LLM prompts should prefer summary composites and boolean tags rather than raw item lists.
+
+- Aesthetic (casual) — `specs/questions/aesthetic_module_casual.txt`:
+  - Purpose: Short 18-item casual aesthetic module for quicker captures.
+  - Scoring & composites: Same normalization (0–100). Example composites provided (minimalism, colorfulness, warmth, motion, imagery, typography). Use thresholds (e.g., >=65) to derive boolean tags.
+
+Implementation notes:
+- Scorer implementations MUST reference these question files for exact wording and item indices.
+- Composite formulas and inversion rules live in the aesthetic mapping spec; ensure consistency between mapping and scorer code.
+- During import of existing ContextFiles, flag any inferred or defaulted values derived from partial/question-level data in the change summary presented to users.
+
+
 ### Design & UX Suggestions (Non-normative)
 
 The following recommendations improve completion rates and user engagement; they are optional design techniques and must be balanced with accessibility and privacy requirements. See: `specs/ui-ux-specs/engaging-ui-ux-techniques.md` for full details.
