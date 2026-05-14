@@ -42,15 +42,15 @@ User Story 3 (P3) — Review, change summary, export
 
 - [X] T015 [US3] [P] Add tests for change-summary: `tests/unit/changeSummary.test.ts` with examples of import causing inferred defaults and module replacements.
 
-- [ ] T016 [US3] Implement pbtxt export: `src/lib/serializer/toPbtxt.ts` (reuse T004) and test `tests/unit/pbtxt.test.ts` verifying pbtxt produced by serializer can be parsed back to equivalent JSON.
+- [X] T016 [US3] Implement pbtxt export: `src/lib/serializer/toPbtxt.ts` (reuse T004) and test `tests/unit/pbtxt.test.ts` verifying pbtxt produced by serializer can be parsed back to equivalent JSON.
 
 Cross-cutting & final
 
-- [ ] T017 [P] Add linting and formatting config: `.eslintrc.cjs`, `.prettierrc` and ensure `npm run lint` is a script in `package.json`.
+- [X] T017 [P] Add linting and formatting config: `.eslintrc.cjs`, `.prettierrc` and ensure `npm run lint` is a script in `package.json`.
 
-- [ ] T018 Add CI tasks to run validator and tests: verify `.github/workflows/validate-json.yml` triggers `npm ci`, `npm run validate:json`, and `npm test` on PRs.
+- [X] T018 Add CI tasks to run validator and tests: verify `.github/workflows/validate-json.yml` triggers `npm ci`, `npm run validate:json`, and `npm test` on PRs.
 
-- [ ] T019 Update documentation: review and update `specs/001-personality-context-site/quickstart.md`, `README.md`, and add `docs/developer/` notes describing how to run scorer, importer, and serializer.
+- [X] T019 Update documentation: review and update `specs/001-personality-context-site/quickstart.md`, `README.md`, and add `docs/developer/` notes describing how to run scorer, importer, and serializer.
 
 Dependencies (high-level)
 

@@ -48,4 +48,5 @@ Notes
 - `npm ci` then `npm run validate:json`
 - `npm test` (unit tests)
 - `npm run lint` (if linting is added)
+- `npm run format` (optional code formatting step)
 
