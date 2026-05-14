@@ -95,9 +95,9 @@ User Story 4 (UI) — Svelte frontend for survey, progress, and export
 
 - [X] T030 [US4] [P] Add unit tests for UI services: `tests/unit/ui.profileService.test.js` — test scoring integration and ContextFile structure returned by `profileService` using Vitest.
 
-- [ ] T031 [US4] Add basic E2E smoke test against dev server: `tests/e2e/ui-smoke.test.js` — Node test that requests `http://localhost:5173` (or configured UI dev URL), posts responses, asserts example.generated.json is created.
+- [X] T031 [US4] Add basic E2E smoke test against dev server: `tests/e2e/ui-smoke.test.js` — Node test that requests `http://localhost:5174` (configured UI dev URL), posts responses, asserts example.generated.json is created (test is tolerant when server not running).
 
-- [ ] T032 Polish and CI: update `.github/workflows/validate-json.yml` (or add new workflow) to run `npm run build:ui` and optionally run UI smoke tests in CI; update `specs/001-personality-context-site/quickstart.md` with UI run instructions.
+- [X] T032 Polish and CI: update `.github/workflows/validate-json.yml` (or add new workflow) to run `npm run build:ui` and optionally run UI smoke tests in CI; update `specs/001-personality-context-site/quickstart.md` with UI run instructions.
 
 Task counts
 
