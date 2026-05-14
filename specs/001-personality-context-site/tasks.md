@@ -71,9 +71,37 @@ Suggested MVP
 
 - Deliver User Story 1 (T005..T009) first to produce a working scorer and JSON ContextFile export that validates against the canonical schema.
 
+User Story 4 (UI) — Svelte frontend for survey, progress, and export
+
+- [ ] T020 [US4] Add Svelte + Vite dev dependencies and package.json scripts: update `package.json` to include `dev:ui`, `build:ui`, `preview:ui` and devDependencies `svelte`, `vite`, `@sveltejs/vite-plugin-svelte`, `svelte-preprocess`.
+
+- [ ] T021 [P] Create Vite config for Svelte: `vite.config.js` at repo root with svelte plugin and dev server config.
+
+- [ ] T022 [US4] Scaffold UI entry: create `src/ui/main.js` and `src/ui/App.svelte` that mount the Svelte app and provide a root layout.
+
+- [ ] T023 [US4] [P] Implement Survey component: `src/ui/components/Survey.svelte` — renders questions from `specs/questions/`, accepts/selects responses (1-5), validates length 50, emits responses list.
+
+- [ ] T024 [US4] [P] Implement ProgressBar component: `src/ui/components/ProgressBar.svelte` — animated progress indicator showing answered count and percent.
+
+- [ ] T025 [US4] [P] Implement Summary component: `src/ui/components/Summary.svelte` — shows normalized trait scores, raw scores summary, and module-level details after scoring.
+
+- [ ] T026 [US4] Integrate scorer & serializer into UI service: `src/ui/services/profileService.js` — imports `src/lib/scorer/ipipScorer` and `src/lib/serializer/toContextFile`, exposes `scoreAndExport(responses)` returning ContextFile object.
+
+- [ ] T027 [US4] Implement ExportButtons component: `src/ui/components/ExportButtons.svelte` — provides JSON download and pbtxt download (uses `src/lib/serializer/toPbtxt.js`) and shows generated file names.
+
+- [ ] T028 [US4] [P] Add client-side routing and pages: `src/ui/pages/SurveyPage.svelte`, `src/ui/pages/ReviewPage.svelte` and wire routes in `App.svelte`.
+
+- [ ] T029 [US4] [P] Add UI dev scripts and documentation: update `package.json` (`dev:ui`, `build:ui`), add `docs/developer/ui.md` with instructions to run and build the Svelte app.
+
+- [ ] T030 [US4] [P] Add unit tests for UI services: `tests/unit/ui.profileService.test.js` — test scoring integration and ContextFile structure returned by `profileService` using Vitest.
+
+- [ ] T031 [US4] Add basic E2E smoke test against dev server: `tests/e2e/ui-smoke.test.js` — Node test that requests `http://localhost:5173` (or configured UI dev URL), posts responses, asserts example.generated.json is created.
+
+- [ ] T032 Polish and CI: update `.github/workflows/validate-json.yml` (or add new workflow) to run `npm run build:ui` and optionally run UI smoke tests in CI; update `specs/001-personality-context-site/quickstart.md` with UI run instructions.
+
 Task counts
 
-- Total tasks: 19
-- Tasks by story: US1: 5 (T005-T009), US2: 4 (T010-T013), US3: 3 (T014-T016), Setup/Foundation/Cross-cutting: 7 (T001-T004, T017-T019)
+- Total tasks: 32
+- Tasks by story: US1: 5 (T005-T009), US2: 4 (T010-T013), US3: 3 (T014-T016), US4: 13 (T020-T032), Setup/Foundation/Cross-cutting: 7 (T001-T004, T017-T019)
 
 
