@@ -57,12 +57,15 @@ Note: After export, users may edit the downloaded context file in their preferre
 
 - What happens if a user abandons the flow mid-test? (save progress, offer to resume or discard)
 - How are conflicting answers across sets reconciled? (merge strategy documented)
+- How should partial imports (missing modules) be treated in the UI and change summary? (e.g., prompt to infer vs explicit user confirmation) [Edge Case]
+- What recovery options are available if an export/import round-trip produces inconsistent or invalid data? (rollback guidance, user-visible warnings) [Edge Case]
+- How is user consent for optional analytics or server persistence obtained and recorded? (consent flow, opt-in/out) [Edge Case]
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST present the core IPIP question set and clearly indicate estimated completion time.
+- **FR-001**: The system MUST present the core IPIP question set and clearly indicate estimated completion time (displayed as approximate minutes or as percentage progress).
 - **FR-002**: The system MUST allow adding additional question sets (extended personality, aesthetic, musical) progressively.
 - **FR-003**: The system MUST validate responses and prevent submission with missing required fields.
 - **FR-004**: The system MUST generate a compact context file summarizing trait scores and a 1-2 sentence natural-language persona summary.
@@ -565,7 +568,7 @@ HIGH INT → direct, bold tone; intense topics welcome
 ## Assumptions
 
 - Target users want a short, portable description they can paste into LLM prompts.
-- Data retention and account model to be decided (see NEEDS CLARIFICATION markers).
+- Data retention and account model: By default, profiles remain client-side only (in-memory during the session or stored in browser localStorage). Server-side persistent storage is out of scope unless explicitly enabled and documented (see FR-007 and Clarifications).
 
 ## Deliverables
 
