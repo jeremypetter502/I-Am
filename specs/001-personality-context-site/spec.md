@@ -175,6 +175,41 @@ The following recommendations improve completion rates and user engagement; they
 - Accessibility and consent: ensure high-contrast, readable typography, explicit consent for storing/exporting data, and options to opt out of animated or gamified experiences.
 
 
+### UI Requirements (Normative): Layout, Breakpoints & Accessibility
+
+This normative section captures required UX-related requirements that implementations MUST satisfy. These requirements are normative and map to checklist items CHK001..CHK010 and FR-001, FR-009, FR-011, FR-007, FR-014.
+
+#### UI Layout & Breakpoints [Clarity, Coverage]
+
+- Required breakpoints and layout behavior: mobile (<=599px), tablet (600px–1023px), desktop (>=1024px). Implementations MUST describe how primary screens adapt at these breakpoints (single-column mobile, two-column tablet, content+sidebar desktop). The primary summary card should be placed above-the-fold on mobile and occupy at least 30% of the content column on desktop. [Spec §Design & UX Suggestions]
+- Single-question-per-screen flow behavior: the core IPIP flow presents one question per screen with a persistent progress indicator and a clearly labeled "Next" action. Navigation must allow backward review of previous answers. Estimated completion time MUST be shown (minutes) or a percentage progress indicator as required by FR-001.
+
+#### Primary CTA & Interaction Targets [Measurability]
+
+- Primary CTA sizing and prominence: recommended minimum font-size 18px for primary CTAs, minimum interactive target 44x44 CSS px, and text contrast ratio >= 4.5:1. Primary CTA placement MUST be consistent across question screens and review/export screens. [Design & UX Suggestions]
+- Interaction states: hover, focus, pressed states MUST be documented and consistent across components. State descriptions should reference expected visual change (color/outline/opacity) and required ARIA attributes where applicable.
+
+#### Progress Indicator & Save/Resume Behavior [Coverage, FR-001]
+
+- Progress indicator: must show both percent complete and an estimated remaining time in minutes (or a clear explicit label stating approximate time). The indicator must update as answers are recorded and be visible on all question screens.
+- Save/Resume: the UI MUST autosave progress to browser localStorage at least after every 5 answers and provide a clear "Resume" affordance when a saved session exists. Users MUST be able to discard saved progress explicitly.
+
+#### Loading, Zero & Error States [Coverage, Edge Case]
+
+- Loading states: asynchronous operations (e.g., importing a ContextFile, profile recalculation) MUST present a loading affordance with textual status. For short operations, provide inline spinner and ephemeral status (<500ms perceived). For longer operations (>=2s) provide progress or cancel option. For profile recalculation on typical hardware/network, total time MUST be <= 5s (SC-003).
+- Zero/empty states: define copy and CTA for no-profile, empty-modules, and no-question-bank scenarios. Provide actionable guidance (e.g., "Start core IPIP survey") and avoid empty blank screens.
+- Error & recovery: on import validation failures, present a clear modal describing the problem, list inferred/defaulted fields (FR-009), and provide options: "Undo import (revert to prior state)", "Proceed with inferred defaults", or "Cancel". The undo path MUST restore the prior in-memory profile (FR-014).
+
+#### Accessibility & Keyboard Navigation [Coverage, Measurability]
+
+- Keyboard navigation: all interactive flows MUST be fully operable by keyboard (Tab, Shift+Tab, Enter/Space). Provide a logical focus order and skip links for primary sections. Document focus-visible styles and ARIA roles for composite widgets.
+- Reduced motion & preferences: respect the user's reduced-motion preference (prefers-reduced-motion) by disabling non-essential animations.
+- Labels & inputs: all form controls MUST have accessible labels and instructions; use aria-describedby for contextual help. The survey SHOULD provide alternative text equivalents for any visual choices used as responses.
+
+#### Traceability & References
+
+- Each UI requirement above maps to checklist items in specs/001-personality-context-site/checklists/ux.md (CHK001..CHK010) and references FR-001 (progress/estimated time), FR-009 (import behavior), FR-011 (change summary), FR-007 (privacy/consent), and FR-014 (rollback/undo).
+
 ### IPIP-50 Scoring (reference and algorithm)
 
 This project includes an `ipip_50_respondent` file containing the 50 base IPIP items. The scoring approach below follows common IPIP-50 practice and must be verified against the exact item wording in `ipip_50_respondent`.
