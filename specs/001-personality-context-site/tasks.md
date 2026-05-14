@@ -28,19 +28,19 @@ User Story 1 (P1) — Core IPIP flow (MVP)
 
 User Story 2 (P2) — Progressive modules & import
 
-- [ ] T010 [US2] Implement JSON import handler: `src/lib/importer/index.ts` — exposes `importJson(filePath)` which validates JSON with AJV, merges present modules into in-memory profile, and returns `{ profile, inferredFields }` marking defaults.
+- [X] T010 [US2] Implement JSON import handler: `src/lib/importer/index.ts` — exposes `importJson(filePath)` which validates JSON with AJV, merges present modules into in-memory profile, and returns `{ profile, inferredFields }` marking defaults.
 
-- [ ] T011 [US2] Implement pbtxt import/export using protobufjs: `src/lib/importer/pbtxt.ts` — functions `parsePbtxt(text)` and `serializePbtxt(json)` mirroring serializer tasks.
+- [X] T011 [US2] Implement pbtxt import/export using protobufjs: `src/lib/importer/pbtxt.ts` — functions `parsePbtxt(text)` and `serializePbtxt(json)` mirroring serializer tasks.
 
-- [ ] T012 [US2] [P] Add unit tests for importers: `tests/unit/importer.test.ts` — test JSON import with partial/example files and pbtxt round-trip.
+- [X] T012 [US2] [P] Add unit tests for importers: `tests/unit/importer.test.ts` — test JSON import with partial/example files and pbtxt round-trip.
 
-- [ ] T013 [US2] Implement module replacement logic: `src/lib/modules/moduleManager.ts` — when `retakeModule(name, newData)` is called, it replaces module data entirely and updates `modules[]` metadata. Add `tests/unit/moduleManager.test.ts`.
+- [X] T013 [US2] Implement module replacement logic: `src/lib/modules/moduleManager.ts` — when `retakeModule(name, newData)` is called, it replaces module data entirely and updates `modules[]` metadata. Add `tests/unit/moduleManager.test.ts`.
 
 User Story 3 (P3) — Review, change summary, export
 
-- [ ] T014 [US3] Implement change-summary generator: `src/lib/changeSummary/index.ts` — function `diffProfiles(oldProfile, newProfile) => { added:[], removed:[], updated:[], inferred:[] }` and human-readable summary builder.
+- [X] T014 [US3] Implement change-summary generator: `src/lib/changeSummary/index.ts` — function `diffProfiles(oldProfile, newProfile) => { added:[], removed:[], updated:[], inferred:[] }` and human-readable summary builder.
 
-- [ ] T015 [US3] [P] Add tests for change-summary: `tests/unit/changeSummary.test.ts` with examples of import causing inferred defaults and module replacements.
+- [X] T015 [US3] [P] Add tests for change-summary: `tests/unit/changeSummary.test.ts` with examples of import causing inferred defaults and module replacements.
 
 - [ ] T016 [US3] Implement pbtxt export: `src/lib/serializer/toPbtxt.ts` (reuse T004) and test `tests/unit/pbtxt.test.ts` verifying pbtxt produced by serializer can be parsed back to equivalent JSON.
 

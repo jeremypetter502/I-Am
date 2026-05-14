@@ -1,0 +1,68 @@
+Aesthetic Preferences — Casual Module
+
+Instructions
+- Rate each item using this 1–5 scale:
+  1 = Very inaccurate / Strongly disagree
+  2 = Moderately inaccurate / Disagree
+  3 = Neither accurate nor inaccurate / Neutral
+  4 = Moderately accurate / Agree
+  5 = Very accurate / Strongly agree
+- For semantic-differential items (A — B) the left anchor = 1 and the right anchor = 5.
+- Keep answers honest — there are no right/wrong answers.
+
+PART A — Quick semantic differential (1–5; left = 1, right = 5)
+1. Attractive — Unattractive
+2. Harmonious — Disharmonious
+3. Simple — Complex
+4. Minimal — Ornate
+5. Modern — Traditional
+6. Warm (cozy) — Cool (clinical)
+7. Calm — Dynamic
+8. Clean (flat) — Textured (decorative)
+9. Playful — Serious
+10. Friendly — Professional
+
+PART B — Concrete preference statements (1–5)
+11. I prefer clean, uncluttered layouts.
+12. I like generous whitespace / “breathing room.”
+13. I prefer dense, information-packed layouts.
+14. I prefer bold, saturated color palettes.
+15. I prefer muted, desaturated palettes.
+16. I prefer high contrast between text and background.
+17. I prefer subtle, tasteful animations / micro‑motion.
+18. I dislike motion / animations in interfaces.
+19. I prefer photographic images (real photos) over illustrations.
+20. I prefer illustrative / graphic imagery over photos.
+21. I prefer serif typefaces for long-form reading.
+22. I prefer sans-serif typefaces for a modern look.
+23. I prefer large, bold headings and expressive typography.
+24. I prefer consistent, grid-based layouts.
+25. I enjoy asymmetric or experimental layouts.
+26. I value readability over decorative typography.
+27. I like designs that feel premium / luxurious.
+28. I like designs that feel friendly / approachable.
+29. Visual style matters a lot when I choose an app, product, or venue.
+30. When choosing a place to eat, photos of dishes influence me more than short descriptions.
+
+PART C — Context toggles (1–5)
+31. For personal/home use I prefer playful & expressive visuals rather than clean & neutral visuals.
+32. For work use I prefer minimal & professional over colorful & expressive visuals.
+
+PART D — Optional interactive tasks (use when you can show images)
+- Pairwise A/B picks: show two thumbnails (A vs B) and ask which you prefer. Repeat across many pairs; use counts to estimate preference strength.
+- Palette pick: show 3 palettes; ask to pick 1 or rank top 2.
+- Font pick: show sample headings/body text in 3 fonts; pick preferred.
+
+PART E — Open prompts (optional)
+- List up to 3 websites, apps, or brands whose look you love (free text).
+- In 3 words, describe the visual tone you prefer (e.g., "calm, modern, warm").
+
+Scoring notes for implementers
+- Use the same normalization for all 1–5 items: normalized = ((response - 1) / 4) * 100 → maps to 0–100.
+- For semantic-differential items, mapping orientation matters. See the mapping spec file for exact inversion rules.
+- Optional visual tasks (A/B, palette, fonts) provide higher-signal preferences; aggregate choices and convert to 0–100 (chosen_count/total * 100).
+
+Privacy
+- Treat responses as personal data. Do not reveal raw responses when personalizing outputs — summarize traits and preferences instead.
+
+End of module.

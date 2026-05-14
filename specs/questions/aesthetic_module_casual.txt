@@ -1,0 +1,46 @@
+Casual Aesthetic Preferences — Short Module
+
+How to answer:
+- For each sentence, pick a number 1–5:
+  1 = Not at all, 2 = A little, 3 = Somewhat, 4 = Mostly, 5 = Very much
+- Be honest — no right/wrong answers.
+
+1. I like things that look simple and not cluttered.
+2. I like blank space around things (not crowded).
+3. I prefer clean, tidy layouts over busy ones.
+4. I like warm, cozy colors (soft browns, warm greys).
+5. I like bold, bright colors.
+6. I prefer soft, muted color palettes over loud ones.
+7. I like photos of real people, food, or places (not cartoons).
+8. I like drawings or illustrations (not photos).
+9. Seeing photos of the food helps me pick a restaurant.
+10. I like small, gentle animations or movement in apps/websites.
+11. Moving things on a page annoy or distract me.
+12. I prefer simple, easy-to-read fonts (not fancy).
+13. I like big, clear headings and readable text.
+14. I like things that look modern and up-to-date.
+15. I like designs that feel homey or classic.
+16. How much does how something looks matter when you choose an app/place? (1 = not at all, 5 = a lot)
+17. For personal stuff I prefer playful or colorful looks.
+18. For work I prefer clean and professional looks.
+
+Optional:
+- If you can show pictures, we can do quick A/B picks (you pick which image you like).
+- Free text: name a brand or site whose look you love, or give three words that describe your taste.
+
+Scoring notes:
+- Convert each answer to 0–100: score = ((answer - 1) / 4) * 100.
+- Example composites:
+  minimalism = mean(scores of items 1,2,3)
+  bold_color = mean(score item 5, (100 - score item 6))
+  warmth = score 4
+  likes_motion = mean(score 10, (100 - score 11))
+  prefers_photos = score 7
+  prefers_illustrations = score 8
+  typography_readability = mean(score 12, score 13)
+  visual_importance = score 16
+  personal_vs_work_tone = {"home_playful": score 17, "work_clean": score 18}
+
+Use these composites as 0–100 personalization signals and boolean tags (>=65 = prefer/true) for rule-based LLM behavior.
+
+End of module.
