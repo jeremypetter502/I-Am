@@ -73,21 +73,21 @@ Suggested MVP
 
 User Story 4 (UI) — Svelte frontend for survey, progress, and export
 
-- [ ] T020 [US4] Add Svelte + Vite dev dependencies and package.json scripts: update `package.json` to include `dev:ui`, `build:ui`, `preview:ui` and devDependencies `svelte`, `vite`, `@sveltejs/vite-plugin-svelte`, `svelte-preprocess`.
+- [X] T020 [US4] Add Svelte + Vite dev dependencies and package.json scripts: update `package.json` to include `dev:ui`, `build:ui`, `preview:ui` and devDependencies `svelte`, `vite`, `@sveltejs/vite-plugin-svelte`, `svelte-preprocess`.
 
-- [ ] T021 [P] Create Vite config for Svelte: `vite.config.js` at repo root with svelte plugin and dev server config.
+- [X] T021 [P] Create Vite config for Svelte: `vite.config.js` at repo root with svelte plugin and dev server config.
 
-- [ ] T022 [US4] Scaffold UI entry: create `src/ui/main.js` and `src/ui/App.svelte` that mount the Svelte app and provide a root layout.
+- [X] T022 [US4] Scaffold UI entry: create `src/ui/main.js` and `src/ui/App.svelte` that mount the Svelte app and provide a root layout.
 
-- [ ] T023 [US4] [P] Implement Survey component: `src/ui/components/Survey.svelte` — renders questions from `specs/questions/`, accepts/selects responses (1-5), validates length 50, emits responses list.
+- [X] T023 [US4] [P] Implement Survey component: `src/ui/components/Survey.svelte` — renders questions from `specs/questions/`, accepts/selects responses (1-5), validates length 50, emits responses list.
 
-- [ ] T024 [US4] [P] Implement ProgressBar component: `src/ui/components/ProgressBar.svelte` — animated progress indicator showing answered count and percent.
+- [X] T024 [US4] [P] Implement ProgressBar component: `src/ui/components/ProgressBar.svelte` — animated progress indicator showing answered count and percent.
 
-- [ ] T025 [US4] [P] Implement Summary component: `src/ui/components/Summary.svelte` — shows normalized trait scores, raw scores summary, and module-level details after scoring.
+- [X] T025 [US4] [P] Implement Summary component: `src/ui/components/Summary.svelte` — shows normalized trait scores, raw scores summary, and module-level details after scoring.
 
-- [ ] T026 [US4] Integrate scorer & serializer into UI service: `src/ui/services/profileService.js` — imports `src/lib/scorer/ipipScorer` and `src/lib/serializer/toContextFile`, exposes `scoreAndExport(responses)` returning ContextFile object.
+- [X] T026 [US4] Integrate scorer & serializer into UI service: `src/ui/services/profileService.js` — imports `src/lib/scorer/ipipScorer` and `src/lib/serializer/toContextFile`, exposes `scoreAndExport(responses)` returning ContextFile object.
 
-- [ ] T027 [US4] Implement ExportButtons component: `src/ui/components/ExportButtons.svelte` — provides JSON download and pbtxt download (uses `src/lib/serializer/toPbtxt.js`) and shows generated file names.
+- [X] T027 [US4] Implement ExportButtons component: `src/ui/components/ExportButtons.svelte` — provides JSON download and pbtxt download (uses `src/lib/serializer/toPbtxt.js`) and shows generated file names.
 
 - [ ] T028 [US4] [P] Add client-side routing and pages: `src/ui/pages/SurveyPage.svelte`, `src/ui/pages/ReviewPage.svelte` and wire routes in `App.svelte`.
 
