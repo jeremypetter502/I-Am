@@ -9,7 +9,8 @@
 
   function updateRoute() {
     const raw = (typeof window !== 'undefined' && window.location && window.location.hash) ? window.location.hash : '#/survey';
-    const h = raw.replace(/^#\//, '');
+    // strip leading '#/' and any querystring (e.g., '#/survey?resume=1' -> 'survey')
+    const h = raw.replace(/^#\//, '').split('?')[0];
     route = h || 'survey';
   }
 
