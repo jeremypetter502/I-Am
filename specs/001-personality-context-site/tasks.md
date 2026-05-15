@@ -37,8 +37,8 @@ User Story 2 (P2) — Progressive modules & import
 - [X] T013 [US2] Implement module replacement logic: `src/lib/modules/moduleManager.ts` — when `retakeModule(name, newData)` is called, it replaces module data entirely and updates `modules[]` metadata. Add `tests/unit/moduleManager.test.ts`.
 
 - [ ] T035 [US2] [P] Add aesthetics question bank: create `specs/questions/aesthetic_module.txt` (canonical 18+ items) and ensure it is versioned under specs/questions/.
-- [ ] T036 [US2] Implement aesthetics scorer: `src/lib/scorer/aestheticsScorer.js` — compute normalized scores and composites (minimalism, colorfulness, warmth, texture, motion) and export `scoreAesthetics(responses)`.
-- [ ] T037 [US2] [P] Add unit tests for aesthetics scorer: `tests/unit/aestheticsScorer.test.js` with sample responses validating normalization and composites.
+- [X] T036 [US2] Implement aesthetics scorer: `src/lib/scorer/aestheticsScorer.js` — compute normalized scores and composites (minimalism, colorfulness, warmth, texture, motion) and export `scoreAesthetics(responses)`.
+- [X] T037 [US2] [P] Add unit tests for aesthetics scorer: `tests/unit/aestheticsScorer.test.js` with sample responses validating normalization and composites.
 - [ ] T038 [US2] [P] Add music question bank: create `specs/questions/music_module.txt` (factor items mapping to music factors) and version it.
 - [ ] T039 [US2] Implement music scorer: `src/lib/scorer/musicScorer.js` — compute music factor scores (mellow, sophisticated, unpretentious, intense, contemporary) normalized 0–100 and export `scoreMusic(responses)`.
 - [ ] T040 [US2] [P] Add unit tests for music scorer: `tests/unit/musicScorer.test.js` with sample responses validating factor calculations.
