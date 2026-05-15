@@ -36,7 +36,7 @@
       try {
         const ipipResponses = resumeData?.modules?.ipip?.responses || moduleResults.ipip?.responses || [];
         const scored = scoreResponses(ipipResponses);
-        const ctx = toContextFile(scored, { aesthetics: resumeData?.modules?.aesthetics?.responses || moduleResults.aesthetics?.responses, music: resumeData?.modules?.music?.responses || moduleResults.music?.responses });
+        const ctx = toContextFile(scored, { ipip: ipipResponses, aesthetics: resumeData?.modules?.aesthetics?.responses || moduleResults.aesthetics?.responses, music: resumeData?.modules?.music?.responses || moduleResults.music?.responses });
         try { localStorage.setItem('pctx_profile', JSON.stringify(ctx)); } catch(e) {}
       } catch (err) {
         console.error('Failed to export context', err);

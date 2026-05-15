@@ -81,8 +81,12 @@ export function toContextFile(scored, moduleResponses = {}) {
   const now = new Date().toISOString();
   const modules = {
     ipip: {
+      responses: Array.isArray(moduleResponses.ipip) ? moduleResponses.ipip : [],
       raw_scores: scored.raw,
-      normalized: scored.normalized
+      normalized: scored.normalized,
+      completed: Array.isArray(moduleResponses.ipip) ? moduleResponses.ipip.length >= 50 : true,
+      last_updated: now,
+      scoring_version: 'ipip-v1'
     }
   };
 
@@ -90,7 +94,7 @@ export function toContextFile(scored, moduleResponses = {}) {
   if (moduleResponses.aesthetics && typeof externalAesthetics === 'function') {
     try {
       const aest = externalAesthetics(moduleResponses.aesthetics);
-      modules.aesthetics = aest;
+      modules.aesthetics = Object.assign({ responses: moduleResponses.aesthetics, last_updated: now }, aest);
     } catch (e) {
       // ignore scorer errors
     }
@@ -100,7 +104,7 @@ export function toContextFile(scored, moduleResponses = {}) {
   if (moduleResponses.music && typeof externalMusic === 'function') {
     try {
       const mus = externalMusic(moduleResponses.music);
-      modules.music = mus;
+      modules.music = Object.assign({ responses: moduleResponses.music, last_updated: now }, mus);
     } catch (e) {
       // ignore scorer errors
     }

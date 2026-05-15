@@ -67,8 +67,10 @@
     if (!isComplete()) return alert('Please answer all questions (50).');
     const scored = scoreResponses(responses);
     const context = toContextFile(scored);
-    // emit result
-    dispatch('complete', context);
+    // save final completed progress
+    try { sessionService.saveProgress('ipip', { responses: responses.slice(0), current: responses.length, expectedLength: questions.length, completed: true }); } catch(e) {}
+    // emit result with module metadata (module name, raw responses, and scored result)
+    dispatch('complete', { module: 'ipip', responses: responses.slice(0), result: scored, context });
   }
 </script>
 
