@@ -4,7 +4,7 @@
   import Aesthetics from '../components/Aesthetics.svelte';
   import Music from '../components/Music.svelte';
   import sessionService from '../services/sessionService.js';
-  import { scoreResponses, toContextFile } from '../services/profileService.js';
+  import { scoreResponses, toContextFile, toPbtxt } from '../services/profileService.js';
 
   let resumePrompt = false;
   let resumeData = null;
@@ -24,18 +24,68 @@
     } catch(e) { resumePrompt = false }
   });
 
+  // UI prompt and partial export when a module completes
+  let showDownloadPrompt = false;
+  let partialProfile = null;
+  let partialModule = null;
+
+  function downloadPartial(format = 'json'){
+    try {
+      if (!partialProfile) return;
+      if (format === 'pbtxt' && typeof toPbtxt === 'function') {
+        const txt = toPbtxt(partialProfile);
+        const blob = new Blob([txt], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `profile.partial.${partialModule}.pbtxt`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const blob = new Blob([JSON.stringify(partialProfile, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `profile.partial.${partialModule}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch(e) { console.error('Download failed', e); }
+  }
+
   function handleModuleComplete(e){
     const { module, responses, result } = e.detail;
     try { sessionService.saveProgress(module, { responses, current: responses.length, expectedLength: responses.length }); } catch(e) {}
     completedModules[module] = true;
     moduleResults[module] = { responses, result };
 
+    // generate a partial ContextFile representing current completed modules
+    try {
+      const ipipResponses = resumeData?.modules?.ipip?.responses || moduleResults.ipip?.responses || [];
+      const moduleResponses = {
+        ipip: ipipResponses,
+        aesthetics: resumeData?.modules?.aesthetics?.responses || moduleResults.aesthetics?.responses,
+        music: resumeData?.modules?.music?.responses || moduleResults.music?.responses
+      };
+      // score IPIP only if 50 responses present, otherwise leave scores empty
+      let scored = { raw: {}, normalized: {} };
+      if (Array.isArray(ipipResponses) && ipipResponses.length === 50) {
+        scored = scoreResponses(ipipResponses);
+      }
+      const partial = toContextFile(scored, moduleResponses);
+      partialProfile = partial;
+      partialModule = module;
+      showDownloadPrompt = true;
+    } catch (err) {
+      console.error('Failed to prepare partial context', err);
+    }
+
     if (module === 'ipip') active = 'aesthetics';
     else if (module === 'aesthetics') active = 'music';
     else if (module === 'music') {
       try {
         const ipipResponses = resumeData?.modules?.ipip?.responses || moduleResults.ipip?.responses || [];
-        const scored = scoreResponses(ipipResponses);
+        const scored = (Array.isArray(ipipResponses) && ipipResponses.length === 50) ? scoreResponses(ipipResponses) : { raw: {}, normalized: {} };
         const ctx = toContextFile(scored, { ipip: ipipResponses, aesthetics: resumeData?.modules?.aesthetics?.responses || moduleResults.aesthetics?.responses, music: resumeData?.modules?.music?.responses || moduleResults.music?.responses });
         try { localStorage.setItem('pctx_profile', JSON.stringify(ctx)); } catch(e) {}
       } catch (err) {
@@ -68,6 +118,15 @@
     <button class:active={active==='aesthetics'} on:click={()=>active='aesthetics'}>Aesthetics</button>
     <button class:active={active==='music'} on:click={()=>active='music'}>Music</button>
   </div>
+
+  {#if showDownloadPrompt}
+    <div class="download-prompt">
+      <div>Module {partialModule} completed. Download current ContextFile?</div>
+      <button on:click={() => downloadPartial('json')}>Download JSON</button>
+      <button on:click={() => downloadPartial('pbtxt')}>Download pbtxt</button>
+      <button on:click={() => showDownloadPrompt = false}>Dismiss</button>
+    </div>
+  {/if}
 
   {#if active === 'ipip'}
     <Survey on:complete={handleModuleComplete} initialResponses={resumeData?.modules?.ipip?.responses} initialCurrent={resumeData?.modules?.ipip?.current} />

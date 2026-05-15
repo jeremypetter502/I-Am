@@ -55,6 +55,7 @@ User Story 2 (P2) — Progressive modules & import
 - [X] T048 [US4] Add tests for resume and module UI: `tests/unit/ui.resume.test.js` — unit/integration tests verifying autosave/resume, module badges, and review page interactions (use jsdom or testing-library/svelte).
 - [ ] T049 [US4] Add jsdom + testing-library/svelte UI tests: implement `tests/unit/ui.resume.test.js` to assert resume prompt appears when saved progress exists, clicking Resume shows module tabs, and verify sessionService persistence.
 - [ ] T050 [US4] Run UI tests and fix any failures: ensure devDependencies include necessary testing libs or mock appropriately; update CI if needed.
+- [ ] T051 [US4] Add per-module download option: when a module is completed, present a download option for the current ContextFile (partial). Implement UI prompt and tests (tests/unit/ui.download.test.js).
 
 User Story 3 (P3) — Review, change summary, export
 
