@@ -53,6 +53,8 @@ User Story 2 (P2) — Progressive modules & import
 - [X] T046 [US4] Add module completion badges & timestamps: include `last_updated` and `completed` fields in module metadata in `src/lib/serializer/toContextFile.js` and render badges in `src/ui/components/ModuleList.svelte`.
 - [X] T047 [US4] Implement Review page: create `src/ui/pages/ReviewPage.svelte` to list completed modules, provide retake/edit links, and show change summary using `src/lib/changeSummary/index.js`.
 - [X] T048 [US4] Add tests for resume and module UI: `tests/unit/ui.resume.test.js` — unit/integration tests verifying autosave/resume, module badges, and review page interactions (use jsdom or testing-library/svelte).
+- [ ] T049 [US4] Add jsdom + testing-library/svelte UI tests: implement `tests/unit/ui.resume.test.js` to assert resume prompt appears when saved progress exists, clicking Resume shows module tabs, and verify sessionService persistence.
+- [ ] T050 [US4] Run UI tests and fix any failures: ensure devDependencies include necessary testing libs or mock appropriately; update CI if needed.
 
 User Story 3 (P3) — Review, change summary, export
 

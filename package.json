@@ -11,15 +11,17 @@
     "build:ui": "vite build --config vite.config.mjs",
     "preview:ui": "vite preview --config vite.config.mjs"
   },
-
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.1.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/svelte": "^5.3.1",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
+    "jsdom": "^21.1.2",
     "protobufjs": "^8.0.0",
-    "vitest": "^1.0.0",
     "svelte": "^5.1.0",
+    "svelte-preprocess": "^5.0.0",
     "vite": "^6.2.4",
-    "@sveltejs/vite-plugin-svelte": "^5.1.1",
-    "svelte-preprocess": "^5.0.0"
+    "vitest": "^1.0.0"
   }
 }
