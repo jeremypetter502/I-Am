@@ -1,0 +1,25 @@
+1. I enjoy calm, mellow music.
+2. I prefer music that is intense and energetic.
+3. I like music with complex arrangements and harmonies.
+4. Simple, catchy melodies are my preference.
+5. I appreciate experimental or avant-garde sounds.
+6. I prefer acoustic instrumentation over electronic.
+7. Lyrics and storytelling in songs matter to me.
+8. I enjoy heavy, distorted sounds and loud dynamics.
+9. I like music that feels polished and produced.
+10. I prefer raw, live-sounding recordings.
+11. I value rhythmic complexity and groove.
+12. I prefer straightforward, danceable beats.
+13. I enjoy music that evokes strong emotions.
+14. I like music that is uplifting and positive.
+15. I prefer songs with rich instrumental textures.
+16. I enjoy minimal, stripped-down arrangements.
+17. I like contemporary pop and chart music.
+18. I appreciate classic or vintage sounds.
+19. I prefer music that challenges my expectations.
+20. I like music that is easy to sing along with.
+
+Scoring notes for implementers:
+- Group questions into factors (e.g., mellow, intense, sophisticated, contemporary, unpretentious).
+- Normalize 1–5 to 0–100 using ((resp-1)/4)*100.
+- Aggregate factor scores by averaging grouped item normalized scores.

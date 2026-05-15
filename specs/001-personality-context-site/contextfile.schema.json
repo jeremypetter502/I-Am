@@ -6,6 +6,20 @@
   "additionalProperties": false,
   "required": ["schema_version", "generated_at", "profile"],
   "properties": {
+    "preamble": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "purpose": { "type": "string" },
+        "schema_version": { "type": "string" },
+        "scoring_version": { "type": "string" },
+        "trait_key_map": { "type": "object", "additionalProperties": { "type": "string" } },
+        "normalization": { "type": "string" },
+        "provenance": { "type": "object", "additionalProperties": true },
+        "privacy": { "type": "object", "additionalProperties": true },
+        "usage_snippet": { "type": "string" }
+      }
+    },
     "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$", "description": "Schema version, e.g. 1.0" },
     "generated_at": { "type": "string", "format": "date-time", "description": "UTC timestamp when file was produced" },
     "source": {
@@ -66,7 +80,9 @@
                   "type": "object",
                   "additionalProperties": { "type": "number", "minimum": 0, "maximum": 100 },
                   "description": "Normalized 0..100 trait scores"
-                }
+                },
+                "completed": { "type": "boolean" },
+                "last_updated": { "type": "string", "format": "date-time" }
               }
             },
             "aesthetics": {

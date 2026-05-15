@@ -1,0 +1,92 @@
+{
+  "schema_version": "0.1",
+  "generated_at": "2026-05-14T02:17:43.927Z",
+  "profile": {
+    "id": "web",
+    "summary": "Generated from dev server",
+    "scores": {
+      "openness": 52.5,
+      "conscientiousness": 55,
+      "extraversion": 52.5,
+      "agreeableness": 45,
+      "neuroticism": 52.5
+    },
+    "raw_scores": {
+      "openness": 31,
+      "conscientiousness": 32,
+      "extraversion": 31,
+      "agreeableness": 28,
+      "neuroticism": 31
+    },
+    "modules": {
+      "ipip": {
+        "responses": [
+          3,
+          3,
+          3,
+          3,
+          3,
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          4,
+          3,
+          3,
+          3,
+          3,
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          5,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          4,
+          3,
+          3,
+          2,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3
+        ],
+        "raw_trait_scores": {
+          "O": 31,
+          "C": 32,
+          "E": 31,
+          "A": 28,
+          "N": 31
+        },
+        "normalized_trait_scores": {
+          "O": 52.5,
+          "C": 55,
+          "E": 52.5,
+          "A": 45,
+          "N": 52.5
+        }
+      }
+    }
+  }
+}

@@ -2,17 +2,25 @@
   import { onMount } from 'svelte';
   import SurveyPage from './pages/SurveyPage.svelte';
   import ReviewPage from './pages/ReviewPage.svelte';
+  import sessionService from './services/sessionService.js';
 
   let route = 'survey';
+  let hasSaved = false;
 
   function updateRoute() {
-    const h = (location.hash || '#/survey').replace('#/','');
+    const raw = (typeof window !== 'undefined' && window.location && window.location.hash) ? window.location.hash : '#/survey';
+    const h = raw.replace(/^#\//, '');
     route = h || 'survey';
   }
 
   onMount(() => {
-    updateRoute();
-    window.addEventListener('hashchange', updateRoute);
+    try {
+      updateRoute();
+      window.addEventListener('hashchange', updateRoute);
+      hasSaved = sessionService.hasSaved();
+    } catch (err) {
+      console.error('App init error', err);
+    }
   });
 </script>
 
@@ -20,6 +28,12 @@
   <a href="#/survey">Survey</a> |
   <a href="#/review">Review</a>
 </nav>
+
+{#if hasSaved}
+  <div class="resume-banner">
+    A saved session was found. <a href="#/survey?resume=1">Resume survey</a>
+  </div>
+{/if}
 
 <main>
   <h1>Personality Context Generator</h1>

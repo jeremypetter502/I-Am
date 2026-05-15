@@ -20,6 +20,16 @@ function toContextFile({ id, summary, traits }, options) {
     raw_scores[map[k]] = rawVal;
   }
 
+  function remapTraits(obj) {
+    if (!obj || typeof obj !== 'object') return {};
+    const out = {};
+    for (const key of Object.keys(obj)) {
+      const mapped = map[key] || key;
+      out[mapped] = obj[key];
+    }
+    return out;
+  }
+
   const ipipResponses = (options && options.ipipResponses) ? options.ipipResponses : [];
   const profile = {
     id: id || null,
@@ -29,15 +39,29 @@ function toContextFile({ id, summary, traits }, options) {
     modules: {
       ipip: {
         responses: ipipResponses,
-        raw_trait_scores: raw || {},
-        normalized_trait_scores: normalized || {}
+        raw_trait_scores: remapTraits(raw) || {},
+        normalized_trait_scores: remapTraits(normalized) || {},
+        completed: Array.isArray(ipipResponses) && ipipResponses.length >= 50,
+        last_updated: (options && options.lastUpdated) ? options.lastUpdated : new Date().toISOString()
       }
     }
+  };
+
+  const preamble = {
+    purpose: 'compact personality profile for LLM prompts',
+    schema_version: '1.0',
+    scoring_version: 'ipip-v1',
+    trait_key_map: map,
+    normalization: '0-100 (Normalized = ((Raw - 10)/40) * 100 for IPIP-50)',
+    provenance: { tool: 'personality-site', tool_version: '0.1' },
+    privacy: { persist_client_side_only: true },
+    usage_snippet: "Use 'profile.scores' for summary prompts; 'modules.ipip' contains detailed responses and trait-level scores."
   };
 
   return {
     schema_version: '0.1',
     generated_at: new Date().toISOString(),
+    preamble,
     profile
   };
 }

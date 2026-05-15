@@ -1,0 +1,25 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>PCTX Test</title></head>
+<body>
+<h1>Personality Context Generator</h1>
+<p>Enter 50 comma-separated responses (1-5) or click Fill.</p>
+<textarea id="resp" style="width:100%;height:200px">3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3</textarea>
+<button id="fill">Fill 50x3</button>
+<button id="send">Generate</button>
+<pre id="out"></pre>
+<script>
+async function post(data){
+ const res=await fetch('/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+ return res.json();
+}
+document.getElementById('fill').onclick=()=>{ document.getElementById('resp').value=Array(50).fill(3).join(','); };
+document.getElementById('send').onclick=async()=>{
+ const txt=document.getElementById('resp').value;
+ const arr=txt.split(',').map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n));
+ const r=await post({responses:arr});
+ document.getElementById('out').textContent=JSON.stringify(r,null,2);
+};
+</script>
+</body>
+</html>

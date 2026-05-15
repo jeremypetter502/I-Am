@@ -1,4 +1,4 @@
-const { serializePbtxt, parsePbtxt } = require('../../src/lib/importer/pbtxt');
+const { serializePbtxt, parsePbtxt } = require('../importer/pbtxt');
 
 function toPbtxt(json) {
   return serializePbtxt(json);

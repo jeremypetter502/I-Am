@@ -1,0 +1,11 @@
+# ESLint ignore patterns
+node_modules/
+dist/
+build/
+coverage/
+*.min.js
+.cache/
+.vscode/
+.idea/
+*.log
+.env*

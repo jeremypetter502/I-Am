@@ -1,3 +1,19 @@
+<!-- Preamble: machine-readable metadata for LLM and tooling -->
+```json
+{
+  "preamble": {
+    "purpose": "compact personality profile for LLM prompts",
+    "schema_version": "1.0",
+    "scoring_version": "ipip-v1",
+    "trait_key_map": { "O": "openness", "C": "conscientiousness", "E": "extraversion", "A": "agreeableness", "N": "neuroticism" },
+    "normalization": "0-100 (Normalized = ((Raw - 10)/40) * 100 for IPIP-50)",
+    "provenance": { "tool": "personality-site", "tool_version": "0.1" },
+    "privacy": { "persist_client_side_only": true },
+    "usage_snippet": "Use 'profile.scores' for summary prompts; 'modules.ipip' contains detailed responses and trait-level scores."
+  }
+}
+```
+
 # Feature Specification: Personality context generator
 
 **Feature Branch**: `[001-personality-context-site]`
@@ -82,6 +98,7 @@ Note: After export, users may edit the downloaded context file in their preferre
 - **FR-012**: The system MUST provide a client-side scorer utility that computes trait scores (including reverse-scoring), applies configured mappings, and emits a versioned ContextFile ready for export and import.
 - **FR-014**: The system MUST provide clear rollback guidance and an undo path when an import or export round-trip produces inconsistent or invalid data. The UI must allow the user to revert to the previous profile state or discard the import and present user-facing warnings describing the inconsistency. [Edge Case]
 - **FR-015**: Consent and opt-in actions (for analytics or server-side persistence) MUST be explicitly recorded and included in exported metadata when enabled; the UI must surface the consent action prior to enabling any server-side storage or analytics. [Privacy, Traceability]
+- **FR-016**: The system MUST immediately record a user's response and automatically advance to the next question when the user selects an answer option (for example, clicking a numeric choice). The advance MUST NOT require the user to click an explicit "Next" control. Implementations MUST still provide a way to review and change previous answers (e.g., back navigation or a review screen) before final submission, and MUST ensure keyboard and assistive-technology accessibility for selection and navigation. [UX, Accessibility]
 
 ### Key Entities *(include if feature involves data)*
 
@@ -182,7 +199,7 @@ This normative section captures required UX-related requirements that implementa
 #### UI Layout & Breakpoints [Clarity, Coverage]
 
 - Required breakpoints and layout behavior: mobile (<=599px), tablet (600px–1023px), desktop (>=1024px). Implementations MUST describe how primary screens adapt at these breakpoints (single-column mobile, two-column tablet, content+sidebar desktop). The primary summary card should be placed above-the-fold on mobile and occupy at least 30% of the content column on desktop. [Spec §Design & UX Suggestions]
-- Single-question-per-screen flow behavior: the core IPIP flow presents one question per screen with a persistent progress indicator and a clearly labeled "Next" action. Navigation must allow backward review of previous answers. Estimated completion time MUST be shown (minutes) or a percentage progress indicator as required by FR-001.
+- Single-question-per-screen flow behavior: the core IPIP flow presents one question per screen with a persistent progress indicator. When a user selects an answer option (for example, clicking a numeric choice), the response MUST be recorded and the UI MUST automatically advance to the next question without requiring an explicit "Next" click. Navigation MUST allow backward review and changing of previous answers. Estimated completion time MUST be shown (minutes) or a percentage progress indicator as required by FR-001.
 
 #### Primary CTA & Interaction Targets [Measurability]
 

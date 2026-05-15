@@ -4,7 +4,11 @@
   import { loadQuestions, scoreResponses, toContextFile } from '../services/profileService.js';
 
   const dispatch = createEventDispatcher();
+  import sessionService from '../services/sessionService.js';
+
   let questions = [];
+  export let initialResponses = null;
+  export let initialCurrent = 0;
   let responses = Array(50).fill(null);
   let current = 0;
   let loading = true;
@@ -15,6 +19,11 @@
       questions = await loadQuestions();
       // ensure exactly 50 questions
       questions = questions.slice(0,50);
+      // if initial responses provided (resume), apply them
+      if (initialResponses && Array.isArray(initialResponses)) {
+        for (let i=0;i<Math.min(initialResponses.length, responses.length);i++) responses[i] = initialResponses[i];
+        current = initialCurrent || 0;
+      }
       loading = false;
     } catch (err) {
       error = err.message || String(err);
@@ -24,6 +33,23 @@
 
   function setResponse(value) {
     responses[current] = value;
+    // autosave every 5 answers
+    const answered = responses.filter(r => typeof r === 'number').length;
+    if (answered % 5 === 0) {
+      // save progress for ipip module
+      try { sessionService.saveProgress('ipip', { responses: responses.slice(0), current, expectedLength: questions.length }); } catch(e) {}
+    }
+  }
+
+  // Handle an answer selection: record it and advance automatically
+  function handleAnswer(value) {
+    setResponse(value);
+    // small visual pause so user sees selection, then advance
+    setTimeout(() => {
+      if (current < questions.length - 1) {
+        current += 1;
+      }
+    }, 120);
   }
 
   function next() {
@@ -57,7 +83,7 @@
     <div class="q-text">{questions[current]}</div>
     <div class="answers">
       {#each [1,2,3,4,5] as n}
-        <button class:sel={responses[current]===n} on:click={() => { setResponse(n); }}>{n}</button>
+        <button class:sel={responses[current]===n} on:click={() => handleAnswer(n)} aria-label={"Answer "+n}>{n}</button>
       {/each}
     </div>
 

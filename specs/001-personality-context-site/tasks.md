@@ -36,6 +36,24 @@ User Story 2 (P2) — Progressive modules & import
 
 - [X] T013 [US2] Implement module replacement logic: `src/lib/modules/moduleManager.ts` — when `retakeModule(name, newData)` is called, it replaces module data entirely and updates `modules[]` metadata. Add `tests/unit/moduleManager.test.ts`.
 
+- [ ] T035 [US2] [P] Add aesthetics question bank: create `specs/questions/aesthetic_module.txt` (canonical 18+ items) and ensure it is versioned under specs/questions/.
+- [ ] T036 [US2] Implement aesthetics scorer: `src/lib/scorer/aestheticsScorer.js` — compute normalized scores and composites (minimalism, colorfulness, warmth, texture, motion) and export `scoreAesthetics(responses)`.
+- [ ] T037 [US2] [P] Add unit tests for aesthetics scorer: `tests/unit/aestheticsScorer.test.js` with sample responses validating normalization and composites.
+- [ ] T038 [US2] [P] Add music question bank: create `specs/questions/music_module.txt` (factor items mapping to music factors) and version it.
+- [ ] T039 [US2] Implement music scorer: `src/lib/scorer/musicScorer.js` — compute music factor scores (mellow, sophisticated, unpretentious, intense, contemporary) normalized 0–100 and export `scoreMusic(responses)`.
+- [ ] T040 [US2] [P] Add unit tests for music scorer: `tests/unit/musicScorer.test.js` with sample responses validating factor calculations.
+
+# UI integration tasks (User Story 4)
+- [X] T041 [US4] Implement Aesthetics UI component: `src/ui/components/Aesthetics.svelte` — render aesthetic questions, record responses (1–5), emit module results to profileService.
+- [X] T042 [US4] Implement Music UI component: `src/ui/components/Music.svelte` — render music preference questions, record responses, emit module results.
+- [X] T043 [US4] Integrate module scorers into profileService: `src/ui/services/profileService.js` — import and call `scoreAesthetics` and `scoreMusic`, include results in ContextFile generation.
+- [X] T044 [US4] [P] Add UI tests/integration: `tests/unit/ui.modules.test.js` — verify selecting responses for Aesthetics and Music produces expected module entries in generated ContextFile (mock scoring if necessary).
+
+- [X] T045 [US4] Add autosave & resume functionality: create `src/ui/services/sessionService.js` to persist in-progress module responses to localStorage every 5 answers and implement resume prompt in `src/ui/App.svelte` and `src/ui/pages/SurveyPage.svelte`.
+- [X] T046 [US4] Add module completion badges & timestamps: include `last_updated` and `completed` fields in module metadata in `src/lib/serializer/toContextFile.js` and render badges in `src/ui/components/ModuleList.svelte`.
+- [X] T047 [US4] Implement Review page: create `src/ui/pages/ReviewPage.svelte` to list completed modules, provide retake/edit links, and show change summary using `src/lib/changeSummary/index.js`.
+- [X] T048 [US4] Add tests for resume and module UI: `tests/unit/ui.resume.test.js` — unit/integration tests verifying autosave/resume, module badges, and review page interactions (use jsdom or testing-library/svelte).
+
 User Story 3 (P3) — Review, change summary, export
 
 - [X] T014 [US3] Implement change-summary generator: `src/lib/changeSummary/index.ts` — function `diffProfiles(oldProfile, newProfile) => { added:[], removed:[], updated:[], inferred:[] }` and human-readable summary builder.
@@ -51,6 +69,8 @@ Cross-cutting & final
 - [X] T018 Add CI tasks to run validator and tests: verify `.github/workflows/validate-json.yml` triggers `npm ci`, `npm run validate:json`, and `npm test` on PRs.
 
 - [X] T019 Update documentation: review and update `specs/001-personality-context-site/quickstart.md`, `README.md`, and add `docs/developer/` notes describing how to run scorer, importer, and serializer.
+
+- [ ] T034 Add machine-readable preamble: Insert a machine-readable preamble into `specs/001-personality-context-site/spec.md` and update `src/lib/serializer/toContextFile.js` to include the same preamble metadata in generated ContextFiles; add validation test to ensure preamble presence.
 
 Dependencies (high-level)
 
@@ -80,6 +100,8 @@ User Story 4 (UI) — Svelte frontend for survey, progress, and export
 - [X] T022 [US4] Scaffold UI entry: create `src/ui/main.js` and `src/ui/App.svelte` that mount the Svelte app and provide a root layout.
 
 - [X] T023 [US4] [P] Implement Survey component: `src/ui/components/Survey.svelte` — renders questions from `specs/questions/`, accepts/selects responses (1-5), validates length 50, emits responses list.
+
+- [X] T033 [US4] Implement auto-advance on answer selection: selecting an answer records it and automatically advances to the next question; ensure ARIA labels and keyboard accessibility (src/ui/components/Survey.svelte).
 
 - [X] T024 [US4] [P] Implement ProgressBar component: `src/ui/components/ProgressBar.svelte` — animated progress indicator showing answered count and percent.
 
