@@ -64,8 +64,8 @@
       const ipipResponses = resumeData?.modules?.ipip?.responses || moduleResults.ipip?.responses || [];
       const moduleResponses = {
         ipip: ipipResponses,
-        aesthetics: resumeData?.modules?.aesthetics?.responses || moduleResults.aesthetics?.responses,
-        music: resumeData?.modules?.music?.responses || moduleResults.music?.responses
+        aesthetics: moduleResults.aesthetics ? { responses: moduleResults.aesthetics.responses, result: moduleResults.aesthetics.result } : (resumeData?.modules?.aesthetics ? { responses: resumeData.modules.aesthetics.responses } : null),
+        music: moduleResults.music ? { responses: moduleResults.music.responses, result: moduleResults.music.result } : (resumeData?.modules?.music ? { responses: resumeData.modules.music.responses } : null)
       };
       // score IPIP only if 50 responses present, otherwise leave scores empty
       let scored = { raw: {}, normalized: {} };

@@ -90,13 +90,19 @@ export function toContextFile(scored, moduleResponses = {}) {
     }
   };
 
-  // If aesthetics responses provided and external scorer present, compute and include
-  if (moduleResponses.aesthetics && typeof externalAesthetics === 'function') {
+  // If aesthetics responses provided, include responses and metadata. Prefer computed scorer if available.
+  if (moduleResponses.aesthetics) {
     try {
-      const aest = externalAesthetics(moduleResponses.aesthetics);
-      modules.aesthetics = Object.assign({ responses: moduleResponses.aesthetics, last_updated: now }, aest);
+      // allow moduleResponses.aesthetics to be either an array of responses or an object { responses, result }
+      const aestResp = Array.isArray(moduleResponses.aesthetics) ? moduleResponses.aesthetics : moduleResponses.aesthetics.responses;
+      const providedResult = (!Array.isArray(moduleResponses.aesthetics) && moduleResponses.aesthetics.result) ? moduleResponses.aesthetics.result : null;
+      let computed = providedResult;
+      if (!computed && typeof externalAesthetics === 'function') {
+        try { computed = externalAesthetics(aestResp); } catch(e) { computed = null; }
+      }
+      modules.aesthetics = Object.assign({ responses: aestResp || [], last_updated: now, completed: Array.isArray(aestResp) ? aestResp.length >= 1 : false }, computed || {});
     } catch (e) {
-      // ignore scorer errors
+      // ignore errors but still try to include raw responses if present
     }
   }
 
