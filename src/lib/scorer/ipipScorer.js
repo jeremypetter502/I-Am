@@ -1,13 +1,12 @@
-// ipipScorer.js - CommonJS implementation for Node tests
-const REVERSE_INDICES = {
-  O: [42,44,46,48,50],
-  C: [22,24,26,28,30],
-  E: [2,4,6,8,10],
-  A: [12,14,16,18,20],
-  N: [32,34,36,38,40]
-};
+export function scoreIpip(responses) {
+  const REVERSE_INDICES = {
+    O: [42,44,46,48,50],
+    C: [22,24,26,28,30],
+    E: [2,4,6,8,10],
+    A: [12,14,16,18,20],
+    N: [32,34,36,38,40]
+  };
 
-function scoreIpip(responses) {
   if (!Array.isArray(responses) || responses.length !== 50) throw new Error('responses must be array of length 50');
   // responses are 1..5
   const traits = { O:0, C:0, E:0, A:0, N:0 };
@@ -37,4 +36,4 @@ function scoreIpip(responses) {
   return { raw, normalized: traits };
 }
 
-module.exports = { scoreIpip };
+export default { scoreIpip };

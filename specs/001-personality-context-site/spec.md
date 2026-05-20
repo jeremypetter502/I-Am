@@ -98,8 +98,52 @@ Note: After export, users may edit the downloaded context file in their preferre
 - **FR-012**: The system MUST provide a client-side scorer utility that computes trait scores (including reverse-scoring), applies configured mappings, and emits a versioned ContextFile ready for export and import.
 - **FR-014**: The system MUST provide clear rollback guidance and an undo path when an import or export round-trip produces inconsistent or invalid data. The UI must allow the user to revert to the previous profile state or discard the import and present user-facing warnings describing the inconsistency. [Edge Case]
 - **FR-015**: Consent and opt-in actions (for analytics or server-side persistence) MUST be explicitly recorded and included in exported metadata when enabled; the UI must surface the consent action prior to enabling any server-side storage or analytics. [Privacy, Traceability]
+
+- **FR-023**: The system MUST provide a standalone Skills Assessment module (parallel to Aesthetics, Music, and Communication modules) that presents the 35 Standardized Transferable Skills from the O*NET standard in a self-assessment format.
+
+- **FR-024**: The system MUST normalize skills responses to 0–100 scale and apply a Results Filter before including them in exports. The Results Filter MUST use a four-step algorithm: (1) Threshold (>= 60 qualifies, 35–59 conditional, < 35 omitted); (2) Interview Defense test (provide a real-world example); (3) Day One Autonomy test (perform standard task independently); (4) Relevance & Recency test (used within 2–3 years). Only skills passing all four steps are included in the filtered results.
+
+- **FR-025**: The system MUST display two views of skills results: (a) **Filtered Results** (job-ready skills confirmed by tests, suitable for resumes and interviews) and (b) **Full Assessment** (all scored skills, unfiltered, for user review and manual curation). Users may toggle between views and manually override/edit inclusion before export.
+
+- **FR-026**: The system MUST include skills module results in exports (Markdown and ContextFile JSON) with clear labels indicating test status (Confirmed, Conditional, Stale). The filtered skill list MUST be the default export format unless the user explicitly selects "Full Assessment" for export. Skills MUST be encoded in the compact IAM string using O*NET standardized skill position indices (S01–S35) and 0–99 proficiency values using sparse encoding (only non-zero skills included).
+
+- **FR-027**: The system MUST support importing previously exported ContextFiles with Skills module data. Imported skills results MUST preserve test confirmations and status labels and be available for re-scoring or editing before re-export. The IAM compact string parser MUST correctly decode skill position indices and map them to the canonical O*NET 35-skill taxonomy.
+- **FR-028**: The STATE module MUST be initialized to canonical baseline defaults (`bandwidth:50`, `mode:convergent`, `horizon:long`, `stakes:casual`) and treated as always available rather than a completion-based questionnaire. The UI MUST NOT display STATE as `In Progress` or `Complete`, and MUST NOT show `x/x` progress indicators for STATE.
+
+### IAM Compact String Encoding (Reference)
+
+The I-Am Context Code (IAM) specification is the standard compact representation for all personality/career/skill data.
+See `specs/personality-specs/personality_code.spec.md` for the full normative spec.
+
+**Version**: 0.6 (standardized O*NET skill positions plus STATE segment)
+
+**Format**: `IAM/<version>/<context>:<OCEAN>/<AES>/<MUS>/<COM>/<CAR>/<STATE>`
+
+**Career/Skills Segment (CAR)** encoding:
+- Pattern: `CAR{8-digit-soc}S{skill-idx}{proficiency}[{skill-idx}{proficiency}]*`
+- Example: `CAR15113200S0190S1899S2485S3360`
+- Skill indices S01–S35 map to the 35 O*NET Standardized Transferable Skills (canonical list in personality_code.spec.md)
+- Proficiency values: 00–99 (normalized, where 60–99 = results-worthy, 35–59 = conditional, 0–34 = omit)
+- Sparse encoding: only include skills with non-zero proficiency to minimize string length
+
+**STATE segment** encoding:
+- Canonical pattern: `STATE:bandwidth{bb},mode:{convergent|divergent},horizon:{now|long},stakes:{critical|casual}`
+- Segment order requirement: OCEAN -> AES -> MUS -> COM -> CAR -> STATE
+- Example full suffix: `/CAR15113200S0190S1899S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical`
+
+**IAM Decoder Reference** (for LLMs receiving IAM codes):
+- Use skill index to look up skill name from the O*NET 35-skill position map (do not guess abbreviations)
+- Apply threshold rules for filtering and presentation
+- Treat as a soft signal, not a hard rule
+
+For ContextFile JSON export, the skill data is preserved verbatim (name, score, test status); the IAM string is a compact synopsis.
 - **FR-016**: The system MUST immediately record a user's response and automatically advance to the next question when the user selects an answer option (for example, clicking a numeric choice). The advance MUST NOT require the user to click an explicit "Next" control. Implementations MUST still provide a way to review and change previous answers (e.g., back navigation or a review screen) before final submission, and MUST ensure keyboard and assistive-technology accessibility for selection and navigation. [UX, Accessibility]
 - **FR-017**: When a user completes any module (e.g., IPIP, Aesthetics, Music), the system MUST present the user with the option to download a ContextFile that reflects all modules completed so far (a partial ContextFile). The partial ContextFile MUST include completed modules with available responses, module metadata (last_updated, completed flag, scoring_version if available), and any computed scores where scoring inputs are complete. The UI MUST allow choosing the export format (JSON or pbtxt) and MUST validate JSON exports against the canonical schema when possible. (Traceability: relates to FR-004, FR-006, FR-013, FR-011)
+- **FR-018**: All business logic (scorers, serializer, IAM generator, import/export rules) MUST be implemented only in the canonical library under `src/lib/` (for example, `src/lib/scorer`, `src/lib/serializer`, `src/lib/iam`). The UI layer (`src/ui/`) MUST import and call these library functions and MUST NOT duplicate scoring or serialization logic. Any duplication discovered during review must be removed and replaced by calls to the canonical implementations. (Traceability: enforces code organization and maintainability.)
+- **FR-019**: The IAM compact string MUST support a Career segment appended as the final slash-separated group using pattern `JOB{soc8}{skillToken1}{vv}{skillToken2}{vv}...`, where `soc8` is an 8-digit O*NET-SOC code (`XX-XXXX.XX` normalized to digits) and each `vv` is a normalized integer in the range `00-99`.
+- **FR-020**: The system MUST maintain and version a static Career skill-token map for IAM generation: `PR` (Programming), `LD` (Leadership and Management), `CT` (Critical Thinking and Problem Solving), `SP` (Speaking and Communication), `DT` (Data Analysis and Interpretation), `CR` (Creativity and Innovation).
+- **FR-021**: When base context contains an O*NET role and skill values, IAM generation MUST include the Career segment in this canonical order: OCEAN -> Aesthetics -> Music -> Communication (if present) -> Career.
+- **FR-022**: Career segment parsing and generation MUST be lossless for defined fields across export/import round-trips; generated files MUST preserve both `profile.base.onet` and all supported skill values used in IAM encoding.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -174,6 +218,73 @@ Implementation notes:
 - Scorer implementations MUST reference these question files for exact wording and item indices.
 - Composite formulas and inversion rules live in the aesthetic mapping spec; ensure consistency between mapping and scorer code.
 - During import of existing ContextFiles, flag any inferred or defaulted values derived from partial/question-level data in the change summary presented to users.
+
+- Skills module — `specs/questions/skills_module.txt`:
+  - Purpose: Self-assessment of the 35 Standardized Transferable Skills from the O*NET standard (e.g., Critical Thinking, Leadership, Speaking, Programming, Data Analysis, Creativity & Innovation, etc.).
+  - Response scale: 0–5 Likert scale (0=Not Applicable, 1=Beginner, 2=Intermediate, 3=Advanced, 4=Expert, 5=Mastery).
+  - Scoring: Normalize responses to 0–100 scale, then apply the **Results Filter** logic (below) to determine which skills to surface in exports.
+  - Filtering framework (Results Filter): The scorer MUST apply a four-step filtering system to ensure only defensible, job-relevant skills are listed:
+    1. **Threshold Filter** (numerical baseline): Skill score >= 60 on 0–100 scale qualifies for further review. Scores 35–59 are conditionally included only if job-relevant. Scores < 35 are omitted entirely.
+    2. **Interview Defense Test** (contextual): For any skill scoring 50+, the user is prompted to confirm they can provide a real-world success story demonstrating the skill (2-minute example). If no example provided, the skill is marked as unconfirmed and omitted from professional outputs.
+    3. **Day One Autonomy Test** (operational readiness): For any skill scoring 50+, confirm the user can perform standard tasks independently without step-by-step guidance. If uncertain, the skill is downgraded or omitted.
+    4. **Relevance & Recency Test** (temporal validity): For any skill scoring 50+, confirm active use within 2–3 years. Skills not recently used are marked stale and de-prioritized in exports or omitted if not job-critical.
+  - Output: Two result sets: (a) **Filtered Results** — only skills >= 60 AND passing tests (ready for resume/interview); (b) **Full Assessment** (optional unfiltered list for user review and manual curation before export). Both retain confidence labels (Confirmed, Conditional, Stale).
+  - Privacy: Skills are employment-sensitive and must never be inferred from other modules. Only direct self-assessment and explicit test responses are used; no inference from personality or aesthetics.
+
+### 35 Standardized Transferable Skills (O*NET Reference)
+
+The Skills module assesses the following 35 competencies from the O*NET standardized skills taxonomy. These are organized by conceptual grouping for reference:
+
+**Cognitive & Analysis Skills**
+1. Critical Thinking & Problem Solving
+2. Data Analysis & Interpretation
+3. Research & Investigation
+4. Systems Thinking & Modeling
+5. Judgment & Decision Making
+
+**Communication & Interpersonal Skills**
+6. Speaking & Communication
+7. Listening & Comprehension
+8. Writing & Documentation
+9. Negotiation & Persuasion
+10. Collaboration & Teamwork
+
+**Leadership & Management Skills**
+11. Leadership & Supervision
+12. Delegation & Accountability
+13. Conflict Resolution & Mediation
+14. Mentoring & Coaching
+15. Strategic Planning
+
+**Technical & Specialized Skills**
+16. Programming & Software Development
+17. Systems Administration & IT Support
+18. Database Management & SQL
+19. Cloud Technologies & DevOps
+20. Cybersecurity & Risk Management
+
+**Business & Process Skills**
+21. Project Management
+22. Process Improvement & Optimization
+23. Financial Analysis & Budgeting
+24. Operations Management
+25. Supply Chain & Logistics
+
+**Creative & Innovation Skills**
+26. Creativity & Innovation
+27. Design Thinking & Prototyping
+28. User Experience (UX) Design
+29. Visual & Spatial Reasoning
+30. Adaptability & Change Management
+
+**Specialized & Domain Skills**
+31. Sales & Customer Relations
+32. Marketing & Brand Development
+33. Quality Assurance & Testing
+34. Training & Knowledge Transfer
+35. Compliance & Regulation
+
+Implementation note (non-normative): Business logic (scoring, serialization, IAM generation, and import rules) SHOULD live under `src/lib/` and be exposed as well-documented functions. UI code in `src/ui/` SHOULD import and call these functions rather than reimplementing them. This separation improves testability, bundling, and ensures identical behavior between CLI/scripts and the browser UI.
 
 
 ### Design & UX Suggestions (Non-normative)
@@ -471,13 +582,13 @@ Example snippet to attach to personal_context
 
 Need a small scorer to compute these composites from structured responses? Reply yes to have a ready script created.
 
-### Personality Context Code (PCTX) Specification (from specs/personality-specs/personality_code.spec.md)
+### Personality Context Code (IAM) Specification (from specs/personality-specs/personality_code.spec.md)
 
-# Personality Context Code (PCTX) Specification v0.1
+# I-Am Context Code (IAM) Specification v0.1
 
 ## Purpose
 
-The PCTX code is a compact, labeled, single-line encoding of a user's full
+The IAM code is a compact, labeled, single-line encoding of a user's full
 personality profile derived from the IPIP, Aesthetic, and STOMP survey modules.
 
 It is designed for efficient LLM consumption:
@@ -491,7 +602,7 @@ It is designed for efficient LLM consumption:
 ## Format
 
 ```
-PCTX/<version>/<context>:<OCEAN_segment>/<AES_segment>/<MUS_segment>
+IAM/<version>/<context>:<OCEAN_segment>/<AES_segment>/<MUS_segment>
 ```
 
 ### Version
@@ -503,7 +614,7 @@ PCTX/<version>/<context>:<OCEAN_segment>/<AES_segment>/<MUS_segment>
 ### Full example
 
 ```
-PCTX/0.1/W:O72C88E55A60N22/MIN80CLR35WRM60MOT45IMG70TYP65LAY55/MEL40SOP70UNP55INT20CON65
+IAM/0.1/W:O72C88E55A60N22/MIN80CLR35WRM60MOT45IMG70TYP65LAY55/MEL40SOP70UNP55INT20CON65
 ```
 
 ---
@@ -574,8 +685,8 @@ Omit any segment that has not been completed. Segments present must follow order
 OCEAN → AES → MUS, separated by `/`.
 
 ```
-PCTX/0.1:O72C88E55A60N22
-PCTX/0.1:O72C88E55A60N22/MIN80CLR35WRM60MOT45IMG70TYP65LAY55
+IAM/0.1:O72C88E55A60N22
+IAM/0.1:O72C88E55A60N22/MIN80CLR35WRM60MOT45IMG70TYP65LAY55
 ```
 
 ---
@@ -588,19 +699,19 @@ PCTX/0.1:O72C88E55A60N22/MIN80CLR35WRM60MOT45IMG70TYP65LAY55
 | + AES             | 12     | 0–100         | ~10²⁴                |
 | + MUS (full)      | 17     | 0–100         | ~10³⁴                |
 
-Each individual's full PCTX code is effectively unique.
+Each individual's full IAM code is effectively unique.
 
 ---
 
 ## LLM usage guidance
 
-When a PCTX code appears in a system prompt or user context block:
+When an IAM code appears in a system prompt or user context block:
 
 1. Parse each labeled segment using the token table above.
 2. Apply interpretation thresholds (≥65 HIGH, 35–64 MED, <35 LOW) per field.
 3. Use HIGH and LOW flags to influence tone, detail level, format, and suggestions.
 4. Do NOT infer clinical or diagnostic conclusions from these scores.
-5. Treat the PCTX code as a soft, probabilistic signal — not a rigid rule.
+5. Treat the IAM code as a soft, probabilistic signal — not a rigid rule.
 
 ### Quick reference for LLMs
 
@@ -657,7 +768,7 @@ This normative section captures required security & privacy requirements that im
 ## Regex pattern (validation)
 
 ```
-^PCTX\/0\.1(\/[WH])?:O\d{1,3}C\d{1,3}E\d{1,3}A\d{1,3}N\d{1,3}(\/MIN\d{1,3}CLR\d{1,3}WRM\d{1,3}MOT\d{1,3}IMG\d{1,3}TYP\d{1,3}LAY\d{1,3})?(\/MEL\d{1,3}SOP\d{1,3}UNP\d{1,3}INT\d{1,3}CON\d{1,3})?$
+^IAM\/0\.1(\/[WH])?:O\d{1,3}C\d{1,3}E\d{1,3}A\d{1,3}N\d{1,3}(\/MIN\d{1,3}CLR\d{1,3}WRM\d{1,3}MOT\d{1,3}IMG\d{1,3}TYP\d{1,3}LAY\d{1,3})?(\/MEL\d{1,3}SOP\d{1,3}UNP\d{1,3}INT\d{1,3}CON\d{1,3})?$
 ```
 
 ## Assumptions

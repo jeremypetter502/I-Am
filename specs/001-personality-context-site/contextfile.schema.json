@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Personal Context (ContextFile) Schema",
-  "description": "Versioned schema for exported personal context files (JSON). Supports IPIP, aesthetic, music, extended modules and PCTX mappings.",
+  "description": "Versioned schema for exported personal context files (JSON). Supports IPIP, aesthetic, music, extended modules and IAM mappings.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "generated_at", "profile"],
@@ -17,7 +17,8 @@
         "normalization": { "type": "string" },
         "provenance": { "type": "object", "additionalProperties": true },
         "privacy": { "type": "object", "additionalProperties": true },
-        "usage_snippet": { "type": "string" }
+        "usage_snippet": { "type": "string" },
+        "machine_readable": { "type": "object", "additionalProperties": true }
       }
     },
     "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$", "description": "Schema version, e.g. 1.0" },
@@ -140,6 +141,108 @@
                 }
               }
             },
+            "communication": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "responses": {
+                  "type": "array",
+                  "items": { "type": "integer", "minimum": 1, "maximum": 5 },
+                  "minItems": 20,
+                  "maxItems": 20
+                },
+                "raw_trait_scores": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "driver": { "type": "number", "minimum": 5, "maximum": 25 },
+                    "analytical": { "type": "number", "minimum": 5, "maximum": 25 },
+                    "expressive": { "type": "number", "minimum": 5, "maximum": 25 },
+                    "amiable": { "type": "number", "minimum": 5, "maximum": 25 }
+                  }
+                },
+                "normalized_trait_scores": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "driver": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "analytical": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "expressive": { "type": "number", "minimum": 0, "maximum": 100 },
+                    "amiable": { "type": "number", "minimum": 0, "maximum": 100 }
+                  }
+                },
+                "completed": { "type": "boolean" },
+                "last_updated": { "type": "string", "format": "date-time" }
+              }
+            },
+            "skills": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "responses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": { "type": "string", "minLength": 1 },
+                      "index": { "type": "integer", "minimum": 1, "maximum": 35 },
+                      "category": { "type": "string" },
+                      "raw_score": { "type": "number", "minimum": 0, "maximum": 5 },
+                      "normalized_score": { "type": "number", "minimum": 0, "maximum": 100 },
+                      "threshold_status": { "type": "string", "enum": ["results_worthy", "conditional", "omit"] },
+                      "listed_status": { "type": "string", "enum": ["confirmed", "conditional", "excluded"] },
+                      "test_results": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "interview_defense": { "type": "boolean" },
+                          "day_one_autonomy": { "type": "boolean" },
+                          "relevance_recency": { "type": "boolean" }
+                        }
+                      }
+                    },
+                    "required": ["name", "index", "normalized_score"]
+                  }
+                },
+                "filtered": {
+                  "type": "array",
+                  "items": { "$ref": "#/properties/profile/properties/modules/properties/skills/properties/responses/items" }
+                },
+                "normalized": {
+                  "type": "array",
+                  "items": { "type": "number", "minimum": 0, "maximum": 100 },
+                  "maxItems": 35
+                },
+                "testAnswers": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "interview_defense": { "type": "boolean" },
+                      "day_one_autonomy": { "type": "boolean" },
+                      "relevance_recency": { "type": "boolean" }
+                    }
+                  }
+                },
+                "completed": { "type": "boolean" },
+                "last_updated": { "type": "string", "format": "date-time" }
+              }
+            },
+            "state": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "bandwidth": { "type": "number", "minimum": 0, "maximum": 100 },
+                "mode": { "type": "string", "enum": ["convergent", "divergent"] },
+                "horizon": { "type": "string", "enum": ["now", "long"] },
+                "stakes": { "type": "string", "enum": ["critical", "casual"] },
+                "completed": { "type": "boolean" },
+                "last_updated": { "type": "string", "format": "date-time" }
+              },
+              "required": ["bandwidth", "mode", "horizon", "stakes"]
+            },
             "extended": {
               "type": "object",
               "description": "Optional extended modules; schema may vary",
@@ -158,16 +261,50 @@
           "description": "Top-level convenience mapping (mirrors modules.aesthetics)",
           "additionalProperties": true
         },
-        "pctx": {
+        "base": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "code": { "type": "string", "description": "Personality Context Code (PCTX) string following PCTX specification" },
-            "version": { "type": "string", "description": "PCTX version identifier (optional)" }
+            "onet": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "soc_code": { "type": "string", "pattern": "^\\d{2}-\\d{4}$" },
+                "title": { "type": "string", "minLength": 1 },
+                "version": { "type": "string" }
+              },
+              "required": ["soc_code", "title"]
+            },
+            "name": { "type": "string", "maxLength": 120 },
+            "job_title": { "type": "string", "maxLength": 120 },
+            "company": { "type": "string", "maxLength": 120 },
+            "skills": { "type": "string", "maxLength": 400 },
+            "years_experience": { "type": "number", "minimum": 0, "maximum": 80 },
+            "education_level": {
+              "type": "string",
+              "enum": ["high_school", "associate", "bachelor", "master", "doctorate", "other"]
+            },
+            "timezone": { "type": "string", "minLength": 1 },
+            "locale": { "type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$" },
+            "communication_style": { "type": "string", "maxLength": 40 },
+            "short_bio": { "type": "string", "maxLength": 280 }
+          }
+        },
+        "iam": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "code": { "type": "string", "description": "I-AM compact code string following IAM specification" },
+            "version": { "type": "string", "description": "IAM version identifier (optional)" }
           },
           "required": ["code"]
         }
       }
+    },
+    "raw_responses": {
+      "type": "object",
+      "description": "Application-only raw input responses intended for client-side state; LLMs should ignore this field.",
+      "additionalProperties": true
     }
   }
 }

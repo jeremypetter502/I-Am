@@ -1,9 +1,10 @@
 {
   "name": "i-am",
   "version": "0.0.0",
+  "type": "module",
   "private": true,
   "scripts": {
-    "validate:json": "node specs/001-personality-context-site/scripts/validate-json.js specs/001-personality-context-site/contextfile.schema.json specs/001-personality-context-site/example.json",
+    "validate:json": "node specs/001-personality-context-site/scripts/validate-json.cjs specs/001-personality-context-site/contextfile.schema.json specs/001-personality-context-site/example.json",
     "test": "vitest",
     "lint": "eslint . --ext .js,.ts",
     "format": "prettier --write .",

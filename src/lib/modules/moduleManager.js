@@ -11,4 +11,13 @@ function retakeModule(profile, name, newData) {
   }
   return profile;
 }
-module.exports = { retakeModule };
+
+const MODULE_DEFINITIONS = [
+  { key: 'base', label: 'Base Context', expectedLength: 1 },
+  { key: 'ipip', label: 'IPIP', expectedLength: 50 },
+  { key: 'aesthetics', label: 'Aesthetics', expectedLength: 32 },
+  { key: 'music', label: 'Music', expectedLength: 20 },
+  { key: 'communication', label: 'Communication', expectedLength: 20 }
+];
+
+export { retakeModule, MODULE_DEFINITIONS };

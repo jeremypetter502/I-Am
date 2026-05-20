@@ -35,10 +35,105 @@
       "music": {
         "factors": { "mellow": 60, "sophisticated": 45, "unpretentious": 30, "intense": 10, "contemporary": 40 }
       },
+      "communication": {
+        "responses": [4,5,4,5,3,4,4,5,4,4,2,3,2,2,3,4,4,4,3,3],
+        "raw_trait_scores": { "driver": 21, "analytical": 21, "expressive": 12, "amiable": 18 },
+        "normalized_trait_scores": { "driver": 80, "analytical": 80, "expressive": 35, "amiable": 65 },
+        "completed": true,
+        "last_updated": "2026-05-18T16:00:00Z"
+      },
+      "skills": {
+        "responses": [
+          {
+            "name": "Reading Comprehension",
+            "index": 1,
+            "category": "Cognitive & Analysis",
+            "raw_score": 4.5,
+            "normalized_score": 90,
+            "threshold_status": "results_worthy",
+            "listed_status": "confirmed",
+            "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true }
+          },
+          {
+            "name": "Troubleshooting",
+            "index": 18,
+            "category": "Technical & Specialized",
+            "raw_score": 5,
+            "normalized_score": 99,
+            "threshold_status": "results_worthy",
+            "listed_status": "confirmed",
+            "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true }
+          },
+          {
+            "name": "Quality Control Analysis",
+            "index": 24,
+            "category": "Technical & Specialized",
+            "raw_score": 4.25,
+            "normalized_score": 85,
+            "threshold_status": "results_worthy",
+            "listed_status": "confirmed",
+            "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true }
+          },
+          {
+            "name": "Systems Evaluation",
+            "index": 33,
+            "category": "Cognitive & Analysis",
+            "raw_score": 3,
+            "normalized_score": 60,
+            "threshold_status": "results_worthy",
+            "listed_status": "confirmed",
+            "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true }
+          },
+          {
+            "name": "Programming",
+            "index": 23,
+            "category": "Technical & Specialized",
+            "raw_score": 2.25,
+            "normalized_score": 45,
+            "threshold_status": "conditional",
+            "listed_status": "conditional",
+            "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true }
+          }
+        ],
+        "filtered": [
+          { "name": "Reading Comprehension", "index": 1, "normalized_score": 90, "listed_status": "confirmed" },
+          { "name": "Troubleshooting", "index": 18, "normalized_score": 99, "listed_status": "confirmed" },
+          { "name": "Programming", "index": 23, "normalized_score": 45, "listed_status": "conditional" },
+          { "name": "Quality Control Analysis", "index": 24, "normalized_score": 85, "listed_status": "confirmed" },
+          { "name": "Systems Evaluation", "index": 33, "normalized_score": 60, "listed_status": "confirmed" }
+        ],
+        "normalized": [90, 45, 20, 75, 55],
+        "testAnswers": {
+          "1": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true },
+          "18": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true },
+          "23": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true }
+        },
+        "completed": true,
+        "last_updated": "2026-05-18T16:00:00Z"
+      },
+      "state": {
+        "bandwidth": 30,
+        "mode": "convergent",
+        "horizon": "now",
+        "stakes": "critical",
+        "completed": true,
+        "last_updated": "2026-05-18T16:00:00Z"
+      },
       "extended": { "notes": "User provided extras" }
+    },
+    "base": {
+      "onet": { "soc_code": "15-1252", "title": "Software Developers", "version": "2022" },
+      "job_title": "Frontend Engineer",
+      "company": "Acme Corp",
+      "years_experience": 4,
+      "education_level": "bachelor",
+      "timezone": "America/Los_Angeles",
+      "locale": "en-US",
+      "communication_style": "concise",
+      "short_bio": "Builds delightful web UIs."
     },
     "tags": { "prefers_minimal": true, "prefers_photos": true },
     "preferences": { "aesthetics": { "minimalism": 82.5 } },
-    "pctx": { "code": "PCTX:v1|E:55|A:47|C:70|N:25|O:78", "version": "1.0" }
+    "iam": { "code": "IAM/0.6:O78C70E30A65N25/COMM/DRV80ANC80EXP35AMB65/CAR15125200S0190S1899S2345S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical", "version": "0.6" }
   }
 }

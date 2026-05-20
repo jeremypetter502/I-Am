@@ -11,11 +11,12 @@
     ipip: { responses: number[50], raw_trait_scores: map<string, number>, normalized_trait_scores: map<string, number> },
     aesthetics: { minimalism, colorfulness, warmth, texture, motion, imagery, typography, layout, importance },
     music: { factors: map<string, number> },
+    state: { bandwidth: number(0..100), mode: convergent|divergent, horizon: now|long, stakes: critical|casual },
     extended: map<string, any>
   }
   - tags: map<string, boolean>
   - preferences: map<string, any>
-  - pctx: { code: string, version?: string }
+  - iam: { code: string, version?: string }
 
 ## Data Types in Code
 - Use TypeScript types for strong validation in scorer and serializer modules.

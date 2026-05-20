@@ -1,0 +1,27 @@
+[
+  {
+    "soc_code": "15-1252",
+    "title": "Software Developers",
+    "aliases": ["Software Engineer", "Application Developer", "Frontend Engineer"]
+  },
+  {
+    "soc_code": "15-1255",
+    "title": "Web and Digital Interface Designers",
+    "aliases": ["UI Designer", "UX Designer", "Product Designer"]
+  },
+  {
+    "soc_code": "11-1021",
+    "title": "General and Operations Managers",
+    "aliases": ["Operations Manager", "General Manager"]
+  },
+  {
+    "soc_code": "13-2011",
+    "title": "Accountants and Auditors",
+    "aliases": ["Accountant", "Auditor"]
+  },
+  {
+    "soc_code": "29-1141",
+    "title": "Registered Nurses",
+    "aliases": ["RN", "Nurse"]
+  }
+]

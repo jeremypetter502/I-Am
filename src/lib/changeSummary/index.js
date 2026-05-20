@@ -21,11 +21,32 @@ function diffProfiles(oldP = {}, newP = {}) {
   // inferred fields placeholder: find keys explicitly set to null in newP
   for (const [k,v] of Object.entries(newP)) if (v === null) inferred.push(k);
 
-  return { added, removed, updated, inferred };
+  const skillsSummary = buildSkillsSummary(oldMods, newMods);
+
+  return { added, removed, updated, inferred, skillsSummary };
+}
+
+function buildSkillsSummary(oldMods = {}, newMods = {}) {
+  const oldSkills = oldMods.skills;
+  const newSkills = newMods.skills;
+  if (!newSkills) return '';
+  const changed = !oldSkills || JSON.stringify(oldSkills) !== JSON.stringify(newSkills);
+  if (!changed) return '';
+
+  const list = Array.isArray(newSkills.filtered)
+    ? newSkills.filtered
+    : Array.isArray(newSkills.responses)
+      ? newSkills.responses
+      : [];
+
+  const confirmed = list.filter((item) => item && item.listed_status === 'confirmed').length;
+  const conditional = list.filter((item) => item && item.listed_status === 'conditional').length;
+  return `Added Skills Assessment module: ${confirmed} confirmed skills, ${conditional} conditional skills`;
 }
 
 function summaryText(diff) {
   const parts = [];
+  if (diff.skillsSummary) parts.push(diff.skillsSummary);
   if (diff.added.length) parts.push(`Added: ${diff.added.join(', ')}`);
   if (diff.removed.length) parts.push(`Removed: ${diff.removed.join(', ')}`);
   if (diff.updated.length) parts.push(`Updated: ${diff.updated.join(', ')}`);
@@ -33,4 +54,4 @@ function summaryText(diff) {
   return parts.join('\n') || 'No changes';
 }
 
-module.exports = { diffProfiles, summaryText };
+export { diffProfiles, summaryText };

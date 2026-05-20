@@ -23,6 +23,3 @@ export function scoreMusic(responses){
   return { raw, normalized, count: responses.length };
 }
 
-if(typeof module !== 'undefined' && module.exports){
-  module.exports = { scoreMusic };
-}

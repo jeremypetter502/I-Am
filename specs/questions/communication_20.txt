@@ -1,0 +1,20 @@
+1. I prefer getting straight to the point with minimal introductory context.
+2. I prefer concise action steps over extensive explanation.
+3. I am comfortable deciding from short, condensed summaries.
+4. I prefer responses that start with a clear recommendation.
+5. I find long conversational setup unnecessary when solving tasks.
+6. I need the underlying logic before trusting conclusions.
+7. I prefer precise numbers, structure, and traceable reasoning.
+8. I value step-by-step validation for important decisions.
+9. I prefer explicit assumptions and constraints in answers.
+10. I favor organized breakdowns (tables/lists) over broad narratives.
+11. I like exploring big-picture framing before execution details.
+12. I value creative analogies and conceptual examples.
+13. I enjoy brainstorming several divergent options.
+14. I prefer responses that highlight possibility and innovation.
+15. I like speculative what-if exploration before narrowing scope.
+16. I value supportive tone over blunt efficiency.
+17. I prefer collaborative pacing and check-ins during complex tasks.
+18. I appreciate contextual validation before critique.
+19. I prefer constructive and diplomatic language.
+20. I like responses that feel conversational and cooperative.

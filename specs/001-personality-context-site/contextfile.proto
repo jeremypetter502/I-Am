@@ -26,7 +26,8 @@ message Profile {
   Modules modules = 5;
   map<string,bool> tags = 6;
   map<string,string> preferences = 7;
-  Pctx pctx = 8;
+  Iam iam = 8;
+  BaseContext base = 9;
 }
 
 message Scores {
@@ -42,6 +43,7 @@ message Modules {
   Aesthetics aesthetics = 2;
   Music music = 3;
   map<string,string> extended = 4;
+  Communication communication = 5;
 }
 
 message Ipip {
@@ -68,4 +70,30 @@ message Layout { double grid_consistency = 1; double experimental_layouts = 2; }
 
 message Music { map<string,double> factors = 1; }
 
-message Pctx { string code = 1; string version = 2; }
+message Communication {
+  repeated int32 responses = 1; // 20 items, each 1..5
+  map<string,double> raw_trait_scores = 2;
+  map<string,double> normalized_trait_scores = 3;
+  bool completed = 4;
+  string last_updated = 5;
+}
+
+message BaseContext {
+  OnetOccupation onet = 1;
+  string job_title = 2;
+  string company = 3;
+  double years_experience = 4;
+  string education_level = 5;
+  string timezone = 6;
+  string locale = 7;
+  string communication_style = 8;
+  string short_bio = 9;
+}
+
+message OnetOccupation {
+  string soc_code = 1;
+  string title = 2;
+  string version = 3;
+}
+
+message Iam { string code = 1; string version = 2; }

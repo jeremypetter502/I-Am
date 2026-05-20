@@ -86,7 +86,45 @@
           "A": 45,
           "N": 52.5
         }
+      },
+      "skills": {
+        "responses": [
+          { "name": "Reading Comprehension", "index": 1, "normalized_score": 90, "listed_status": "confirmed", "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true } },
+          { "name": "Troubleshooting", "index": 18, "normalized_score": 99, "listed_status": "confirmed", "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true } },
+          { "name": "Programming", "index": 23, "normalized_score": 45, "listed_status": "conditional", "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true } },
+          { "name": "Quality Control Analysis", "index": 24, "normalized_score": 85, "listed_status": "confirmed", "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true } },
+          { "name": "Systems Evaluation", "index": 33, "normalized_score": 60, "listed_status": "confirmed", "test_results": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true } }
+        ],
+        "filtered": [
+          { "name": "Reading Comprehension", "index": 1, "normalized_score": 90, "listed_status": "confirmed" },
+          { "name": "Troubleshooting", "index": 18, "normalized_score": 99, "listed_status": "confirmed" },
+          { "name": "Programming", "index": 23, "normalized_score": 45, "listed_status": "conditional" },
+          { "name": "Quality Control Analysis", "index": 24, "normalized_score": 85, "listed_status": "confirmed" },
+          { "name": "Systems Evaluation", "index": 33, "normalized_score": 60, "listed_status": "confirmed" }
+        ],
+        "testAnswers": {
+          "1": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true },
+          "18": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true },
+          "23": { "interview_defense": true, "day_one_autonomy": true, "relevance_recency": true }
+        },
+        "completed": true,
+        "last_updated": "2026-05-18T16:00:00Z"
+      },
+      "state": {
+        "bandwidth": 30,
+        "mode": "convergent",
+        "horizon": "now",
+        "stakes": "critical",
+        "completed": true,
+        "last_updated": "2026-05-18T16:00:00Z"
       }
+    },
+    "base": {
+      "onet": { "soc_code": "15-1252", "title": "Software Developers" }
+    },
+    "iam": {
+      "code": "IAM/0.6:O52C55E53A45N53/CAR15125200S0190S1899S2345S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical",
+      "version": "0.6"
     }
   }
 }

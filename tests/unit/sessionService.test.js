@@ -29,4 +29,51 @@ describe('sessionService', () => {
     expect(cleared).toBe(true);
     expect(svc.hasSaved()).toBe(false);
   });
+
+  it('persists skills testAnswers confirmation state', () => {
+    const ok = svc.saveProgress('skills', {
+      responses: [3, null, null],
+      current: 1,
+      expectedLength: 35,
+      testAnswers: {
+        1: {
+          interview_defense: true,
+          day_one_autonomy: false,
+          relevance_recency: true
+        }
+      }
+    });
+    expect(ok).toBe(true);
+
+    const data = svc.loadProgress();
+    expect(data.modules.skills.testAnswers).toBeTruthy();
+    expect(data.modules.skills.testAnswers['1']).toEqual({
+      interview_defense: true,
+      day_one_autonomy: false,
+      relevance_recency: true
+    });
+  });
+
+  it('persists canonical state module payload', () => {
+    const ok = svc.saveProgress('state', {
+      responses: [1],
+      current: 1,
+      expectedLength: 1,
+      state: {
+        bandwidth: 101,
+        mode: 'divergent',
+        horizon: 'now',
+        stakes: 'critical'
+      }
+    });
+    expect(ok).toBe(true);
+
+    const data = svc.loadProgress();
+    expect(data.modules.state.state).toEqual({
+      bandwidth: 100,
+      mode: 'divergent',
+      horizon: 'now',
+      stakes: 'critical'
+    });
+  });
 });

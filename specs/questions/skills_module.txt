@@ -1,0 +1,54 @@
+# Skills Assessment Module (O*NET Standardized Transferable Skills)
+# Scale: 0 (No proficiency) to 5 (Expert, can teach others)
+# Scoring notes:
+# - Normalize each response with score * 20 (0..100).
+# - Threshold status: >=60 results-worthy, 35-59 conditional, <35 omit.
+# - Scores >=50 require all three confirmation tests for filtered export:
+#   Interview Defense, Day One Autonomy, Relevance & Recency.
+
+## Cognitive & Analysis
+1. Reading Comprehension: I can quickly understand and apply complex written material.
+2. Mathematics: I can use quantitative reasoning to solve real-world work problems.
+3. Science: I can apply scientific principles to decisions and troubleshooting.
+4. Critical Thinking: I evaluate claims and assumptions before acting.
+5. Active Learning: I learn new tools or processes quickly and retain them.
+6. Learning Strategies: I pick effective methods to learn difficult topics.
+7. Monitoring: I track outcomes and adjust when quality drops.
+8. Complex Problem Solving: I can break down and solve unclear, multi-step issues.
+9. Identify Patterns: I identify patterns and trends in data or behavior.
+10. Data Analysis: I analyze datasets to produce useful conclusions.
+11. Systems Evaluation: I evaluate how well systems perform and where to improve.
+12. Judgment & Decision Making: I make sound decisions under uncertainty.
+
+## Communication & Interpersonal
+13. Active Listening: I listen for meaning and ask clarifying questions.
+14. Writing: I write clearly for different audiences.
+15. Speaking: I explain ideas clearly in conversations and presentations.
+16. Social Perceptiveness: I notice cues about others' reactions and needs.
+17. Coordination: I coordinate my actions with others effectively.
+18. Persuasion: I can influence others with credible reasoning.
+19. Negotiation: I can negotiate trade-offs and agreement.
+20. Instructing: I can teach skills in a way others can apply.
+21. Service Orientation: I proactively support people and resolve their needs.
+
+## Leadership & Management
+22. Management of Personnel Resources: I coach, assign, and evaluate people effectively.
+
+## Technical & Specialized
+23. Troubleshooting: I diagnose causes of technical/process problems.
+24. Technology Design: I design or adapt technology solutions to needs.
+25. Installation: I can set up systems/equipment correctly.
+26. Programming: I can write or modify software/scripts for practical tasks.
+27. Quality Control Analysis: I verify output quality against standards.
+28. Equipment Maintenance: I perform preventive maintenance reliably.
+29. Repairing: I repair systems/equipment when faults occur.
+
+## Business & Process
+30. Operations Analysis: I analyze workflows to improve efficiency.
+31. Equipment Selection: I choose tools/equipment appropriate for the job.
+32. Time Management: I plan and prioritize work to meet deadlines.
+33. Management of Financial Resources: I budget and allocate funds responsibly.
+34. Management of Material Resources: I allocate and track materials effectively.
+
+## Creative & Innovation
+35. Creativity & Innovation: I generate and apply novel useful ideas.

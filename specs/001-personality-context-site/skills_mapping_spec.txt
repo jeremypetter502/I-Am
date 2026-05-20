@@ -1,0 +1,41 @@
+Skills Mapping Specification (Results Filter)
+
+Version: 0.4
+Scope: Skills Assessment module and IAM Career segment serialization
+
+1) Canonical skill index
+- Skill positions are fixed as S01..S35 and map to O*NET standardized transferable skills.
+- Source of truth: src/lib/iam/skillPositionMap.js
+
+2) Input scale and normalization
+- User response scale: 0..5
+- Normalized score: round(response * 20), range 0..100
+
+3) Threshold policy
+- >=60: results_worthy
+- 35..59: conditional
+- <35: omit
+
+4) Confirmation tests (required for >=50)
+For skills with normalized score >=50, include only when all are true:
+- interview_defense: user can defend the skill in an interview
+- day_one_autonomy: user can apply the skill independently on day one
+- relevance_recency: user has used the skill recently enough to be job-relevant
+
+5) Listed status
+- confirmed: included and results_worthy
+- conditional: included but below results_worthy threshold
+- excluded: not included in filtered list
+
+6) IAM Career encoding (v0.4)
+- Segment prefix: /CAR
+- Shape: /CAR{soc8}S{idx}{score}...
+- idx: 2-digit skill index (01..35)
+- score: 2-digit normalized proficiency (00..99)
+- Sparse encoding: only included skills are serialized
+- Example: /CAR15125200S0190S1899S2485S3360
+
+7) Extensibility
+- Domain-specific subsets may be derived from fullAssessment without changing canonical indices.
+- Threshold values can be revised by policy without changing serialization format.
+- New confirmation signals must be additive and backward-compatible in schema.

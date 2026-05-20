@@ -1,9 +1,8 @@
-const { serializePbtxt, parsePbtxt } = require('../importer/pbtxt');
+import { serializePbtxt, parsePbtxt } from '../importer/pbtxt.js';
 
-function toPbtxt(json) {
+export function toPbtxt(json) {
   return serializePbtxt(json);
 }
-function fromPbtxt(text) {
+export function fromPbtxt(text) {
   return parsePbtxt(text);
 }
-module.exports = { toPbtxt, fromPbtxt };

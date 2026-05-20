@@ -1,0 +1,171 @@
+<script>
+  import { onMount, createEventDispatcher } from 'svelte';
+  import ProgressBar from './ProgressBar.svelte';
+  import { scoreCommunicationIfAvailable } from '../services/profileService.js';
+  import sessionService from '../services/sessionService.js';
+
+  export let initialResponses = null;
+  export let initialCurrent = 0;
+  export let onProgress = null;
+  const dispatch = createEventDispatcher();
+
+  const scaleChoices = [
+    { value: 1, note: '1 · Strongly disagree' },
+    { value: 2, note: '2 · Disagree' },
+    { value: 3, note: '3 · Neutral' },
+    { value: 4, note: '4 · Agree' },
+    { value: 5, note: '5 · Strongly agree' }
+  ];
+
+  let questions = [];
+  let responses = [];
+  let current = 0;
+  let loading = true;
+  let error = null;
+  let answeredCount = 0;
+
+  const toAnswerNumber = (value) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return null;
+    if (numeric < 1 || numeric > 5) return null;
+    return numeric;
+  };
+  const isAnswered = (value) => toAnswerNumber(value) !== null;
+  const countAnswered = (values) => values.filter((value) => isAnswered(value)).length;
+
+  async function loadQuestions() {
+    const parse = (txt) => txt.split(/\r?\n/).map((l) => l.trim()).filter((l) => /^\d+\./.test(l)).map((l) => l.replace(/^\d+\.\s*/, '').trim());
+    try {
+      if (typeof fetch === 'function') {
+        const res = await fetch('/specs/questions/communication_20.txt');
+        if (res.ok) return parse(await res.text());
+      }
+    } catch (e) {}
+
+    try {
+      const mod = await import('../../../specs/questions/communication_20.txt?raw');
+      return parse(mod?.default ?? mod);
+    } catch (e) {
+      if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+        const fs = await import('fs');
+        const path = await import('path');
+        const p = path.resolve(process.cwd(), 'specs', 'questions', 'communication_20.txt');
+        return parse(await fs.promises.readFile(p, 'utf8'));
+      }
+      throw e;
+    }
+  }
+
+  onMount(async () => {
+    try {
+      questions = await loadQuestions();
+      const nextResponses = Array(questions.length).fill(null);
+      if (Array.isArray(initialResponses)) {
+        for (let i = 0; i < Math.min(questions.length, initialResponses.length); i++) {
+          nextResponses[i] = toAnswerNumber(initialResponses[i]);
+        }
+        if (typeof initialCurrent === 'number' && initialCurrent >= 0) {
+          current = Math.min(initialCurrent, questions.length - 1);
+        } else {
+          const firstUnanswered = nextResponses.findIndex((r) => !isAnswered(r));
+          current = firstUnanswered === -1 ? questions.length - 1 : firstUnanswered;
+        }
+      }
+      responses = nextResponses;
+      answeredCount = countAnswered(nextResponses);
+      loading = false;
+    } catch (e) {
+      error = e.message || String(e);
+      loading = false;
+    }
+  });
+
+  function setResponse(value) {
+    if (current < 0 || current >= responses.length) return;
+    const wasComplete = questions.length > 0 && countAnswered(responses) >= questions.length;
+    const nextResponses = responses.slice(0);
+    nextResponses[current] = value;
+    responses = nextResponses;
+    answeredCount = countAnswered(nextResponses);
+
+    const nowComplete = questions.length > 0 && countAnswered(nextResponses) >= questions.length;
+    const firstUnanswered = nextResponses.findIndex((entry) => !isAnswered(entry));
+    const nextCurrent = firstUnanswered === -1 ? Math.max(questions.length - 1, 0) : firstUnanswered;
+
+    try {
+      sessionService.saveProgress('communication', { responses: nextResponses, current: nextCurrent, expectedLength: questions.length });
+      const progressDetail = { module: 'communication', responses: nextResponses.slice(0), current: nextCurrent, expectedLength: questions.length };
+      dispatch('moduleprogress', progressDetail);
+      if (typeof onProgress === 'function') onProgress(progressDetail);
+
+      if (!wasComplete && nowComplete) {
+        const result = scoreCommunicationIfAvailable(nextResponses);
+        sessionService.saveProgress('communication', { responses: nextResponses.slice(0), current: nextResponses.length, expectedLength: questions.length, completed: true });
+        dispatch('complete', { module: 'communication', responses: nextResponses.slice(0), result });
+      }
+    } catch (err) {
+      console.error('Failed to autosave communication progress', err);
+    }
+
+    if (current < questions.length - 1) current += 1;
+  }
+
+  function prev() { if (current > 0) current -= 1; }
+  function next() {
+    const firstUnanswered = responses.findIndex((entry) => !isAnswered(entry));
+    if (firstUnanswered !== -1) {
+      current = firstUnanswered;
+      return;
+    }
+    if (current < questions.length - 1) current += 1;
+  }
+  function isComplete() { return questions.length > 0 && countAnswered(responses) >= questions.length; }
+  function atLastQuestion() { return questions.length > 0 && current >= questions.length - 1; }
+</script>
+
+{#if loading}
+  <div class="state-card"><p class="state-eyebrow">Loading</p><h3>Fetching communication questions…</h3></div>
+{:else if error}
+  <div class="state-card error"><p class="state-eyebrow">Error</p><h3>Unable to load questions</h3><p>{error}</p></div>
+{:else}
+  <section class="question-shell">
+    <ProgressBar answered={answeredCount} total={questions.length} />
+    <div class="question-card">
+      <div class="question-meta">
+        <div>
+          <p class="state-eyebrow">Question {current + 1} of {questions.length}</p>
+          <h3>{questions[current]}</h3>
+        </div>
+      </div>
+      <div class="answers" role="group" aria-label={`Question ${current + 1} response options`}>
+        {#each scaleChoices as choice}
+          <button class:sel={responses[current] === choice.value} class="answer-chip" on:click={() => setResponse(choice.value)} aria-pressed={responses[current] === choice.value} aria-label={`Answer ${choice.value}`}>
+            <span class="value">{choice.value}</span>
+          </button>
+        {/each}
+      </div>
+      <div class="nav">
+        <button on:click={prev} disabled={current === 0}>Prev</button>
+        {#if !isComplete()}
+          <button on:click={next}>{atLastQuestion() ? 'Review unanswered' : 'Next'}</button>
+        {/if}
+      </div>
+    </div>
+  </section>
+{/if}
+
+<style>
+  .state-card,.question-card{border-radius:24px;padding:20px;background:rgba(255,255,255,.94);border:1px solid rgba(148,163,184,.2);box-shadow:0 16px 34px rgba(15,23,42,.08)}
+  .state-card{display:grid;gap:6px}
+  .state-eyebrow{margin:0;text-transform:uppercase;letter-spacing:.14em;font-size:.74rem;font-weight:800;color:#6366f1}
+  .question-shell{display:grid;gap:14px}
+  .question-card{display:grid;gap:16px}
+  .answers{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+  .answer-chip{min-height:88px;padding:12px;border-radius:18px;border:1px solid rgba(148,163,184,.22);background:linear-gradient(180deg,#fff 0%,#f8fafc 100%)}
+  .answer-chip.sel{border-color:rgba(99,102,241,.5);box-shadow:0 14px 26px rgba(99,102,241,.14);background:linear-gradient(180deg,#eef2ff 0%,#fff 100%)}
+  .value{font-size:1.3rem;font-weight:900;color:#0f172a}
+  .nav{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+  .nav button{padding:10px 14px;border-radius:999px;background:#e2e8f0;color:#0f172a;font-weight:800}
+  @media (max-width:900px){.answers{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:560px){.answers{grid-template-columns:1fr}}
+</style>

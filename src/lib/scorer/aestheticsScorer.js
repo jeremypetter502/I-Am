@@ -23,7 +23,3 @@ export function scoreAesthetics(responses){
   return { raw, normalized, count: responses.length };
 }
 
-// CommonJS compatibility
-if(typeof module !== 'undefined' && module.exports){
-  module.exports = { scoreAesthetics };
-}

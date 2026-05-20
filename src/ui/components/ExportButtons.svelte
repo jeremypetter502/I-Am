@@ -1,31 +1,52 @@
 <script>
   export let profile;
-  import { toPbtxt } from '../services/profileService.js';
+  import { toIamMarkdown, sanitizeContextFile } from '../services/profileService.js';
+  import sessionService from '../services/sessionService.js';
 
-  function downloadJSON() {
-    const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'profile.context.json';
-    a.click();
-    URL.revokeObjectURL(url);
+  function buildExportProfile(inputProfile) {
+    const exportProfile = inputProfile ? { ...inputProfile } : {};
+    const rootProfile = exportProfile.profile && typeof exportProfile.profile === 'object'
+      ? { ...exportProfile.profile }
+      : { ...exportProfile };
+    const savedBase = sessionService.loadBaseContext();
+
+    exportProfile.profile = rootProfile;
+    if (savedBase && typeof savedBase === 'object') {
+      if (!exportProfile.profile.base || Object.keys(exportProfile.profile.base).length === 0) {
+        exportProfile.profile.base = { ...savedBase };
+      }
+    }
+    return sanitizeContextFile(exportProfile);
   }
-  function downloadPbtxt() {
-    const text = toPbtxt(profile);
-    const blob = new Blob([text], { type: 'text/plain' });
+
+  function downloadIamMarkdown() {
+    const text = toIamMarkdown(buildExportProfile(profile));
+    const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'profile.context.pbtxt';
+    a.download = 'profile.context.iam.md';
     a.click();
     URL.revokeObjectURL(url);
   }
 </script>
 <div class="exports">
-  <button on:click={downloadJSON}>Download JSON</button>
-  <button on:click={downloadPbtxt}>Download pbtxt</button>
+  <button class="primary" on:click={downloadIamMarkdown}>Download IAM Markdown</button>
 </div>
 <style>
-  .exports button { margin-right:8px }
+  .exports button {
+    margin-right: 8px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    .exports button {
+      font-size: 0.9rem;
+      padding: 10px 16px;
+      width: 100%;
+    }
+  }
 </style>

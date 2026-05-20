@@ -86,8 +86,51 @@ profile {
       importance: 70
     }
     music { factors { key: "mellow" value: 60 } factors { key: "sophisticated" value: 45 } }
+    communication {
+      responses: 4
+      responses: 5
+      responses: 4
+      responses: 5
+      responses: 3
+      responses: 4
+      responses: 4
+      responses: 5
+      responses: 4
+      responses: 4
+      responses: 2
+      responses: 3
+      responses: 2
+      responses: 2
+      responses: 3
+      responses: 4
+      responses: 4
+      responses: 4
+      responses: 3
+      responses: 3
+      raw_trait_scores { key: "driver" value: 21 }
+      raw_trait_scores { key: "analytical" value: 21 }
+      raw_trait_scores { key: "expressive" value: 12 }
+      raw_trait_scores { key: "amiable" value: 18 }
+      normalized_trait_scores { key: "driver" value: 80 }
+      normalized_trait_scores { key: "analytical" value: 80 }
+      normalized_trait_scores { key: "expressive" value: 35 }
+      normalized_trait_scores { key: "amiable" value: 65 }
+      completed: true
+      last_updated: "2026-05-18T16:00:00Z"
+    }
+  }
+  base {
+    onet { soc_code: "15-1252" title: "Software Developers" version: "2022" }
+    job_title: "Frontend Engineer"
+    company: "Acme Corp"
+    years_experience: 4
+    education_level: "bachelor"
+    timezone: "America/Los_Angeles"
+    locale: "en-US"
+    communication_style: "concise"
+    short_bio: "Builds delightful web UIs."
   }
   tags { key: "prefers_minimal" value: true }
   preferences { key: "aesthetics" value: "{\"minimalism\":82.5}" }
-  pctx { code: "PCTX:v1|E:55|A:47|C:70|N:25|O:78" version: "1.0" }
+  iam { code: "IAM/0.2:O78C70E30A65N25/COMM/DRV80ANC80EXP35AMB65" version: "0.2" }
 }

@@ -35,7 +35,6 @@ function toContextFile({ id, summary, traits }, options) {
     id: id || null,
     summary: summary || '',
     scores,
-    raw_scores,
     modules: {
       ipip: {
         responses: ipipResponses,
@@ -47,23 +46,49 @@ function toContextFile({ id, summary, traits }, options) {
     }
   };
 
-  const preamble = {
-    purpose: 'compact personality profile for LLM prompts',
-    schema_version: '1.0',
-    scoring_version: 'ipip-v1',
-    trait_key_map: map,
-    normalization: '0-100 (Normalized = ((Raw - 10)/40) * 100 for IPIP-50)',
-    provenance: { tool: 'personality-site', tool_version: '0.1' },
-    privacy: { persist_client_side_only: true },
-    usage_snippet: "Use 'profile.scores' for summary prompts; 'modules.ipip' contains detailed responses and trait-level scores."
-  };
+  if (options && options.baseContext && typeof options.baseContext === 'object') {
+    profile.base = { ...options.baseContext };
+  }
 
-  return {
+  if (options && options.communication && typeof options.communication === 'object') {
+    profile.modules.communication = { ...options.communication };
+  }
+
+  if (options && options.skills && typeof options.skills === 'object') {
+    profile.modules.skills = Array.isArray(options.skills) ? [...options.skills] : { ...options.skills };
+  }
+
+  if (options && options.state && typeof options.state === 'object') {
+    const state = options.state;
+    profile.modules.state = {
+      bandwidth: Number.isFinite(Number(state.bandwidth)) ? Math.max(0, Math.min(100, Math.round(Number(state.bandwidth)))) : 50,
+      mode: state.mode === 'divergent' ? 'divergent' : 'convergent',
+      horizon: state.horizon === 'now' ? 'now' : 'long',
+      stakes: state.stakes === 'critical' ? 'critical' : 'casual',
+      completed: state.completed === undefined ? true : Boolean(state.completed),
+      last_updated: state.last_updated || ((options && options.lastUpdated) ? options.lastUpdated : new Date().toISOString())
+    };
+  }
+
+  const result = {
     schema_version: '0.1',
     generated_at: new Date().toISOString(),
-    preamble,
     profile
   };
+
+  // Append raw_responses block (application state only). LLMs should ignore this section.
+  // Keep raw scores only in profile.raw_scores to avoid duplicated sections.
+  const rawResponsesData = (options && options.rawResponses && typeof options.rawResponses === 'object') ? options.rawResponses : {};
+  const { raw_scores: _ignoreRawScores, ipip: _ignoreIpip, ...rawResponsesWithoutScores } = rawResponsesData;
+  result.raw_responses = {
+    note: "NOTE: The 'raw_responses' block at the end of this file is for application state only. Disregard it entirely when tailoring your responses.",
+    data: rawResponsesWithoutScores
+  };
+
+  // Canonical raw-score section.
+  result.profile.raw_scores = raw_scores;
+
+  return result;
 }
 
-module.exports = { toContextFile };
+export { toContextFile };

@@ -16,4 +16,24 @@ describe('changeSummary', () => {
     expect(s).toMatch(/Added/);
     expect(s).toMatch(/Updated/);
   });
+
+  it('summarizes skills module confirmed and conditional counts', () => {
+    const oldP = { modules: {} };
+    const newP = {
+      modules: {
+        skills: {
+          filtered: [
+            { name: 'Critical Thinking', listed_status: 'confirmed' },
+            { name: 'Programming', listed_status: 'confirmed' },
+            { name: 'Time Management', listed_status: 'conditional' }
+          ]
+        }
+      }
+    };
+    const d = diffProfiles(oldP, newP);
+    const s = summaryText(d);
+    expect(s).toMatch(/Skills Assessment module/);
+    expect(s).toMatch(/2 confirmed skills/);
+    expect(s).toMatch(/1 conditional skills/);
+  });
 });
