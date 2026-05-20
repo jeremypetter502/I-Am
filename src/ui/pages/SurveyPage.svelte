@@ -750,45 +750,39 @@
 
 <section class="survey-shell">
   <div class="survey-hero">
-    <div class="hero-branding">
-      <img src="/iam-logo.png" alt="IAM Logo" class="hero-logo" />
-      <div class="hero-titles">
-        <h1 class="survey-app-title">I-Am</h1>
-        <p class="subtitle">Context Generator</p>
+    <div class="hero-toolbar">
+      <div class="toolbar-left">
+        <img src="/iam-logo.png" alt="IAM" class="logo-icon" />
+        <span class="app-name">I-Am</span>
       </div>
-    </div>
-    <div class="hero-content">
-      <div class="hero-toolbar">
-        <div class="toolbar-actions">
-          <input bind:this={importInput} class="hidden-input" type="file" accept="application/json,text/markdown,.md" on:change={handleImportFile} />
-          <button class="mini-btn" on:click={triggerImportPicker}>Upload</button>
-          <button class="mini-btn" on:click={() => { showIamPopup = true; iamCopyStatus = ''; }} disabled={!canDownloadProfile}>View IAM</button>
-          <button class="mini-btn" on:click={downloadCurrent} disabled={!canDownloadProfile}>IAM Markdown</button>
-          <button class="mini-btn danger" on:click={doStartOver}>Reset</button>
-        </div>
+      <div class="toolbar-actions">
+        <input bind:this={importInput} class="hidden-input" type="file" accept="application/json,text/markdown,.md" on:change={handleImportFile} />
+        <button class="mini-btn" on:click={triggerImportPicker}>Upload</button>
+        <button class="mini-btn" on:click={() => { showIamPopup = true; iamCopyStatus = ''; }} disabled={!canDownloadProfile}>View IAM</button>
+        <button class="mini-btn" on:click={downloadCurrent} disabled={!canDownloadProfile}>Download</button>
+        <button class="mini-btn danger" on:click={doStartOver}>Reset</button>
         <button class="mini-btn subtle" on:click={() => showHelp = true} aria-haspopup="dialog" aria-expanded={showHelp}>Help</button>
       </div>
-      <h2>{activeMeta.emoji} {activeMeta.label}</h2>
-      {#if importMessage}
-        <p class="hero-message">{importMessage}</p>
-      {/if}
-      {#if importError}
-        <p class="hero-error">Import failed: {importError}</p>
-      {/if}
-      <div class="module-rail" aria-label="Module navigator">
-        {#each moduleOrder as mod}
-          <button
-            class={`module-chip ${active === mod.key ? 'active' : ''} ${completedModules[mod.key] ? 'done' : ''} tone-${mod.tone}`}
-            on:click={() => setActiveModule(mod.key)}
-          >
-            <span class="module-chip__emoji">{mod.emoji}</span>
-            <span class="module-chip__label">{mod.label}</span>
-            {#if mod.key !== 'state'}
-              <small>{moduleProgressLabels[mod.key]}</small>
-            {/if}
-          </button>
-        {/each}
-      </div>
+    </div>
+    {#if importMessage}
+      <p class="hero-message">{importMessage}</p>
+    {/if}
+    {#if importError}
+      <p class="hero-error">Import failed: {importError}</p>
+    {/if}
+    <div class="module-rail" aria-label="Module navigator">
+      {#each moduleOrder as mod}
+        <button
+          class={`module-chip ${active === mod.key ? 'active' : ''} ${completedModules[mod.key] ? 'done' : ''} tone-${mod.tone}`}
+          on:click={() => setActiveModule(mod.key)}
+        >
+          <span class="module-chip__emoji">{mod.emoji}</span>
+          <span class="module-chip__label">{mod.label}</span>
+          {#if mod.key !== 'state'}
+            <small>{moduleProgressLabels[mod.key]}</small>
+          {/if}
+        </button>
+      {/each}
     </div>
   </div>
 
@@ -885,60 +879,30 @@
   }
 
   .survey-hero {
-    padding: 24px;
-    display: flex;
-    flex-direction: row;
-    gap: 32px;
-    align-items: center;
-  }
-
-  .hero-branding {
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    flex-shrink: 0;
-    text-align: center;
-    min-width: 140px;
+    gap: 16px;
   }
 
-  .hero-logo {
-    width: 80px;
-    height: 80px;
+  .logo-icon {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    box-shadow: var(--iam-card-shadow);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 
-  .survey-app-title {
-    font-size: 1.4rem;
-    margin: 0;
+  .app-name {
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--iam-text-primary);
-  }
-  
-  .hero-titles .subtitle {
-    font-size: 0.8rem;
-    margin: 0;
-    font-weight: 600;
-    color: var(--iam-text-secondary);
-  }
-
-  .hero-content {
-    flex-grow: 1;
-    min-width: 0;
-  }
-
-  .survey-hero h2 {
-    margin: 6px 0 10px;
-    font-size: clamp(1.7rem, 3vw, 2.5rem);
-    line-height: 1.06;
-    color: var(--iam-text-primary);
+    margin-left: 8px;
   }
 
   .survey-hero p {
     margin: 0;
     color: var(--iam-text-secondary);
-    max-width: 60ch;
+    font-size: 0.9rem;
   }
 
   .eyebrow,
@@ -960,25 +924,32 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 8px;
+    gap: 12px;
     flex-wrap: wrap;
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .toolbar-actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
+    align-items: center;
   }
 
   .mini-btn {
-    padding: 7px 11px;
+    padding: 6px 12px;
     border-radius: 999px;
-    font-weight: 800;
-    font-size: 0.8rem;
-    background: #e2e8f0;
-    color: #0f172a;
+    font-weight: 700;
+    font-size: 0.75rem;
+    background: rgba(148, 163, 184, 0.2);
+    color: var(--iam-text-primary);
     border: 1px solid rgba(148, 163, 184, 0.3);
+    white-space: nowrap;
   }
 
   .mini-btn.subtle {
@@ -1018,57 +989,59 @@
   .module-rail {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 14px;
+    gap: 8px;
   }
 
   .module-chip {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex: 1 1 190px;
-    padding: 14px;
-    border-radius: 20px;
-    border: 1px solid var(--iam-card-border);
-    background: var(--iam-card-bg);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
-    text-align: left;
-    transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background 140ms ease;
-    backdrop-filter: blur(12px);
-    color: var(--iam-text-primary);
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.15);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--iam-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .module-chip:hover,
   .module-chip:focus-visible {
-    transform: translateY(-4px);
+    transform: scale(1.05);
     outline: none;
-    border-color: var(--iam-teal);
-    box-shadow: 0 16px 26px rgba(6, 182, 212, 0.2);
+    border-color: var(--iam-button-bg);
+    background: rgba(99, 102, 241, 0.2);
   }
 
   .module-chip.active {
-    border-color: var(--iam-purple);
-    box-shadow: 0 18px 30px rgba(168, 85, 247, 0.25);
-    background: rgba(168, 85, 247, 0.1);
+    border-color: var(--iam-button-bg);
+    background: var(--iam-button-bg);
+    color: #fff;
   }
 
   .module-chip.done {
-    background: rgba(132, 204, 22, 0.1);
+    background: rgba(132, 204, 22, 0.2);
     border-color: var(--iam-green);
+    color: var(--iam-green);
   }
 
   .module-chip__emoji {
-    font-size: 1.2rem;
+    font-size: 1rem;
   }
 
   .module-chip__label {
-    font-weight: 900;
+    font-weight: 700;
+    font-size: 0.85rem;
   }
 
   .module-chip small {
-    margin-left: auto;
-    color: var(--iam-text-secondary);
-    font-weight: 800;
+    margin-left: 4px;
+    color: currentColor;
+    font-weight: 700;
+    opacity: 0.8;
+    font-size: 0.75rem;
   }
 
   .panel,
@@ -1110,6 +1083,77 @@
   .workspace {
     display: grid;
     gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    .survey-hero {
+      padding: 12px;
+    }
+
+    .hero-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .toolbar-left {
+      justify-content: center;
+    }
+
+    .toolbar-actions {
+      justify-content: center;
+    }
+
+    .mini-btn {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.7rem;
+      padding: 6px 8px;
+    }
+
+    .module-rail {
+      gap: 6px;
+    }
+
+    .module-chip {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+    }
+
+    .module-chip__label {
+      display: none;
+    }
+
+    .module-chip small {
+      font-size: 0.7rem;
+    }
+
+    .workspace {
+      padding: 16px;
+    }
+
+    .workspace-header h3 {
+      font-size: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .app-name {
+      font-size: 0.95rem;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+    }
+
+    .module-chip {
+      padding: 5px 8px;
+    }
+
+    .workspace {
+      padding: 12px;
+    }
   }
 
   .workspace-header {
@@ -1176,11 +1220,52 @@
     font-weight: 700;
   }
 
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
     .survey-hero {
+      padding: 12px;
+    }
+
+    .hero-toolbar {
       flex-direction: column;
-      align-items: center;
-      text-align: center;
+      align-items: stretch;
+    }
+
+    .toolbar-left {
+      justify-content: center;
+    }
+
+    .toolbar-actions {
+      justify-content: center;
+    }
+
+    .mini-btn {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.7rem;
+      padding: 6px 8px;
+    }
+
+    .module-chip {
+      font-size: 0.8rem;
+      padding: 6px 10px;
+    }
+
+    .module-chip__label {
+      display: none;
+    }
+
+    .module-chip small {
+      font-size: 0.7rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .app-name {
+      font-size: 0.95rem;
+    }
+
+    .module-rail {
+      gap: 6px;
     }
   }
 </style>

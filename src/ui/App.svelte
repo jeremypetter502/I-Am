@@ -146,7 +146,7 @@
 
   .app-shell {
     min-height: 100vh;
-    padding: 16px 16px 64px;
+    padding: 12px;
     display: flex;
     justify-content: center;
   }
@@ -154,12 +154,17 @@
   .content {
     width: 100%;
     max-width: 1000px;
-    margin-top: 12px;
   }
 
   @media (max-width: 768px) {
     .app-shell {
-      padding: 12px 12px 40px;
+      padding: 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .app-shell {
+      padding: 4px;
     }
   }
 </style>
