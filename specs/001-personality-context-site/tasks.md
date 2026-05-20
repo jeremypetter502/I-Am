@@ -377,3 +377,12 @@ Recent parallel opportunities:
 - T146 and T147 can run in parallel.
 - T150 and T151 can run in parallel.
 - T148 and T152 can run in parallel once implementation tasks are complete.
+
+Phase 6c: UI/UX Refinement Update
+
+- [X] T155 [US4] Update UI/UX spec: revise ui-ux-specs/engaging-ui-ux-techniques.md to clarify solid button colors and simplify logo space.
+- [X] T156 [US4] App shell layout & style adjustments: remove .iam-header from App.svelte, strip rainbow gradient, define consistent solid button vars.
+- [X] T157 [US4] Consolidate header in SurveyPage.svelte: move iam-logo.png into the survey-hero card in SurveyPage.svelte to save space.
+- [X] T158 [US4] Apply glassmorphic dark theme and Squeezy UI consistently to Survey, Aesthetics, Music, Skills, Communication, State, BaseContextPicker, and ImportContext components.
+- [X] T159 [US4] Audit and fix mobile responsiveness for standard breakpoint (768px/900px) across the main shell, hero card, and module list.
+

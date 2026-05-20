@@ -191,7 +191,7 @@
 
     <div class="scale" role="group" aria-label="Skill score">
       {#each scaleChoices as choice}
-        <button class="chip" class:sel={responses[current] === choice} on:click={() => selectValue(choice)}>{choice}</button>
+          <button class="answer-chip" class:sel={responses[current] === choice} on:click={() => selectValue(choice)}><span class="value">{choice}</span></button>
       {/each}
     </div>
 
@@ -204,7 +204,7 @@
       </div>
     {/if}
 
-    <div class="actions">
+    <div class="nav">
       <button on:click={prev} disabled={current === 0}>Prev</button>
       {#if answeredCount < 35}
         <button on:click={next}>{current === 34 ? 'Review unanswered' : 'Next'}</button>
@@ -212,8 +212,8 @@
     </div>
   </div>
 
-  <div class="results-card">
-    <div class="results-head">
+  <div class="summary-card">
+    <div class="summary-head">
       <h4>Assessment results</h4>
       <div class="toggles">
         <label><input type="checkbox" bind:checked={showFullAssessment} /> View Full Assessment</label>
@@ -237,18 +237,16 @@
 
 <style>
   .skills-shell { display: grid; gap: 14px; }
-  .question-card, .results-card { border-radius: 20px; padding: 16px; background: rgba(255,255,255,.95); border: 1px solid rgba(148,163,184,.25); }
-  .eyebrow { margin: 0; font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; color: #475569; }
-  .category { margin-top: 4px; color: #0f766e; font-weight: 700; }
-  .scale { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
-  .chip { border-radius: 12px; border: 1px solid rgba(148,163,184,.28); padding: 10px 0; background: #f8fafc; }
-  .chip.sel { background: #dbeafe; border-color: rgba(59,130,246,.4); }
-  .confirmations { margin-top: 12px; display: grid; gap: 8px; color: #334155; }
-  .confirm-note { margin: 0; font-size: .85rem; color: #b45309; font-weight: 700; }
-  .actions { margin-top: 14px; display: flex; gap: 8px; }
-  .results-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .toggles { display: flex; gap: 10px; flex-wrap: wrap; color: #334155; }
-  ul { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; }
-  li { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; border: 1px solid rgba(148,163,184,.2); border-radius: 12px; padding: 10px; }
-  .muted { color: #64748b; }
+    .eyebrow { margin: 0; font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; color: var(--iam-text-secondary); }
+    .category { margin-top: 4px; color: var(--iam-teal); font-weight: 700; }
+    .scale { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+    .confirmations { margin-top: 12px; display: grid; gap: 8px; color: var(--iam-text-primary); }
+    .confirm-note { margin: 0; font-size: .85rem; color: var(--iam-orange); font-weight: 700; }
+    .nav { margin-top: 14px; display: flex; gap: 8px; }
+    .summary-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .toggles { display: flex; gap: 10px; flex-wrap: wrap; color: var(--iam-text-primary); }
+    ul { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 8px; }
+    li { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; border: 1px solid var(--iam-card-border); border-radius: 12px; padding: 10px; }
+    .muted { color: var(--iam-text-secondary); }
 </style>
+

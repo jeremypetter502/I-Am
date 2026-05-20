@@ -2,14 +2,6 @@
   import SurveyPage from './pages/SurveyPage.svelte';
 </script>
 
-<div class="iam-header">
-  <img src="/iam-logo.png" alt="IAM Logo" class="iam-logo" />
-  <div class="iam-title">
-    <h1>I-Am Context Generator</h1>
-    <p class="subtitle">Compact, portable personality & skills profile for LLMs</p>
-  </div>
-</div>
-
 <div class="app-shell">
   <main class="content">
     <SurveyPage />
@@ -24,11 +16,12 @@
     --iam-green: #84CC16;
     --iam-teal: #06B6D4;
     --iam-blue: #3B82F6;
+    --iam-indigo: #6366f1;
     --iam-dark: #111827;
     --iam-card-bg: rgba(30, 41, 59, 0.7);
     --iam-card-border: rgba(148, 163, 184, 0.1);
     --iam-card-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
-    --iam-gradient: linear-gradient(135deg, var(--iam-purple) 0%, var(--iam-red) 20%, var(--iam-orange) 40%, var(--iam-green) 60%, var(--iam-teal) 80%, var(--iam-blue) 100%);
+    --iam-button-bg: var(--iam-indigo);
     --iam-text-primary: #F8FAFC;
     --iam-text-secondary: #94A3B8;
     --iam-button-hover: rgba(255, 255, 255, 0.1);
@@ -60,6 +53,7 @@
   :global(.summary-head h2),
   :global(.module .label) {
     color: var(--iam-text-primary) !important;
+    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
   }
 
   :global(.state-card p),
@@ -99,14 +93,14 @@
   :global(.answer-chip:hover),
   :global(.answer-chip:focus-visible) {
     transform: translateY(-4px) scale(1.02) !important;
-    border-color: var(--iam-teal) !important;
-    box-shadow: 0 14px 24px rgba(6, 182, 212, 0.15) !important;
+    border-color: var(--iam-button-bg) !important;
+    box-shadow: 0 14px 24px rgba(99, 102, 241, 0.15) !important;
   }
 
   :global(.answer-chip.sel) {
-    background: var(--iam-gradient) !important;
+    background: var(--iam-button-bg) !important;
     border-color: transparent !important;
-    box-shadow: 0 14px 26px rgba(168, 85, 247, 0.25) !important;
+    box-shadow: 0 14px 26px rgba(99, 102, 241, 0.25) !important;
   }
   
   :global(.answer-chip.sel .value) {
@@ -117,11 +111,13 @@
 
   :global(.nav button),
   :global(button.primary) {
-    background: var(--iam-gradient) !important;
+    background: var(--iam-button-bg) !important;
     color: #fff !important;
     border: none;
-    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
     border-radius: 999px !important;
+    padding: 12px 20px !important;
+    font-size: 1rem !important;
   }
   
   :global(.nav button:disabled) {
@@ -137,9 +133,8 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 80% 20%, rgba(239, 68, 68, 0.1) 0%, transparent 30%),
-                radial-gradient(circle at 20% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 30%);
+    background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 30%);
     z-index: -1;
     pointer-events: none;
   }
@@ -149,77 +144,20 @@
     text-decoration: none;
   }
 
-  .iam-header {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    justify-content: center;
-    margin-bottom: 24px;
-    margin-top: 32px;
-    padding: 0 16px;
-  }
-
-  .iam-logo {
-    width: 96px;
-    height: 96px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  .iam-logo:hover {
-    transform: scale(1.05) rotate(5deg);
-  }
-
-  .iam-title h1 {
-    font-size: 2.5rem;
-    font-weight: 800;
-    margin: 0 0 8px 0;
-    background: var(--iam-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    letter-spacing: -0.02em;
-  }
-
-  .iam-title .subtitle {
-    font-size: 1.15rem;
-    color: #94A3B8;
-    margin: 0;
-    font-weight: 500;
-    max-width: 480px;
-    line-height: 1.4;
-  }
-
   .app-shell {
     min-height: 100vh;
     padding: 16px 16px 64px;
+    display: flex;
+    justify-content: center;
   }
 
   .content {
+    width: 100%;
     max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
     margin-top: 12px;
   }
 
   @media (max-width: 768px) {
-    .iam-header {
-      flex-direction: column;
-      text-align: center;
-      gap: 16px;
-      margin-top: 24px;
-    }
-    .iam-logo {
-      width: 72px;
-      height: 72px;
-    }
-    .iam-title h1 {
-      font-size: 1.8rem;
-    }
-    .iam-title .subtitle {
-      font-size: 1rem;
-    }
     .app-shell {
       padding: 12px 12px 40px;
     }

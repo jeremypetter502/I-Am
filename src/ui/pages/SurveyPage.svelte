@@ -750,7 +750,14 @@
 
 <section class="survey-shell">
   <div class="survey-hero">
-    <div>
+    <div class="hero-branding">
+      <img src="/iam-logo.png" alt="IAM Logo" class="hero-logo" />
+      <div class="hero-titles">
+        <h1 class="survey-app-title">I-Am</h1>
+        <p class="subtitle">Context Generator</p>
+      </div>
+    </div>
+    <div class="hero-content">
       <div class="hero-toolbar">
         <div class="toolbar-actions">
           <input bind:this={importInput} class="hidden-input" type="file" accept="application/json,text/markdown,.md" on:change={handleImportFile} />
@@ -879,10 +886,46 @@
 
   .survey-hero {
     padding: 24px;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-    align-items: start;
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .hero-branding {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+    text-align: center;
+    min-width: 140px;
+  }
+
+  .hero-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow: var(--iam-card-shadow);
+  }
+
+  .survey-app-title {
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 800;
+    color: var(--iam-text-primary);
+  }
+  
+  .hero-titles .subtitle {
+    font-size: 0.8rem;
+    margin: 0;
+    font-weight: 600;
+    color: var(--iam-text-secondary);
+  }
+
+  .hero-content {
+    flex-grow: 1;
+    min-width: 0;
   }
 
   .survey-hero h2 {
@@ -1135,7 +1178,9 @@
 
   @media (max-width: 900px) {
     .survey-hero {
-      grid-template-columns: 1fr;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
     }
   }
 </style>

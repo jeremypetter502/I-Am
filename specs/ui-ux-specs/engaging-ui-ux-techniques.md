@@ -21,3 +21,8 @@
 - **Mobile-First Optimization:** Ensure all interactions (dragging, tapping) are smooth on mobile devices, where many users prefer to take interactive quizzes.
 - **Clear, Short Length:** Keep the core questionnaire between 5-10 questions to prevent survey fatigue.
 - **Shareable Outcomes:** Create highly shareable "result cards" (e.g., "You are a 'Socially Active Explorer'") designed for social media, which acts as a reward for completion. [[1](https://www.opinionstage.com/quiz/online-personality-quiz-maker/), [2](https://uxmastery.com/better-user-research-through-surveys/), [3](https://www.youtube.com/watch?v=cI_h0TyqR6s), [4](https://uxtbe.medium.com/how-to-design-better-questionnaires-for-ux-research-98688ee2f120), [5](https://interactiveleadgen.com/blog/fun-personality-quizzes)]
+
+## Customization and Branding
+- **Logo Integration:** The logo should be placed within the hero section of the main workspace rather than occupying a dedicated top-level banner, conserving vertical space.
+- **Simplified Interactions:** Buttons and interactive elements should utilize consistent solid colors instead of rainbow gradients to maintain a professional, focused Aesthetic while still retaining tactile 'Squeezy' behavior.
+
