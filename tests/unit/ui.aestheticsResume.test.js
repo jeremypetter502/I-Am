@@ -23,10 +23,10 @@ describe('Aesthetics resume population', () => {
     const saved = { modules: { aesthetics: { responses: [4], current: 0, completed: false } } };
     localStorage.setItem('iam_inprogress_v1', JSON.stringify(saved));
 
-    const { findByText, container } = render(SurveyPage);
+    const { findByLabelText, container } = render(SurveyPage);
 
-    // wait for the Aesthetics question UI to appear
-    await findByText(/Question 1/);
+    // wait for the Aesthetics question UI to appear (answers group has aria-label)
+    await findByLabelText(/Question 1/);
 
     // the selected answer button should have .sel class and show '4'
     const sel = container.querySelector('.answers button.sel');

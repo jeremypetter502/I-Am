@@ -1,68 +1,75 @@
 import { describe, it, expect } from 'vitest';
-const { toIamMarkdown, scoreAndExport } = require('../../src/ui/services/profileService.js');
+const { toIamDataStorageObject, toIamDataStorageJson, scoreAndExport } = require('../../src/ui/services/profileService.js');
 
-function extractJsonPayload(markdown) {
-  const match = markdown.match(/```json\s*([\s\S]*?)```/i);
-  if (!match) throw new Error('Expected markdown to contain a JSON code fence');
-  return JSON.parse(match[1].trim());
-}
+describe('IAM JSON export', () => {
 
-describe('IAM markdown export', () => {
-  it('contains IAM compact string section and parse-friendly base context markdown', () => {
-    const context = {
-      profile: {
-        iam: { code: 'IAM/0.2:O70C60E50A40N30/COMM/DRV85ANC40EXP20AMB15' },
-        base: { name: 'Jeremy Doe', skills: 'JavaScript, UX', job_title: 'Engineer', onet: { soc_code: '15-1252', title: 'Software Developers' } },
-        modules: {
-          skills: {
-            filtered: [
-              { name: 'Critical Thinking', normalized_score: 85, listed_status: 'confirmed' },
-              { name: 'Programming', normalized_score: 45, listed_status: 'conditional' }
-            ]
-          }
-        },
-        raw_scores: { openness: 32 }
-      },
-      raw_responses: { data: { ipip: [3, 3] } }
-    };
-
-    const md = toIamMarkdown(context);
-    expect(md.includes('# IAM Context File')).toBe(true);
-    expect(md.includes('## Compact IAM String')).toBe(true);
-    expect(md.includes('IAM/0.2:O70C60E50A40N30/COMM/DRV85ANC40EXP20AMB15')).toBe(true);
-    expect(md.includes('## Basic Context')).toBe(true);
-    expect(md.includes('<!-- IAM_BASE_CONTEXT_START -->')).toBe(true);
-    expect(md.includes('- name: Jeremy Doe')).toBe(true);
-    expect(md.includes('- skills: JavaScript, UX')).toBe(true);
-    expect(md.includes('- job_title: Engineer')).toBe(true);
-    expect(md.includes('- onet.soc_code: 15-1252')).toBe(true);
-    expect(md.includes('- onet.title: Software Developers')).toBe(true);
-    expect(md.includes('## Skills Assessment')).toBe(true);
-    expect(md.includes('Critical Thinking: 85')).toBe(true);
-    expect(md.includes('Programming: 45')).toBe(true);
-    expect(md.includes('"raw_scores"')).toBe(true);
-    expect(md.includes('"raw_responses"')).toBe(true);
-  });
-
-  it('does not duplicate ipip responses inside raw_responses.data', () => {
-    const context = scoreAndExport(Array(50).fill(3));
-    const md = toIamMarkdown(context);
-    const payload = extractJsonPayload(md);
-
-    expect(context.profile.modules.ipip.responses).toHaveLength(50);
-    expect(context.raw_responses.data.ipip).toBeUndefined();
-    expect(md.includes('"raw_responses"')).toBe(true);
-    expect(payload.raw_responses.data.ipip).toBeUndefined();
-  });
-
-  it('sanitizes stale cached raw_responses before markdown export', () => {
+  it('exports storage JSON with iam as top-level first field and no duplicate sections', () => {
     const stale = {
       profile: {
+        iam: {
+          code: 'IAM/0.7:O70C60E50A40N30/DELIVERY/DEF55PEER60CHL70DNS50AUD40STR80ABS65FMT60VBS55EMP70CND68HMR52AUT72BUR45'
+        },
         modules: {
           ipip: {
             responses: [3, 3]
+          },
+          skills: {
+            responses: [
+              {
+                name: 'Critical Thinking',
+                index: 7,
+                category: 'Cognitive & Analysis',
+                raw_score: 8,
+                normalized_score: 80,
+                threshold_status: 'results_worthy',
+                listed_status: 'confirmed'
+              }
+            ],
+            filtered: [
+              {
+                name: 'Critical Thinking',
+                index: 7,
+                category: 'Cognitive & Analysis',
+                raw_score: 8,
+                normalized_score: 80,
+                threshold_status: 'results_worthy',
+                listed_status: 'confirmed'
+              }
+            ],
+            normalized: [80],
+            completed: true,
+            last_updated: '2026-05-22T22:57:34.043Z'
+          },
+          delivery: {
+            responses: Array(30).fill(4),
+            normalized: {
+              def: 55,
+              peer: 60,
+              chl: 70,
+              dns: 50,
+              aud: 40,
+              str: 80,
+              abs: 65,
+              fmt: 60,
+              vbs: 55,
+              emp: 70,
+              cnd: 68,
+              hmr: 52,
+              aut: 72,
+              bur: 45
+            }
           }
         }
+      },
+      preferences: {
+        skills: [
+          {
+            name: 'Critical Thinking',
+            index: 7,
+            normalized_score: 80,
+            listed_status: 'confirmed'
+          }
+        ]
       },
       raw_responses: {
         data: {
@@ -72,9 +79,29 @@ describe('IAM markdown export', () => {
       }
     };
 
-    const payload = extractJsonPayload(toIamMarkdown(stale));
-    expect(payload.raw_responses.data.ipip).toBeUndefined();
-    expect(payload.raw_responses.data.music).toEqual([1]);
+    const jsonText = toIamDataStorageJson(stale);
+    const payload = JSON.parse(jsonText);
+    const topLevelKeys = Object.keys(payload);
+
+    expect(topLevelKeys[0]).toBe('iam');
+    expect(payload.iam.startsWith('IAM/0.7')).toBe(true);
+    expect(payload.profile.modules.ipip.responses).toEqual([3, 3]);
+    expect(payload.profile.modules.delivery.normalized.aut).toBe(72);
+    expect(payload.profile.modules.skills.responses).toHaveLength(1);
+    expect(payload.profile.modules.skills.responses[0]).toEqual({
+      name: 'Critical Thinking',
+      index: 7,
+      category: 'Cognitive & Analysis',
+      raw_score: 8
+    });
+    expect(payload.profile.modules.skills.filtered).toBeUndefined();
+    expect(payload.profile.modules.skills.normalized).toBeUndefined();
+    expect(payload.profile.modules.skills.responses[0].normalized_score).toBeUndefined();
+    expect(payload.profile.modules.skills.responses[0].threshold_status).toBeUndefined();
+    expect(payload.profile.modules.skills.responses[0].listed_status).toBeUndefined();
+    expect(payload.profile.preferences).toBeUndefined();
+    expect(payload.profile.iam).toBeUndefined();
+    expect(payload.raw_responses).toBeUndefined();
   });
 
   it('derives IAM code when profile.iam is missing', () => {
@@ -91,7 +118,8 @@ describe('IAM markdown export', () => {
           skills: {
             filtered: [
               { index: 1, normalized_score: 20 }
-            ]
+            ],
+            completed: true
           }
         },
         base: {
@@ -104,9 +132,11 @@ describe('IAM markdown export', () => {
       raw_responses: { data: {} }
     };
 
-    const md = toIamMarkdown(contextWithoutIam);
-    expect(md.includes('`IAM/0.4:O53C50E50A55N50/CAR15125500S0120`')).toBe(true);
-    expect(md.includes('`IAM code unavailable`')).toBe(false);
+    const payload = toIamDataStorageObject(contextWithoutIam);
+    expect(typeof payload.iam).toBe('string');
+    expect(payload.iam.includes('IAM/')).toBe(true);
+    expect(payload.iam.includes('O53C50E50A55N50')).toBe(true);
+    expect(payload.iam.includes('IAM code unavailable')).toBe(false);
   });
 
   it('derives IAM with canonical STATE segment when state module exists', () => {
@@ -124,14 +154,29 @@ describe('IAM markdown export', () => {
             bandwidth: 30,
             mode: 'convergent',
             horizon: 'now',
-            stakes: 'critical'
+            stakes: 'critical',
+            completed: true
           }
         }
-      },
-      raw_responses: { data: {} }
+      }
     };
 
-    const md = toIamMarkdown(contextWithoutIam);
-    expect(md.includes('STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical')).toBe(true);
+    const payload = toIamDataStorageObject(contextWithoutIam);
+    expect(typeof payload.iam).toBe('string');
+    expect(payload.iam.includes('STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical')).toBe(true);
+  });
+
+  it('keeps all answers and scores in storage object generated from scoreAndExport', () => {
+    const context = scoreAndExport(Array(50).fill(3), {
+      music: Array(20).fill(2),
+      delivery: Array(30).fill(4)
+    });
+    const storage = toIamDataStorageObject(context);
+
+    expect(storage.iam).toBeTruthy();
+    expect(storage.profile.modules.ipip.responses).toHaveLength(50);
+    expect(storage.profile.modules.music.responses).toHaveLength(20);
+    expect(storage.profile.modules.delivery.responses).toHaveLength(30);
+    expect(storage.profile.modules.delivery.normalized).toBeTruthy();
   });
 });

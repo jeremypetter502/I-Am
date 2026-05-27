@@ -1,0 +1,72 @@
+# Delivery Module (Unified Preference Delivery)
+# Scale: 1 (Strongly Disagree) to 5 (Strongly Agree)
+# Scoring notes:
+# - This is a single test that combines REL, CAP, COG, PER, and ENV metrics.
+# - Normalize each response using ((r - 1) / 4) * 100.
+# - Reverse-score items marked [R].
+# - Subscales:
+#   REL: DEF, PEER, CHL
+#   CAP: DNS, AUD, STR
+#   COG: ABS, FMT, VBS
+#   PER: EMP, CND, HMR
+#   ENV: AUT, BUR
+#
+# Research basis (construct-level, adapted wording):
+# - Need for Cognition (Cacioppo and Petty).
+# - Interpersonal Reactivity Index (Davis).
+# - Communicator style directness constructs.
+# - Humor style literature.
+# - Job control/workplace autonomy and Organizational Constraints Scale framing.
+#
+# Source URLs:
+# - https://en.wikipedia.org/wiki/Need_for_cognition
+# - https://doi.org/10.1037/0022-3514.42.1.116
+# - https://en.wikipedia.org/wiki/Interpersonal_Reactivity_Index
+# - https://www.eckerd.edu/psychology/iri/
+# - https://doi.org/10.1037/t28066-000
+# - https://doi.org/10.1037/t49814-000
+# - https://en.wikipedia.org/wiki/Job_control_(workplace)
+# - https://paulspector.com/assessments/pauls-no-cost-assessments/organizational-constraints-scale-ocs/
+# - https://en.wikipedia.org/wiki/Likert_scale
+#
+# Note: Questions are newly authored derivative prompts, not verbatim copyrighted scale items.
+
+## REL (Relational Dynamics and Authority)
+1. I prefer an assistant that is formally polite and careful rather than blunt. [DEF]
+2. I prefer an assistant that speaks to me like a peer collaborator. [PEER]
+3. If my assumptions are weak, I want the assistant to challenge them directly. [CHL]
+4. I value emotional validation before critique when discussing frustrating problems. [DEF]
+5. I am comfortable receiving corrective feedback without social cushioning. [CHL]
+6. I prefer the assistant to avoid questioning my approach unless I request critique. [R][CHL]
+
+## CAP (Cognitive Accessibility and Processing)
+7. I understand complex answers better when they are split into short sections. [STR]
+8. Dense paragraphs are usually easier for me than bullet points. [R][DNS]
+9. I often consume assistant responses by listening (text-to-speech or voice mode). [AUD]
+10. I prefer numbered steps with clear checkpoints when solving tasks. [STR]
+11. I want important warnings repeated in plain language, not implied. [DNS]
+12. I prefer one compact paragraph over structured formatting in most cases. [R][STR]
+
+## COG (Cognitive and Formatting Preferences)
+13. I prefer to understand first principles before seeing implementation details. [ABS]
+14. I want answers that use bullets or tables whenever possible. [FMT]
+15. I prefer the minimum explanation needed to act. [R][VBS]
+16. I enjoy unpacking trade-offs and theoretical reasoning before deciding. [ABS]
+17. Narrative prose helps me more than structured formatting. [R][FMT]
+18. I want context, caveats, and alternatives even when I ask for a quick answer. [VBS]
+
+## PER (Persona and Interaction Boundaries)
+19. Before solving the problem, I prefer brief acknowledgement of how frustrating it is. [EMP]
+20. I want clear recommendations even if they sound blunt. [CND]
+21. I appreciate light humor in routine interactions. [HMR]
+22. I prefer neutral, purely transactional tone with no emotional language. [R][EMP]
+23. Diplomatic wording is more useful to me than direct criticism. [R][CND]
+24. Humor in serious troubleshooting contexts usually distracts me. [R][HMR]
+
+## ENV (Professional Ecosystem Baseline)
+25. I can usually implement workflow or tooling changes without multiple approval layers. [AUT]
+26. Compliance, policy, or legacy constraints frequently limit what I can do. [BUR]
+27. I can decide priorities for my work with minimal supervision. [AUT]
+28. Even small changes often require lengthy sign-off processes. [BUR]
+29. I mainly need advice that I can execute independently. [AUT]
+30. Recommendations that assume strict governance and audit constraints are usually necessary for my context. [BUR]

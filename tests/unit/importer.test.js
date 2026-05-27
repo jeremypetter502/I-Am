@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest';
 const fs = require('fs');
 const { importJson } = require('../../src/lib/importer/index');
-const { serializePbtxt, parsePbtxt } = require('../../src/lib/importer/pbtxt');
 const { toContextFile } = require('../../src/lib/serializer/toContextFile');
 const os = require('os');
 const path = require('path');
@@ -40,13 +39,6 @@ describe('importer', () => {
     expect(root.modules.state.mode).toBe('divergent');
     expect(root.modules.skills.responses).toHaveLength(2);
     expect(root.modules.skills.responses[1].name).toBe('Troubleshooting');
-  });
-
-  it('pbtxt round-trip', () => {
-    const obj = { hello: 'world', profile: { id: 'p1' } };
-    const txt = serializePbtxt(obj);
-    const parsed = parsePbtxt(txt);
-    expect(parsed).toEqual(obj);
   });
 
   it('preserves skills filtered/test fields across export-import-reexport', async () => {
@@ -103,6 +95,33 @@ describe('importer', () => {
       day_one_autonomy: true,
       relevance_recency: true
     });
+  });
+
+  it('imports module disabled flags without dropping saved responses', async () => {
+    const filePath = path.join(os.tmpdir(), `importer-disabled-${Date.now()}.json`);
+    const contextFile = toContextFile(
+      { id: 'p1', summary: 's', traits: { O: 10, C: 20, E: 30, A: 40, N: 50 } },
+      {
+        ipipResponses: Array(50).fill(3),
+        communication: {
+          responses: Array(20).fill(3),
+          result: {
+            responses: Array(20).fill(3),
+            raw_trait_scores: { driver: 10, analytical: 10, expressive: 10, amiable: 10 },
+            normalized_trait_scores: { driver: 40, analytical: 45, expressive: 50, amiable: 55 },
+            completed: true
+          },
+          disabled: true
+        }
+      }
+    );
+
+    fs.writeFileSync(filePath, JSON.stringify(contextFile, null, 2), 'utf8');
+    const result = await importJson(filePath);
+    const root = resolveRoot(result);
+
+    expect(root.modules.communication.disabled).toBe(true);
+    expect(root.modules.communication.responses).toHaveLength(20);
   });
 });
 

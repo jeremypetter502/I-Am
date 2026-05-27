@@ -5,7 +5,7 @@
 - Base context is optional and stored under `profile.base`.
 - Communication module has 20 Likert questions (1..5), 5 per trait.
 - IAM compact code upgrades to `0.2` when communication segment is present.
-- Markdown export remains the primary export format with embedded JSON payload.
+- JSON export (`.iam.json`) is the canonical machine-readable artifact; markdown is a companion human-readable export.
 
 ## Migration Notes
 
@@ -22,7 +22,7 @@
 	- Communication scorer + UI module flow
 - Export integration:
 	- IAM `0.2` communication segment `/COMM/DRV..ANC..EXP..AMB..`
-	- Markdown-first export with embedded JSON retains base context and raw data
+	- JSON-first export/import retains base context and module raw data
 - Test run:
 	- `npm test -- --run --silent`
 	- Result: all tests passed (32 tests)

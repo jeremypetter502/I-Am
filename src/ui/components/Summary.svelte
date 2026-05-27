@@ -17,6 +17,16 @@
           <span>I-AM</span>
           <strong>{profile.iam.version || 'latest'}</strong>
         </div>
+        <div class="iam-quickref">
+          <strong>IAM Code Quick Reference (for LLMs):</strong><br>
+          <span><b>OCEAN</b>: Big Five trait scores (O=Openness, C=Conscientiousness, E=Extraversion, A=Agreeableness, N=Neuroticism)</span><br>
+          <span><b>AES</b>: Aesthetic Preferences (MIN=Minimalism, CLR=Colorfulness, WRM=Warmth, MOT=Motion, IMG=Imagery, TYP=Typography, LAY=Layout)</span><br>
+          <span><b>MUS</b>: Music Preferences (MEL=Mellow, SOP=Sophisticated, UNP=Unpretentious, INT=Intense, CON=Contemporary)</span><br>
+          <span><b>DELIVERY</b>: Unified interaction preferences (DEF, PEER, CHL, DNS, AUD, STR, ABS, FMT, VBS, EMP, CND, HMR, AUT, BUR)</span><br>
+          <span><b>COM</b>: Communication Style (DRV=Driver, ANC=Analytical, EXP=Expressive, AMB=Amiable)</span><br>
+          <span><b>CAR</b>: Career/Skills (CAR=O*NET SOC code, Sxx=Skill index, proficiency)</span><br>
+          <span><b>STATE</b>: Dynamic state (bandwidth, mode, horizon, stakes)</span>
+        </div>
       {/if}
     </div>
 
@@ -93,6 +103,27 @@
   .iam-pill strong {
     font-size: 0.98rem;
     color: #0f172a;
+  }
+
+  .iam-quickref {
+    margin-top: 8px;
+    font-size: 0.92rem;
+    color: var(--iam-text-secondary, #64748b);
+    background: rgba(236, 252, 255, 0.7);
+    border-radius: 10px;
+    padding: 10px 14px;
+    line-height: 1.5;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.06);
+  }
+
+  .iam-quickref strong {
+    font-size: 1rem;
+    color: #0f766e;
+  }
+
+  .iam-quickref b {
+    color: #0ea5e9;
+    font-weight: 700;
   }
 
   .scores {

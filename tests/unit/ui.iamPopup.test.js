@@ -38,18 +38,74 @@ describe('SurveyPage IAM popup', () => {
       }
     }));
 
+    // simulate a completed module so Generate becomes available
+    localStorage.setItem('iam_inprogress_v1', JSON.stringify({ modules: { music: { responses: [1,1,1], current: 3, expectedLength: 3, answered: 3, completed: true } } }));
     const { getByText, getByLabelText } = render(SurveyPage);
 
-    await fireEvent.click(getByText('View IAM'));
+  await fireEvent.click(getByText('Generate'));
     expect(getByText('Current IAM String')).toBeTruthy();
 
     const textArea = getByLabelText('Current IAM text');
     expect(textArea.value.includes('IAM: IAM/0.6:MIN/O70C60E50A40N30')).toBe(true);
     expect(textArea.value.includes('Instructions for the LLM:')).toBe(true);
     expect(textArea.value.includes('Treat the IAM string above as authoritative structured profile context for the user.')).toBe(true);
+    expect(textArea.value.includes('Use OCEAN trait weights to tune reasoning cadence')).toBe(false);
+    expect(textArea.value.includes('Use DELIVERY as a delivery profile')).toBe(false);
 
     await fireEvent.click(getByText('Copy'));
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
     expect(window.navigator.clipboard.writeText.mock.calls[0][0].includes('IAM: IAM/0.6:MIN/O70C60E50A40N30')).toBe(true);
+  });
+
+  it('derives the popup IAM string from uploaded base context when iam code is missing', async () => {
+    localStorage.setItem('iam_profile', JSON.stringify({
+      profile: {
+        scores: {
+          openness: 0,
+          conscientiousness: 0,
+          extraversion: 0,
+          agreeableness: 0,
+          neuroticism: 0
+        },
+        base: {
+          name: 'Jeremy Petter',
+          birth_year: 1975,
+          gender: 'male',
+          culture: 'en-US',
+          timezone: 'America/New_York'
+        },
+        modules: {}
+      }
+    }));
+
+    localStorage.setItem('iam_inprogress_v1', JSON.stringify({ modules: { music: { responses: [1,1,1], current: 3, expectedLength: 3, answered: 3, completed: true } } }));
+    const { getByText, getByLabelText } = render(SurveyPage);
+
+    await fireEvent.click(getByText('Generate'));
+
+    const textArea = getByLabelText('Current IAM text');
+    expect(textArea.value.includes('IAM/0.6:Jeremy:1975:Male:en-US:EST')).toBe(true);
+    expect(textArea.value.includes('O0C0E0A0N0')).toBe(false);
+  });
+
+  it('includes music instructions when music IAM segment is present', async () => {
+    localStorage.setItem('iam_profile', JSON.stringify({
+      profile: {
+        iam: { code: 'IAM/0.6:O0C0E0A0N0/MEL25SOP25UNP25INT25CON25' },
+        base: { name: 'Jeremy Petter' },
+        modules: {}
+      }
+    }));
+
+    localStorage.setItem('iam_inprogress_v1', JSON.stringify({ modules: { music: { responses: [1,1,1], current: 3, expectedLength: 3, answered: 3, completed: true } } }));
+    const { getByText, getByLabelText } = render(SurveyPage);
+
+    await fireEvent.click(getByText('Generate'));
+
+    const textArea = getByLabelText('Current IAM text');
+    expect(textArea.value.includes('O0C0E0A0N0')).toBe(false);
+    expect(textArea.value.includes('Use music preference factors to align tone and creative framing')).toBe(true);
+    expect(textArea.value.includes('MUS: Music Preferences')).toBe(true);
+    expect(textArea.value.includes('Use OCEAN trait weights to tune reasoning cadence')).toBe(false);
   });
 });

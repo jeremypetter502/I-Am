@@ -19,12 +19,20 @@ describe('UI base context persistence', () => {
     ensureLocalStorage();
     const base = {
       onet: { soc_code: '15-1252', title: 'Software Developers' },
+      birth_month: 5,
+      birth_day: 14,
+      birth_year: 1990,
+      gender: 'female',
       job_title: 'Frontend Engineer',
       company: 'Acme'
     };
     const ok = sessionService.saveBaseContext(base);
     expect(ok).toBe(true);
     const loaded = sessionService.loadBaseContext();
+    expect(loaded.birth_month).toBe(5);
+    expect(loaded.birth_day).toBe(14);
+    expect(loaded.birth_year).toBe(1990);
+    expect(loaded.gender).toBe('female');
     expect(loaded.job_title).toBe('Frontend Engineer');
     expect(loaded.onet.soc_code).toBe('15-1252');
     sessionService.clearBaseContext();

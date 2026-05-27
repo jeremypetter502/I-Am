@@ -1,5 +1,5 @@
 <script>
-  import { onMount, createEventDispatcher } from 'svelte';
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import ProgressBar from './ProgressBar.svelte';
   import { scoreCommunicationIfAvailable } from '../services/profileService.js';
   import sessionService from '../services/sessionService.js';
@@ -23,6 +23,18 @@
   let loading = true;
   let error = null;
   let answeredCount = 0;
+  const ANSWER_ADVANCE_DELAY_MS = 820;
+  const ANSWER_ANIMATIONS = ['answer-recorded', 'answer-recorded-flare', 'answer-recorded-wobble', 'answer-recorded-pop', 'answer-recorded-ripple'];
+  const ANSWER_BG_ANIMATIONS = ['answer-bg-rise', 'answer-bg-fall', 'answer-bg-center', 'answer-bg-diagonal'];
+  const ANSWER_ACCENT_ANIMATIONS = ['answer-accent-ripple-center', 'answer-accent-ripple-top', 'answer-accent-ripple-bottom', 'answer-accent-ripple-left', 'answer-accent-ripple-right'];
+  const ANSWER_RIPPLE_ORIGINS = [
+    ['50%', '50%'],
+    ['50%', '28%'],
+    ['50%', '72%'],
+    ['32%', '50%'],
+    ['68%', '50%']
+  ];
+  let advanceTimer = null;
 
   const toAnswerNumber = (value) => {
     const numeric = Number(value);
@@ -80,8 +92,41 @@
     }
   });
 
+  onDestroy(() => {
+    if (advanceTimer) clearTimeout(advanceTimer);
+  });
+
+  function queueAutoAdvance(fromIndex) {
+    if (advanceTimer) clearTimeout(advanceTimer);
+    if (fromIndex >= questions.length - 1) return;
+    advanceTimer = setTimeout(() => {
+      if (current === fromIndex) current = fromIndex + 1;
+    }, ANSWER_ADVANCE_DELAY_MS);
+  }
+
+  function applyRandomAnswerAnimation(event) {
+    const target = event?.currentTarget;
+    if (!target) return;
+    const animation = ANSWER_ANIMATIONS[Math.floor(Math.random() * ANSWER_ANIMATIONS.length)];
+    const bgAnimation = ANSWER_BG_ANIMATIONS[Math.floor(Math.random() * ANSWER_BG_ANIMATIONS.length)];
+    const accentAnimation = ANSWER_ACCENT_ANIMATIONS[Math.floor(Math.random() * ANSWER_ACCENT_ANIMATIONS.length)];
+    const [rippleX, rippleY] = ANSWER_RIPPLE_ORIGINS[Math.floor(Math.random() * ANSWER_RIPPLE_ORIGINS.length)];
+    target.style.setProperty('--answer-recorded-animation', animation);
+    target.style.setProperty(
+      '--answer-selected-background',
+      animation === 'answer-recorded-ripple'
+        ? 'radial-gradient(circle, transparent 1%, #4338ca 1%) center/15000% 15000% no-repeat, linear-gradient(180deg, #3730a3 0%, #4f46e5 100%)'
+        : 'linear-gradient(180deg, #3730a3 0%, #4f46e5 100%)'
+    );
+    target.style.setProperty('--answer-recorded-bg-animation', bgAnimation);
+    target.style.setProperty('--answer-recorded-accent-animation', accentAnimation);
+    target.style.setProperty('--answer-ripple-x', rippleX);
+    target.style.setProperty('--answer-ripple-y', rippleY);
+  }
+
   function setResponse(value) {
     if (current < 0 || current >= responses.length) return;
+    const fromIndex = current;
     const wasComplete = questions.length > 0 && countAnswered(responses) >= questions.length;
     const nextResponses = responses.slice(0);
     nextResponses[current] = value;
@@ -107,7 +152,12 @@
       console.error('Failed to autosave communication progress', err);
     }
 
-    if (current < questions.length - 1) current += 1;
+    queueAutoAdvance(fromIndex);
+  }
+
+  function handleAnswer(value, event) {
+    applyRandomAnswerAnimation(event);
+    setResponse(value);
   }
 
   function prev() { if (current > 0) current -= 1; }
@@ -133,21 +183,20 @@
     <div class="question-card">
       <div class="question-meta">
         <div>
-          <p class="state-eyebrow">Question {current + 1} of {questions.length}</p>
-          <h3>{questions[current]}</h3>
+          <h3><span class="question-num">{current + 1}.</span> <span class="question-text">{questions[current]}</span></h3>
         </div>
       </div>
       <div class="answers" role="group" aria-label={`Question ${current + 1} response options`}>
         {#each scaleChoices as choice}
-          <button class:sel={responses[current] === choice.value} class="answer-chip" on:click={() => setResponse(choice.value)} aria-pressed={responses[current] === choice.value} aria-label={`Answer ${choice.value}`}>
+          <button class:sel={responses[current] === choice.value} class="answer-chip" on:click={(event) => handleAnswer(choice.value, event)} aria-pressed={responses[current] === choice.value} aria-label={`Answer ${choice.value}`}>
             <span class="value">{choice.value}</span>
           </button>
         {/each}
       </div>
       <div class="nav">
         <button on:click={prev} disabled={current === 0}>Prev</button>
-        {#if !isComplete()}
-          <button on:click={next}>{atLastQuestion() ? 'Review unanswered' : 'Next'}</button>
+        {#if current < questions.length - 1}
+          <button on:click={next}>Next</button>
         {/if}
       </div>
     </div>

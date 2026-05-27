@@ -28,6 +28,44 @@ export function validateBaseContext(base) {
     }
   }
 
+  if (base.birth_year != null) {
+    const year = Number(base.birth_year);
+    const currentYear = new Date().getFullYear();
+    if (!Number.isFinite(year) || year < 1900 || year > currentYear) {
+      errors.push(`birth_year must be between 1900 and ${currentYear}`);
+    }
+  }
+
+  if (base.gender != null && String(base.gender).trim().length > 60) {
+    errors.push('gender must be <= 60 chars');
+  }
+
+  if (base.culture != null && String(base.culture).trim().length > 40) {
+    errors.push('culture must be <= 40 chars');
+  }
+
+  if (base.birth_month != null) {
+    const month = Number(base.birth_month);
+    if (!Number.isInteger(month) || month < 1 || month > 12) {
+      errors.push('birth_month must be between 1 and 12');
+    }
+  }
+
+  if (base.birth_day != null) {
+    const day = Number(base.birth_day);
+    if (!Number.isInteger(day) || day < 1 || day > 31) {
+      errors.push('birth_day must be between 1 and 31');
+    }
+  }
+
+  if (base.birth_year != null) {
+    const year = Number(base.birth_year);
+    const currentYear = new Date().getFullYear();
+    if (!Number.isInteger(year) || year < 1900 || year > currentYear) {
+      errors.push(`birth_year must be between 1900 and ${currentYear}`);
+    }
+  }
+
   if (base.short_bio && String(base.short_bio).length > 280) {
     errors.push('short_bio must be <= 280 chars');
   }
@@ -90,7 +128,10 @@ export function normalizeBaseContext(base) {
   if (out.job_title != null) out.job_title = String(out.job_title).trim();
   if (out.company != null) out.company = String(out.company).trim();
   if (out.name != null) out.name = String(out.name).trim().slice(0, 120);
+  if (out.first_name != null) out.first_name = String(out.first_name).trim().slice(0, 80);
   if (out.skills != null) out.skills = String(out.skills).trim().slice(0, 400);
+  if (out.culture != null) out.culture = String(out.culture).trim().slice(0, 40);
+  if (out.gender != null) out.gender = String(out.gender).trim().slice(0, 60);
   if (out.timezone != null) out.timezone = String(out.timezone).trim();
   if (out.locale != null) out.locale = String(out.locale).trim();
   if (out.communication_style != null) out.communication_style = String(out.communication_style).trim();
@@ -99,6 +140,28 @@ export function normalizeBaseContext(base) {
   if (out.years_experience != null) {
     const num = Number(out.years_experience);
     out.years_experience = Number.isFinite(num) ? Math.max(0, Math.min(80, num)) : undefined;
+  }
+
+  if (out.birth_year != null) {
+    const num = Number(out.birth_year);
+    const currentYear = new Date().getFullYear();
+    out.birth_year = Number.isInteger(num) ? Math.max(1900, Math.min(currentYear, num)) : undefined;
+  }
+
+  if (out.birth_month != null) {
+    const num = Number(out.birth_month);
+    out.birth_month = Number.isInteger(num) ? Math.max(1, Math.min(12, num)) : undefined;
+  }
+
+  if (out.birth_day != null) {
+    const num = Number(out.birth_day);
+    out.birth_day = Number.isInteger(num) ? Math.max(1, Math.min(31, num)) : undefined;
+  }
+
+  if (out.birth_year != null) {
+    const num = Number(out.birth_year);
+    const currentYear = new Date().getFullYear();
+    out.birth_year = Number.isInteger(num) ? Math.max(1900, Math.min(currentYear, num)) : undefined;
   }
 
   if (out.onet && typeof out.onet === 'object') {

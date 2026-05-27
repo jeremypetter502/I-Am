@@ -147,4 +147,29 @@ describe('Serializer + schema', () => {
       relevance_recency: false
     });
   });
+
+  it('preserves disabled flag on state module when provided', () => {
+    const sample = toContextFile(
+      {
+        id: 'disabled-rt',
+        summary: 'disabled module round trip',
+        traits: {
+          raw: { O: 20, C: 24, E: 28, A: 32, N: 36 },
+          normalized: { O: 10, C: 20, E: 30, A: 40, N: 50 }
+        }
+      },
+      {
+        ipipResponses: Array(50).fill(3),
+        state: {
+          bandwidth: 30,
+          mode: 'convergent',
+          horizon: 'now',
+          stakes: 'critical',
+          disabled: true
+        }
+      }
+    );
+
+    expect(sample.profile.modules.state.disabled).toBe(true);
+  });
 });

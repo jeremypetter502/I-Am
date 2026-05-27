@@ -394,3 +394,18 @@ Phase 6d: Mobile-First Responsive Redesign
 - [X] T162 [US4] Optimize module navigation for mobile: hide module labels on small screens, show only emoji and progress counters.
 - [X] T163 [US4] Reduce padding and improve space efficiency: minimize all padding values for mobile screens to maximize content area.
 
+Phase 6e: Component-Level Responsive Enhancements
+
+- [X] T164 [US4] Add responsive answer grids to Survey/Aesthetics/Music components: implement mobile breakpoints (900px→2cols, 560px→1col) with reduced padding and min-height for better mobile touch targets.
+- [X] T165 [US4] Implement Skills module responsive scaling: add breakpoints to scale grid (6→3→2 columns) and optimize navigation buttons for mobile stretch layout.
+- [X] T166 [US4] Add BaseContextPicker mobile form layout: implement single-column grid stacking at 768px with appropriately sized touch-friendly inputs.
+- [X] T167 [US4] Add State module mobile responsiveness: implement form field stacking and input size adjustments for mobile devices.
+- [X] T168 [US4] Implement global font scaling: add body font-size responsive scaling (16px→15px→14px) across breakpoints for optimal mobile readability.
+- [X] T169 [US4] Add responsive card and gap adjustments: reduce survey-shell gaps (24px→16px→12px) and border-radius (20px→16px→12px) for better mobile space utilization.
+
+Phase 6f: Viewport Optimization for All Devices
+
+- [X] T170 [US4] Optimize desktop layout: increase max-width from 1000px to 1400px and app-shell padding from 12px to 16px for better use of large desktop screens.
+- [X] T171 [US4] Add tablet landscape breakpoint: implement 1024px breakpoint with 12px padding for smooth transition between desktop and tablet orientations.
+- [X] T172 [US4] Ensure mobile full-width: remove all padding at ≤480px and set border-radius to 0 for edge-to-edge card display on small mobile devices.
+

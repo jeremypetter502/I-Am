@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
-import { render, fireEvent, cleanup } from '@testing-library/svelte';
+import { render, fireEvent, cleanup, waitFor } from '@testing-library/svelte';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Skills from '../../src/ui/components/Skills.svelte';
+import { skillPositionMap } from '../../src/lib/iam/skillPositionMap.js';
 import { scoreSkills } from '../../src/lib/scorer/skillsScorer.js';
 import { toContextFile } from '../../src/ui/services/profileService.js';
 
@@ -22,99 +23,68 @@ afterEach(() => {
 });
 
 describe('Skills UI integration', () => {
-  it('renders skills module and accepts 0-5 Likert input', async () => {
+  it('renders skills module and accepts 1-10 input', async () => {
     const { getByText, queryByText } = render(Skills);
-    expect(getByText('Skill 1 of 35')).toBeTruthy();
+    expect(getByText(skillPositionMap[0].name)).toBeTruthy();
     await fireEvent.click(getByText('4'));
     expect(getByText((content, element) => element.getAttribute("aria-valuetext") === "1 of 35 answered")).toBeTruthy();
     expect(queryByText(/35\s*\/\s*35 answered/i)).toBeNull();
   });
 
-  it('allows moving to next skill even if review confirmations are unchecked', async () => {
-    const { getByText, getByLabelText } = render(Skills);
+  it('advances to next skill after answering', async () => {
+    const { getByText } = render(Skills);
 
-    expect(getByText('Skill 1 of 35')).toBeTruthy();
+    expect(getByText(skillPositionMap[0].name)).toBeTruthy();
     await fireEvent.click(getByText('3'));
 
-    expect(getByText('Skill 1 of 35')).toBeTruthy();
-    const nextButton = getByText('Next');
-    expect(nextButton.hasAttribute('disabled')).toBe(false);
-    await fireEvent.click(nextButton);
-    expect(getByText('Skill 2 of 35')).toBeTruthy();
-
-    // Users can still choose to provide optional review confirmations.
-    await fireEvent.click(getByText('Prev'));
-    await fireEvent.click(getByLabelText('Interview Defense'));
-    await fireEvent.click(getByLabelText('Day One Autonomy'));
-    await fireEvent.click(getByLabelText('Relevance & Recency'));
+    // Clicking an answer auto-advances to the next skill
+    await waitFor(() => {
+      expect(getByText(skillPositionMap[1].name)).toBeTruthy();
+    }, { timeout: 1200 });
   });
 
-  it('emits updated testAnswers when review confirmations change', async () => {
+  it('emits progress without testAnswers', async () => {
     let latest = null;
-    const onProgress = (detail) => {
-      latest = detail;
-    };
+    const onProgress = (detail) => { latest = detail; };
 
-    const { getByText, getByLabelText } = render(Skills, { onProgress });
+    const { getByText } = render(Skills, { onProgress });
     await fireEvent.click(getByText('3'));
-    await fireEvent.click(getByLabelText('Interview Defense'));
 
     expect(latest).toBeTruthy();
     expect(latest.module).toBe('skills');
-    expect(latest.testAnswers).toBeTruthy();
-    expect(latest.testAnswers['1']).toBeTruthy();
-    expect(latest.testAnswers['1'].interview_defense).toBe(true);
+    expect(latest.testAnswers).toBeUndefined();
   });
 
-  it('resumes at last answered skill regardless of review state', async () => {
+  it('resumes at last answered skill on mount', async () => {
     const initialResponses = [2, 3, null, null, null];
-    const initialConfirmations = {
-      2: {
-        interview_defense: false,
-        day_one_autonomy: false,
-        relevance_recency: false
-      }
-    };
 
     const { getByText } = render(Skills, {
       initialResponses,
-      initialCurrent: 0,
-      initialConfirmations
+      initialCurrent: 0
     });
 
-    expect(getByText('Skill 2 of 35')).toBeTruthy();
+    expect(getByText(skillPositionMap[1].name)).toBeTruthy();
   });
 
-  it('filters out skills below threshold and excludes unconfirmed >= 50 scores', () => {
-    const responses = [4.5, 2.25, 1, 3.75, 2.75, ...Array(30).fill(0)];
-    const tests = {
-      1: { interview_defense: true, day_one_autonomy: true, relevance_recency: true },
-      4: { interview_defense: true, day_one_autonomy: true, relevance_recency: false },
-      5: { interview_defense: true, day_one_autonomy: true, relevance_recency: true }
-    };
-
-    const scored = scoreSkills(responses, tests);
+  it('filters out skills below threshold (omit < 60)', () => {
+    const responses = [9, 6, 5, 10, 7, ...Array(30).fill(1)];
+    const scored = scoreSkills(responses);
     const names = scored.filtered.map((s) => s.name);
-    expect(names).toContain('Reading Comprehension');
-    expect(names).toContain('Mathematics');
-    expect(names).not.toContain('Writing');
-    expect(names).not.toContain('Speaking');
+    // s1=90, s2=60, s3=50, s4=100, s5=70
+    expect(names).toContain(scored.fullAssessment[0].name);
+    expect(names).toContain(scored.fullAssessment[1].name);
+    expect(names).toContain(scored.fullAssessment[3].name);
+    expect(names).toContain(scored.fullAssessment[4].name);
+    expect(names).not.toContain(scored.fullAssessment[2].name);
   });
 
   it('exports filtered skills into ContextFile payload', () => {
-    const confirmations = Object.fromEntries(
-      Array.from({ length: 35 }, (_, index) => [index + 1, {
-        interview_defense: true,
-        day_one_autonomy: true,
-        relevance_recency: true
-      }])
-    );
-    const skills = scoreSkills(Array(35).fill(3), confirmations);
+    const skills = scoreSkills(Array(35).fill(6));
     const scored = { raw: { O: 30, C: 30, E: 30, A: 30, N: 30 }, normalized: { O: 50, C: 50, E: 50, A: 50, N: 50 } };
     const ctx = toContextFile(scored, {
       ipip: Array(50).fill(3),
       base: { onet: { soc_code: '15-1252', title: 'Software Developers' } },
-      skills: { responses: Array(35).fill(3), result: skills }
+      skills: { responses: Array(35).fill(6), result: skills }
     });
 
     expect(ctx.profile.modules.skills).toBeTruthy();
@@ -122,3 +92,5 @@ describe('Skills UI integration', () => {
     expect(ctx.profile.modules.skills.filtered.length).toBeGreaterThan(0);
   });
 });
+
+

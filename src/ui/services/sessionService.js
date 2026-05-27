@@ -3,10 +3,13 @@ const STORAGE_KEY = 'iam_inprogress_v1';
 const BASE_CONTEXT_KEY = 'iam_base_context_v1';
 
 function normalizeResponseValue(value) {
-  if (value === null || value === undefined || value === '') return null;
-  const numeric = Number(value);
+  const rawValue = (value && typeof value === 'object' && !Array.isArray(value))
+    ? (value.raw_score ?? value.score ?? value.value)
+    : value;
+  if (rawValue === null || rawValue === undefined || rawValue === '') return null;
+  const numeric = Number(rawValue);
   if (!Number.isFinite(numeric)) return null;
-  if (numeric < 0 || numeric > 5) return null;
+  if (numeric < 1 || numeric > 10) return null;
   return numeric;
 }
 
@@ -19,6 +22,7 @@ function resolveExpectedLength(moduleName, data, existingModule) {
   if (typeof data.expectedLength === 'number' && data.expectedLength > 0) return data.expectedLength;
   if (typeof existingModule?.expectedLength === 'number' && existingModule.expectedLength > 0) return existingModule.expectedLength;
   if (moduleName === 'ipip') return 50;
+  if (moduleName === 'delivery') return 30;
   if (Array.isArray(data.responses) && data.responses.length > 0) return data.responses.length;
   if (Array.isArray(existingModule?.responses) && existingModule.responses.length > 0) return existingModule.responses.length;
   return 0;
@@ -49,6 +53,10 @@ function normalizeStatePayload(value) {
   };
 }
 
+function normalizeDisabledFlag(value) {
+  return value === true;
+}
+
 export function isModuleCompleted(moduleName, moduleData) {
   if (!moduleData || typeof moduleData !== 'object') return false;
   const answered = countAnsweredResponses(moduleData.responses);
@@ -76,10 +84,14 @@ export function saveProgress(moduleName, data) {
     const fallbackTestAnswers = normalizeTestAnswers(existingModule.testAnswers);
     const normalizedState = normalizeStatePayload(data.state);
     const fallbackState = normalizeStatePayload(existingModule.state);
+    const disabled = data.disabled === undefined
+      ? normalizeDisabledFlag(existingModule.disabled)
+      : normalizeDisabledFlag(data.disabled);
     stored.modules[moduleName] = Object.assign({}, stored.modules[moduleName] || {}, {
       responses: nextResponses,
       ...(normalizedTestAnswers || fallbackTestAnswers ? { testAnswers: normalizedTestAnswers || fallbackTestAnswers } : {}),
       ...(normalizedState || fallbackState ? { state: normalizedState || fallbackState } : {}),
+      disabled,
       current: typeof data.current === 'number' ? data.current : existingModule.current || 0,
       expectedLength,
       answered,
@@ -122,6 +134,34 @@ export function clearProgress() {
   }
 }
 
+export function clearModuleProgress(moduleName) {
+  try {
+    const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (!stored.modules || typeof stored.modules !== 'object' || !stored.modules[moduleName]) return true;
+    const existingModule = stored.modules[moduleName];
+    const nextModule = {
+      ...existingModule,
+      responses: [],
+      current: 0,
+      answered: 0,
+      completed: false,
+      last_updated: new Date().toISOString()
+    };
+    if (moduleName === 'skills') {
+      nextModule.testAnswers = {};
+    }
+    if (moduleName === 'state') {
+      nextModule.state = normalizeStatePayload(existingModule.state);
+    }
+    stored.modules[moduleName] = nextModule;
+    stored.updated_at = nextModule.last_updated;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 export function saveBaseContext(baseContext) {
   try {
     const payload = baseContext && typeof baseContext === 'object' ? baseContext : {};
@@ -155,6 +195,7 @@ export default {
   loadProgress,
   hasSaved,
   clearProgress,
+  clearModuleProgress,
   countAnsweredResponses,
   isModuleCompleted,
   saveBaseContext,

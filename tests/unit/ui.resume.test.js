@@ -22,14 +22,15 @@ beforeEach(() => {
 
 describe('SurveyPage resume UI', () => {
   it('automatically resumes saved progress without a prompt', async () => {
-    const { getByText, queryByText } = render(SurveyPage);
+    const { getByText, queryByText, getAllByText } = render(SurveyPage);
 
     expect(queryByText('Saved in-progress responses found. Resume where you left off?')).toBeNull();
 
     // module tabs should be present
-    expect(getByText((content, element) => element.classList?.contains('module-chip__label') && content === 'Personality')).toBeTruthy();
-    expect(getByText('Aesthetics')).toBeTruthy();
-    expect(getByText('Music')).toBeTruthy();
-    expect(getByText('10/50')).toBeTruthy();
+    expect(getAllByText((content, element) => element.classList?.contains('module-chip__label') && content === 'Personality').length).toBeGreaterThan(0);
+    expect(getAllByText('Aesthetics').length).toBeGreaterThan(0);
+    expect(getAllByText('Music').length).toBeGreaterThan(0);
+    expect(getAllByText('Delivery').length).toBeGreaterThan(0);
+    expect(getAllByText('10/50').length).toBeGreaterThan(0);
   });
 });

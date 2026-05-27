@@ -34,7 +34,7 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function normalizeLikert(value: number): number {
-  return clamp(Math.round(toNumber(value, 0) * 20), 0, 100);
+  return clamp(Math.round(toNumber(value, 0) * 10), 0, 100);
 }
 
 function resolveTestResults(index: number, normalizedScore: number, testAnswers: Record<number, Partial<SkillTestResults>>): SkillTestResults {
@@ -56,16 +56,12 @@ function resolveTestResults(index: number, normalizedScore: number, testAnswers:
 
 function thresholdStatus(normalizedScore: number): 'results_worthy' | 'conditional' | 'omit' {
   if (normalizedScore >= 60) return 'results_worthy';
-  if (normalizedScore >= 35) return 'conditional';
   return 'omit';
 }
 
 function canListSkill(normalizedScore: number, status: 'results_worthy' | 'conditional' | 'omit', tests: SkillTestResults): boolean {
-  if (status === 'omit') return false;
-  if (normalizedScore >= 50) {
-    return Boolean(tests.interview_defense && tests.day_one_autonomy && tests.relevance_recency);
-  }
-  return true;
+  if (status !== 'results_worthy') return false;
+  return Boolean(tests.interview_defense && tests.day_one_autonomy && tests.relevance_recency);
 }
 
 export function scoreSkills(responses: number[] = [], testAnswers: Record<number, Partial<SkillTestResults>> = {}): SkillsScoreResult {
@@ -76,7 +72,7 @@ export function scoreSkills(responses: number[] = [], testAnswers: Record<number
 
   for (let i = 0; i < skillPositionMap.length; i += 1) {
     const entry = skillPositionMap[i];
-    const response = clamp(toNumber(responses[i], 0), 0, 5);
+    const response = clamp(toNumber(responses[i], 0), 0, 10);
     const normalizedScore = normalizeLikert(response);
     const status = thresholdStatus(normalizedScore);
     const tests = resolveTestResults(i + 1, normalizedScore, testAnswers);

@@ -1,6 +1,6 @@
 <script>
   export let profile;
-  import { toIamMarkdown, sanitizeContextFile } from '../services/profileService.js';
+  import { sanitizeContextFile, toIamDataStorageJson } from '../services/profileService.js';
   import sessionService from '../services/sessionService.js';
 
   function buildExportProfile(inputProfile) {
@@ -19,19 +19,19 @@
     return sanitizeContextFile(exportProfile);
   }
 
-  function downloadIamMarkdown() {
-    const text = toIamMarkdown(buildExportProfile(profile));
-    const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+  function downloadIamJson() {
+    const text = toIamDataStorageJson(buildExportProfile(profile));
+    const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'profile.context.iam.md';
+    a.download = 'profile.context.iam.json';
     a.click();
     URL.revokeObjectURL(url);
   }
 </script>
 <div class="exports">
-  <button class="primary" on:click={downloadIamMarkdown}>Download IAM Markdown</button>
+  <button class="primary" on:click={downloadIamJson}>Download IAM JSON</button>
 </div>
 <style>
   .exports button {

@@ -30,7 +30,12 @@ function toContextFile({ id, summary, traits }, options) {
     return out;
   }
 
-  const ipipResponses = (options && options.ipipResponses) ? options.ipipResponses : [];
+  const ipipModule = (options && options.ipip && typeof options.ipip === 'object' && !Array.isArray(options.ipip))
+    ? options.ipip
+    : {
+        responses: (options && options.ipipResponses) ? options.ipipResponses : []
+      };
+  const ipipResponses = Array.isArray(ipipModule.responses) ? ipipModule.responses : [];
   const profile = {
     id: id || null,
     summary: summary || '',
@@ -40,6 +45,7 @@ function toContextFile({ id, summary, traits }, options) {
         responses: ipipResponses,
         raw_trait_scores: remapTraits(raw) || {},
         normalized_trait_scores: remapTraits(normalized) || {},
+        ...(ipipModule.disabled === true ? { disabled: true } : {}),
         completed: Array.isArray(ipipResponses) && ipipResponses.length >= 50,
         last_updated: (options && options.lastUpdated) ? options.lastUpdated : new Date().toISOString()
       }
@@ -65,6 +71,7 @@ function toContextFile({ id, summary, traits }, options) {
       mode: state.mode === 'divergent' ? 'divergent' : 'convergent',
       horizon: state.horizon === 'now' ? 'now' : 'long',
       stakes: state.stakes === 'critical' ? 'critical' : 'casual',
+      ...(state.disabled === true ? { disabled: true } : {}),
       completed: state.completed === undefined ? true : Boolean(state.completed),
       last_updated: state.last_updated || ((options && options.lastUpdated) ? options.lastUpdated : new Date().toISOString())
     };

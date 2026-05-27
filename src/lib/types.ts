@@ -9,7 +9,13 @@ export interface OnetOccupation {
 
 export interface BaseContext {
 	onet?: OnetOccupation;
+	first_name?: string;
 	name?: string;
+	birth_month?: number;
+	birth_day?: number;
+	birth_year?: number;
+	gender?: string;
+	culture?: string;
 	job_title?: string;
 	company?: string;
 	skills?: string;
@@ -35,6 +41,35 @@ export interface CommunicationModule {
 	completed: boolean;
 	last_updated: string;
 }
+
+export interface DeliveryScores {
+	def: number;
+	peer: number;
+	chl: number;
+	dns: number;
+	aud: number;
+	str: number;
+	abs: number;
+	fmt: number;
+	vbs: number;
+	emp: number;
+	cnd: number;
+	hmr: number;
+	aut: number;
+	bur: number;
+}
+
+export interface DeliveryModule {
+	responses: number[];
+	raw: DeliveryScores;
+	normalized: DeliveryScores;
+	completed: boolean;
+	last_updated: string;
+}
+
+// Backwards-compatible aliases
+export type LensScores = DeliveryScores;
+export type LensModule = DeliveryModule;
 
 export type StateMode = 'convergent' | 'divergent';
 export type StateHorizon = 'now' | 'long';

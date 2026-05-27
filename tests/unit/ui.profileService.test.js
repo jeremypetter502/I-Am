@@ -40,7 +40,7 @@ describe('UI profileService', () => {
     expect(stale.raw_responses.data.ipip).toEqual([3, 3, 3]);
   });
 
-  it('serializes state and skills testAnswers into ContextFile output', () => {
+  it('serializes state and skills into ContextFile output', () => {
     const responses = Array(50).fill(3);
     const ctx = scoreAndExport(responses, {
       state: {
@@ -50,24 +50,52 @@ describe('UI profileService', () => {
         stakes: 'critical'
       },
       skills: {
-        responses: Array(35).fill(3),
-        testAnswers: {
-          1: {
-            interview_defense: true,
-            day_one_autonomy: true,
-            relevance_recency: false
-          }
-        }
+        responses: Array(35).fill(3)
       }
     });
 
     expect(ctx.profile.modules.state).toBeTruthy();
     expect(ctx.profile.modules.state.bandwidth).toBe(30);
     expect(ctx.profile.modules.state.mode).toBe('convergent');
-    expect(ctx.profile.modules.skills.testAnswers['1']).toEqual({
-      interview_defense: true,
-      day_one_autonomy: true,
-      relevance_recency: false
+    expect(ctx.profile.modules.skills).toBeTruthy();
+    expect(ctx.profile.modules.skills.testAnswers).toBeUndefined();
+  });
+
+  it('stores disabled module data while omitting it from IAM string', () => {
+    const responses = Array(50).fill(3);
+    const ctx = scoreAndExport(responses, {
+      music: {
+        responses: Array(20).fill(3),
+        result: {
+          normalized: {
+            mellow: 75,
+            sophisticated: 35,
+            unpretentious: 50,
+            intense: 20,
+            contemporary: 55
+          }
+        },
+        disabled: true
+      }
     });
+
+    expect(ctx.profile.modules.music).toBeTruthy();
+    expect(ctx.profile.modules.music.disabled).toBe(true);
+    expect(ctx.profile.iam.code.includes('/MEL')).toBe(false);
+  });
+
+  it('omits personality OCEAN metrics when ipip module is disabled', () => {
+    const responses = Array(50).fill(3);
+    const ctx = scoreAndExport(responses, {
+      ipip: {
+        responses,
+        disabled: true
+      }
+    });
+
+    expect(ctx.profile.modules.ipip).toBeTruthy();
+    expect(ctx.profile.modules.ipip.disabled).toBe(true);
+    expect(ctx.profile.iam.code.includes('O')).toBe(false);
+    expect(ctx.profile.modules.ipip.responses).toHaveLength(50);
   });
 });

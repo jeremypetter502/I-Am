@@ -1,10 +1,10 @@
 export function scoreIpip(responses) {
   const REVERSE_INDICES = {
-    O: [42,44,46,48,50],
-    C: [22,24,26,28,30],
+    O: [42,44,46],
+    C: [22,24,26,28],
     E: [2,4,6,8,10],
-    A: [12,14,16,18,20],
-    N: [32,34,36,38,40]
+    A: [11,13,15,17],
+    N: [32,34]
   };
 
   if (!Array.isArray(responses) || responses.length !== 50) throw new Error('responses must be array of length 50');

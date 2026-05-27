@@ -90,7 +90,7 @@ Note: After export, users may edit the downloaded context file in their preferre
 - **FR-004**: The system MUST generate a compact context file summarizing trait scores and a 1-2 sentence natural-language persona summary.
 - **FR-011**: The system MUST present a concise change summary before export that lists which modules, sections, and fields were added, replaced, or updated compared to any imported profile. The summary must be human-readable and indicate which values were replaced. Users may edit the exported file offline.
 - **FR-006**: The system MUST provide an exported, compact, portable profile format (plain text or small machine-readable format) suitable for embedding in LLM prompts.
-- **FR-013**: The system MUST support exporting ContextFiles in both JSON (schema-validated) and Protocol Buffers Text Format (pbtxt). Export format selection must be available in the UI prior to download.
+- **FR-013**: The system MUST support exporting ContextFiles as JSON (schema-validated when possible). The system MAY also produce a companion markdown artifact for human-readable sharing, but JSON remains the canonical machine-readable format.
 - **FR-007**: The system MUST surface clear privacy/consent steps before saving or exporting personal data. The system will not provide server-side persistent profile storage by default; profiles remain client-side (in-memory during the session or in browser local storage) and are exported/imported by users to persist. Any server-side storage must be opt-in and explicitly documented.
 - **FR-008**: Scoring rules for each question set MUST be documented and versioned alongside the spec.
 - **FR-009**: The system MUST accept an imported ContextFile and perform best-effort ingestion: validate against the canonical schema, import valid modules automatically, and auto-fill reasonable defaults for missing (optional) fields. Any inferred or defaulted values must be clearly flagged in the change summary presented to the user; the user must be able to undo the import or re-import if they reject inferred values.
@@ -115,9 +115,9 @@ Note: After export, users may edit the downloaded context file in their preferre
 The I-Am Context Code (IAM) specification is the standard compact representation for all personality/career/skill data.
 See `specs/personality-specs/personality_code.spec.md` for the full normative spec.
 
-**Version**: 0.6 (standardized O*NET skill positions plus STATE segment)
+**Version**: 0.7 (adds DELIVERY segment; includes standardized O*NET skill positions and STATE segment)
 
-**Format**: `IAM/<version>/<context>:<OCEAN>/<AES>/<MUS>/<COM>/<CAR>/<STATE>`
+**Format**: `IAM/<version>/<context>:<OCEAN>/<AES>/<MUS>/<COM>/<DELIVERY>/<CAR>/<STATE>`
 
 **Career/Skills Segment (CAR)** encoding:
 - Pattern: `CAR{8-digit-soc}S{skill-idx}{proficiency}[{skill-idx}{proficiency}]*`
@@ -126,10 +126,13 @@ See `specs/personality-specs/personality_code.spec.md` for the full normative sp
 - Proficiency values: 00–99 (normalized, where 60–99 = results-worthy, 35–59 = conditional, 0–34 = omit)
 - Sparse encoding: only include skills with non-zero proficiency to minimize string length
 
+**DELIVERY segment** encoding:
+- Canonical pattern: `/DELIVERY/DEFxxPEERxxCHLxxDNSxxAUDxxSTRxxABSxxFMTxxVBSxxEMPxxCNDxxHMRxxAUTxxBURxx`
+
 **STATE segment** encoding:
 - Canonical pattern: `STATE:bandwidth{bb},mode:{convergent|divergent},horizon:{now|long},stakes:{critical|casual}`
-- Segment order requirement: OCEAN -> AES -> MUS -> COM -> CAR -> STATE
-- Example full suffix: `/CAR15113200S0190S1899S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical`
+- Segment order requirement: OCEAN -> AES -> MUS -> COM -> DELIVERY -> CAR -> STATE
+- Example full suffix: `/DELIVERY/DEF40PEER70CHL80DNS75AUD20STR85ABS78FMT82VBS55EMP62CND74HMR30AUT68BUR52/CAR15113200S0190S1899S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical`
 
 **IAM Decoder Reference** (for LLMs receiving IAM codes):
 - Use skill index to look up skill name from the O*NET 35-skill position map (do not guess abbreviations)
@@ -138,12 +141,12 @@ See `specs/personality-specs/personality_code.spec.md` for the full normative sp
 
 For ContextFile JSON export, the skill data is preserved verbatim (name, score, test status); the IAM string is a compact synopsis.
 - **FR-016**: The system MUST immediately record a user's response and automatically advance to the next question when the user selects an answer option (for example, clicking a numeric choice). The advance MUST NOT require the user to click an explicit "Next" control. Implementations MUST still provide a way to review and change previous answers (e.g., back navigation or a review screen) before final submission, and MUST ensure keyboard and assistive-technology accessibility for selection and navigation. [UX, Accessibility]
-- **FR-017**: When a user completes any module (e.g., IPIP, Aesthetics, Music), the system MUST present the user with the option to download a ContextFile that reflects all modules completed so far (a partial ContextFile). The partial ContextFile MUST include completed modules with available responses, module metadata (last_updated, completed flag, scoring_version if available), and any computed scores where scoring inputs are complete. The UI MUST allow choosing the export format (JSON or pbtxt) and MUST validate JSON exports against the canonical schema when possible. (Traceability: relates to FR-004, FR-006, FR-013, FR-011)
+- **FR-017**: When a user completes any module (e.g., IPIP, Aesthetics, Music), the system MUST present the user with the option to download a ContextFile that reflects all modules completed so far (a partial ContextFile). The partial ContextFile MUST include completed modules with available responses, module metadata (last_updated, completed flag, scoring_version if available), and any computed scores where scoring inputs are complete. JSON exports SHOULD be validated against the canonical schema when possible. (Traceability: relates to FR-004, FR-006, FR-013, FR-011)
 - **FR-018**: All business logic (scorers, serializer, IAM generator, import/export rules) MUST be implemented only in the canonical library under `src/lib/` (for example, `src/lib/scorer`, `src/lib/serializer`, `src/lib/iam`). The UI layer (`src/ui/`) MUST import and call these library functions and MUST NOT duplicate scoring or serialization logic. Any duplication discovered during review must be removed and replaced by calls to the canonical implementations. (Traceability: enforces code organization and maintainability.)
-- **FR-019**: The IAM compact string MUST support a Career segment appended as the final slash-separated group using pattern `JOB{soc8}{skillToken1}{vv}{skillToken2}{vv}...`, where `soc8` is an 8-digit O*NET-SOC code (`XX-XXXX.XX` normalized to digits) and each `vv` is a normalized integer in the range `00-99`.
-- **FR-020**: The system MUST maintain and version a static Career skill-token map for IAM generation: `PR` (Programming), `LD` (Leadership and Management), `CT` (Critical Thinking and Problem Solving), `SP` (Speaking and Communication), `DT` (Data Analysis and Interpretation), `CR` (Creativity and Innovation).
-- **FR-021**: When base context contains an O*NET role and skill values, IAM generation MUST include the Career segment in this canonical order: OCEAN -> Aesthetics -> Music -> Communication (if present) -> Career.
-- **FR-022**: Career segment parsing and generation MUST be lossless for defined fields across export/import round-trips; generated files MUST preserve both `profile.base.onet` and all supported skill values used in IAM encoding.
+- **FR-019**: The IAM compact string MUST support a Career segment using the canonical `CAR{soc8}S{idx}{score}...` pattern, where `soc8` is an 8-digit normalized O*NET-SOC code and each score is `00-99`.
+- **FR-020**: Career/skills IAM encoding MUST use O*NET position indices (`S01`-`S35`) with sparse emission (only retained skills encoded).
+- **FR-021**: When Delivery data is present and enabled, IAM generation MUST include a `/DELIVERY/...` segment and promote version to at least `0.7`.
+- **FR-022**: Career and Delivery segment parsing/generation MUST be lossless for defined fields across import/export round-trips.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -183,7 +186,7 @@ For ContextFile JSON export, the skill data is preserved verbatim (name, score, 
 
 - Q: Need a small scoring function that reads responses and emits personal_context output? → A: Yes — include a client-side scoring function.
 
-- Q: Which export formats should be supported for ContextFiles? → A: JSON and Protocol Buffers Text Format (pbtxt). UI should allow choosing format before export.
+- Q: Which export formats should be supported for ContextFiles? → A: JSON is the canonical machine-readable export. Markdown may be emitted as a companion human-readable artifact.
 
 - Q: Where should the JSON schema file live and how should it be referenced? → A: Option A — Place schema at specs/001-personality-context-site/contextfile.schema.json and reference it from this spec.
 

@@ -93,7 +93,9 @@ Add optional `communication` object under `profile.properties.modules.properties
 
 No strict IAM regex is required in this phase to preserve compatibility and avoid over-constraining future segments. Validation remains semantic at module level.
 
-## Protobuf changes
+## Protobuf changes (historical)
+
+Note: Current runtime implementation is JSON-first. The protobuf contract notes below are retained only as historical reference and are not required for active import/export flows.
 
 Target: `specs/001-personality-context-site/contextfile.proto`
 

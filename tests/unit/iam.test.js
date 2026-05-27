@@ -36,6 +36,23 @@ describe('Career segment (v0.4)', () => {
     expect(iam.version).toBe('0.4');
     expect(iam.code).toBe('/CAR15125200S0190S1899S2485S3360');
   });
+
+  it('prefixes IAM with first name, birth year, gender, culture, and timezone abbreviation when present', () => {
+    const scored = { normalized: { O: 83, C: 60, E: 45, A: 78, N: 33 } };
+    const modules = {
+      base: {
+        name: 'Jeremy Petter',
+        birth_year: 1975,
+        gender: 'male',
+        culture: 'en-US',
+        timezone: 'America/New_York'
+      }
+    };
+
+    const iam = buildIam(scored, modules);
+    expect(iam.version).toBe('0.6');
+    expect(iam.code).toBe('IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33');
+  });
 });
 
 describe('iam builder', () => {
@@ -45,6 +62,13 @@ describe('iam builder', () => {
     expect(iam.version).toBe('0.1');
     expect(iam.code.startsWith('IAM/0.1')).toBe(true);
     expect(iam.code.includes('/COMM/')).toBe(false);
+  });
+
+  it('omits OCEAN segment when personality scores are not present', () => {
+    const iam = buildIam({ normalized: { O: 0, C: 0, E: 0, A: 0, N: 0 } }, {});
+    expect(iam.version).toBe('0.1');
+    expect(iam.code).toBe('IAM/0.1');
+    expect(iam.code.includes('O0C0E0A0N0')).toBe(false);
   });
 
   it('appends communication segment and bumps to 0.2', () => {
@@ -99,5 +123,34 @@ describe('iam builder', () => {
     const iam = buildIam(scored, modules);
     expect(iam.code).toContain('/MIN80CLR35WRM60MOT45IMG70');
     expect(iam.code).toContain('/CAR15125200S0190');
+  });
+
+  it('appends delivery segment and bumps version to 0.7', () => {
+    const scored = { normalized: { O: 70, C: 60, E: 50, A: 40, N: 30 } };
+    const modules = {
+      delivery: {
+        normalized: {
+          def: 72,
+          peer: 41,
+          chl: 66,
+          dns: 58,
+          aud: 34,
+          str: 77,
+          abs: 68,
+          fmt: 62,
+          vbs: 81,
+          emp: 64,
+          cnd: 52,
+          hmr: 49,
+          aut: 74,
+          bur: 37
+        }
+      }
+    };
+
+    const iam = buildIam(scored, modules);
+    expect(iam.version).toBe('0.7');
+    expect(iam.code.startsWith('IAM/0.7')).toBe(true);
+    expect(iam.code).toContain('/DELIVERY/DEF72PEER41CHL66DNS58AUD34STR77ABS68FMT62VBS81EMP64CND52HMR49AUT74BUR37');
   });
 });

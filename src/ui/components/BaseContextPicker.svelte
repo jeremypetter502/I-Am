@@ -10,6 +10,62 @@
   let errors = [];
   let lastOnetKey = '';
 
+  const timezoneOptions = [
+    'UTC',
+    'America/New_York',
+    'America/Chicago',
+    'America/Denver',
+    'America/Phoenix',
+    'America/Los_Angeles',
+    'America/Toronto',
+    'America/Vancouver',
+    'America/Sao_Paulo',
+    'Europe/London',
+    'Europe/Paris',
+    'Europe/Berlin',
+    'Europe/Madrid',
+    'Europe/Rome',
+    'Europe/Amsterdam',
+    'Europe/Stockholm',
+    'Europe/Moscow',
+    'Africa/Johannesburg',
+    'Asia/Dubai',
+    'Asia/Kolkata',
+    'Asia/Singapore',
+    'Asia/Hong_Kong',
+    'Asia/Shanghai',
+    'Asia/Tokyo',
+    'Asia/Seoul',
+    'Australia/Sydney',
+    'Pacific/Auckland'
+  ];
+
+  const localeOptions = [
+    'en-US',
+    'en-GB',
+    'en-CA',
+    'en-AU',
+    'es-ES',
+    'es-MX',
+    'fr-FR',
+    'fr-CA',
+    'de-DE',
+    'it-IT',
+    'pt-BR',
+    'pt-PT',
+    'nl-NL',
+    'sv-SE',
+    'pl-PL',
+    'ru-RU',
+    'tr-TR',
+    'ar-SA',
+    'hi-IN',
+    'zh-CN',
+    'zh-TW',
+    'ja-JP',
+    'ko-KR'
+  ];
+
   $: form = normalizeBaseContext(value || {});
 
   // Keep the search box display aligned with the selected O*NET record across remounts/tab switches.
@@ -56,25 +112,53 @@
 
 <section class="base-context">
   <h4>Basic Context (Optional)</h4>
-  <p class="hint">Help the assistant tailor responses with role and background context.</p>
-
-  <label>
-    Job search (O*NET)
-    <input placeholder="Search job titles (e.g. software engineer)" value={query} on:input={runSearch} />
-  </label>
-
-  {#if matches.length}
-    <ul class="matches">
-      {#each matches as item}
-        <li>
-          <button type="button" on:click={() => selectJob(item)}>{item.title} ({item.soc_code})</button>
-        </li>
-      {/each}
-    </ul>
-  {/if}
 
   <div class="grid">
     <label>Name<input value={form.name || ''} on:input={(e) => updateField('name', e)} /></label>
+    <label>Gender<input value={form.gender || ''} on:input={(e) => updateField('gender', e)} /></label>
+    <label>
+      Birth year
+      <input type="number" min="1900" max="2100" step="1" value={form.birth_year ?? ''} on:input={(e) => updateField('birth_year', e)} />
+    </label>
+    <label>
+      Birth month
+      <input type="number" min="1" max="12" step="1" value={form.birth_month ?? ''} on:input={(e) => updateField('birth_month', e)} />
+    </label>
+    <label>
+      Birth day
+      <input type="number" min="1" max="31" step="1" value={form.birth_day ?? ''} on:input={(e) => updateField('birth_day', e)} />
+    </label>
+    <label>
+      Timezone
+      <select value={form.timezone || ''} on:change={(e) => updateField('timezone', e)}>
+        <option value="">Select timezone…</option>
+        {#each timezoneOptions as timezone}
+          <option value={timezone}>{timezone}</option>
+        {/each}
+      </select>
+    </label>
+    <label>
+      Locale
+      <select value={form.locale || ''} on:change={(e) => updateField('locale', e)}>
+        <option value="">Select locale…</option>
+        {#each localeOptions as locale}
+          <option value={locale}>{locale}</option>
+        {/each}
+      </select>
+    </label>
+    <label class="full">
+      Job search (O*NET)
+      <input placeholder="Search job titles (e.g. software engineer)" value={query} on:input={runSearch} />
+    </label>
+    {#if matches.length}
+      <ul class="matches full">
+        {#each matches as item}
+          <li>
+            <button type="button" on:click={() => selectJob(item)}>{item.title} ({item.soc_code})</button>
+          </li>
+        {/each}
+      </ul>
+    {/if}
     <label>Job title<input value={form.job_title || ''} on:input={(e) => updateField('job_title', e)} /></label>
     <label>Company<input value={form.company || ''} on:input={(e) => updateField('company', e)} /></label>
     <label>Years experience<input type="number" min="0" max="80" step="0.5" value={form.years_experience ?? ''} on:input={(e) => updateField('years_experience', e)} /></label>
@@ -90,11 +174,10 @@
         <option value="other">Other</option>
       </select>
     </label>
-    <label>Timezone<input value={form.timezone || ''} placeholder="America/Los_Angeles" on:input={(e) => updateField('timezone', e)} /></label>
-    <label>Locale<input value={form.locale || ''} placeholder="en-US" on:input={(e) => updateField('locale', e)} /></label>
-    <label>Skills<input value={form.skills || ''} placeholder="JavaScript, UX research, data analysis" on:input={(e) => updateField('skills', e)} /></label>
-    <label>Communication style<input value={form.communication_style || ''} placeholder="concise / detailed" on:input={(e) => updateField('communication_style', e)} /></label>
-    <label class="full">Short bio<textarea rows="3" maxlength="280" value={form.short_bio || ''} on:input={(e) => updateField('short_bio', e)}></textarea></label>
+    <label class="full">Skills<textarea rows="2" value={form.skills || ''} placeholder="JavaScript, UX research, data analysis" on:input={(e) => updateField('skills', e)}></textarea></label>
+    <label class="full">Communication style<textarea rows="2" value={form.communication_style || ''} placeholder="concise / detailed" on:input={(e) => updateField('communication_style', e)}></textarea></label>
+    <label class="full">Favorites<textarea rows="2" value={form.favorites || ''} placeholder="Favorite music, movies, colors, things to do, etc." on:input={(e) => updateField('favorites', e)}></textarea></label>
+    <label class="full">Short bio<textarea rows="2" maxlength="280" value={form.short_bio || ''} on:input={(e) => updateField('short_bio', e)}></textarea></label>
   </div>
 
   {#if errors.length}
@@ -125,11 +208,15 @@
     width: 100%; 
     padding: 10px 12px; 
     border-radius: 12px; 
-    border: 1px dashed rgba(148, 163, 184, 0.4); 
-    background: rgba(0, 0, 0, 0.15); 
+    border: 1px solid rgba(148, 163, 184, 0.12); 
+    background: rgba(15, 23, 42, 0.9); 
     color: var(--iam-text-primary); 
     font-size: 0.95rem;
     box-sizing: border-box;
+  }
+  select option {
+    color: var(--iam-text-primary);
+    background: rgba(15, 23, 42, 0.95);
   }
   input::placeholder, select::placeholder, textarea::placeholder {
     color: rgba(148, 163, 184, 0.6);
@@ -151,4 +238,16 @@
     background: rgba(168, 85, 247, 0.25);
   }
   .errors { margin: 0; padding-left: 18px; color: #FCA5A5; font-size: 0.9rem; }
+
+  @media (max-width: 768px) {
+    .base-context { padding: 16px; }
+    .grid { grid-template-columns: 1fr; }
+    label { font-size: 0.85rem; }
+    input, select, textarea { font-size: 0.9rem; padding: 8px 10px; }
+  }
+
+  @media (max-width: 480px) {
+    .base-context { padding: 12px; }
+    .base-context h4 { font-size: 1.1rem; }
+  }
 </style>

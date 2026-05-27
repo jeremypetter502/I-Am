@@ -76,4 +76,21 @@ describe('sessionService', () => {
       stakes: 'critical'
     });
   });
+
+  it('persists and preserves per-module disabled state on reset', () => {
+    const ok = svc.saveProgress('music', {
+      responses: [3, 4, 5],
+      current: 2,
+      expectedLength: 20,
+      disabled: true
+    });
+    expect(ok).toBe(true);
+
+    expect(svc.clearModuleProgress('music')).toBe(true);
+
+    const data = svc.loadProgress();
+    expect(data.modules.music.responses).toEqual([]);
+    expect(data.modules.music.current).toBe(0);
+    expect(data.modules.music.disabled).toBe(true);
+  });
 });

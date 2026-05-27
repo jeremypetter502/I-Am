@@ -8,12 +8,15 @@
   - scores: {extraversion, agreeableness, conscientiousness, neuroticism, openness} (0..100 numbers)
   - raw_scores: map<string, number>
   - modules: {
-    ipip: { responses: number[50], raw_trait_scores: map<string, number>, normalized_trait_scores: map<string, number> },
-    aesthetics: { minimalism, colorfulness, warmth, texture, motion, imagery, typography, layout, importance },
-    music: { factors: map<string, number> },
-    state: { bandwidth: number(0..100), mode: convergent|divergent, horizon: now|long, stakes: critical|casual },
-    extended: map<string, any>
+    ipip: { responses: number[50], raw_trait_scores?: map<string, number>, normalized_trait_scores?: map<string, number>, disabled?: boolean },
+    aesthetics: { responses: number[], result?: object, disabled?: boolean },
+    music: { responses: number[], result?: object, disabled?: boolean },
+    delivery: { responses: number[], result?: object, disabled?: boolean },
+    communication: { responses: number[20], raw_trait_scores?: map<string, number>, normalized_trait_scores?: map<string, number>, disabled?: boolean },
+    skills: { responses: object[], filtered?: object[], testAnswers?: map<string, object>, disabled?: boolean },
+    state: { state: { bandwidth: number(0..100), mode: convergent|divergent, horizon: now|long, stakes: critical|casual }, disabled?: boolean }
   }
+  - base: { onet?, job_title?, company?, years_experience?, education_level?, timezone?, locale?, communication_style?, short_bio? }
   - tags: map<string, boolean>
   - preferences: map<string, any>
   - iam: { code: string, version?: string }
@@ -31,4 +34,4 @@
 
 ## Serialization
 - JSON: use JSON.stringify with schema_version and generated_at.
-- pbtxt: use protobufjs to load contextfile.proto and serialize to text format for export/import.
+- JSON is the canonical machine-readable export/import format.

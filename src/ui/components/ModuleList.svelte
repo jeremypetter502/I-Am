@@ -5,6 +5,7 @@
     ipip: { emoji: '🧠', label: 'Personality', accent: 'violet' },
     aesthetics: { emoji: '🎨', label: 'Aesthetics', accent: 'teal' },
     music: { emoji: '🎵', label: 'Music', accent: 'amber' },
+    delivery: { emoji: '🔎', label: 'Delivery', accent: 'teal' },
     skills: { emoji: '🛠️', label: 'Skills Assessment', accent: 'teal' },
     state: { emoji: '⚡', label: 'State', accent: 'amber' },
     extended: { emoji: '✨', label: 'Extended', accent: 'slate' }

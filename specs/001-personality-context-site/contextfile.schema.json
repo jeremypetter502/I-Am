@@ -82,6 +82,7 @@
                   "additionalProperties": { "type": "number", "minimum": 0, "maximum": 100 },
                   "description": "Normalized 0..100 trait scores"
                 },
+                "disabled": { "type": "boolean" },
                 "completed": { "type": "boolean" },
                 "last_updated": { "type": "string", "format": "date-time" }
               }
@@ -121,6 +122,7 @@
                   },
                   "additionalProperties": false
                 },
+                "disabled": { "type": "boolean" },
                 "importance": { "type": "number", "minimum": 0, "maximum": 100 }
               }
             },
@@ -138,7 +140,8 @@
                     "contemporary": { "type": "number", "minimum": 0, "maximum": 100 }
                   },
                   "additionalProperties": false
-                }
+                },
+                "disabled": { "type": "boolean" }
               }
             },
             "communication": {
@@ -171,6 +174,7 @@
                     "amiable": { "type": "number", "minimum": 0, "maximum": 100 }
                   }
                 },
+                "disabled": { "type": "boolean" },
                 "completed": { "type": "boolean" },
                 "last_updated": { "type": "string", "format": "date-time" }
               }
@@ -226,6 +230,7 @@
                     }
                   }
                 },
+                "disabled": { "type": "boolean" },
                 "completed": { "type": "boolean" },
                 "last_updated": { "type": "string", "format": "date-time" }
               }
@@ -238,6 +243,7 @@
                 "mode": { "type": "string", "enum": ["convergent", "divergent"] },
                 "horizon": { "type": "string", "enum": ["now", "long"] },
                 "stakes": { "type": "string", "enum": ["critical", "casual"] },
+                "disabled": { "type": "boolean" },
                 "completed": { "type": "boolean" },
                 "last_updated": { "type": "string", "format": "date-time" }
               },
@@ -276,6 +282,12 @@
               "required": ["soc_code", "title"]
             },
             "name": { "type": "string", "maxLength": 120 },
+            "first_name": { "type": "string", "maxLength": 80 },
+            "birth_month": { "type": "integer", "minimum": 1, "maximum": 12 },
+            "birth_day": { "type": "integer", "minimum": 1, "maximum": 31 },
+            "birth_year": { "type": "integer", "minimum": 1900, "maximum": 2100 },
+            "gender": { "type": "string", "maxLength": 60 },
+            "culture": { "type": "string", "maxLength": 40 },
             "job_title": { "type": "string", "maxLength": 120 },
             "company": { "type": "string", "maxLength": 120 },
             "skills": { "type": "string", "maxLength": 400 },

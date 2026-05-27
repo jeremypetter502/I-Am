@@ -9,13 +9,13 @@ describe('iam career segment', () => {
     expect(normalizeSoc8('bad')).toBe('');
   });
 
-  it('builds sparse Career segment with ordered non-zero skills', () => {
+  it('builds sparse Career segment with ordered skills >= 60', () => {
     const seg = buildCareerSegment('15125200', [
       { index: 24, normalized_score: 85 },
       { index: 1, normalized_score: 90 },
       { index: 18, normalized_score: 99 },
       { index: 33, normalized_score: 60 },
-      { index: 2, normalized_score: 0 }
+      { index: 2, normalized_score: 59 }
     ]);
 
     expect(seg).toBe('CAR15125200S0190S1899S2485S3360');

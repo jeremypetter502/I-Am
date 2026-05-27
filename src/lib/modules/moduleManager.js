@@ -17,6 +17,7 @@ const MODULE_DEFINITIONS = [
   { key: 'ipip', label: 'IPIP', expectedLength: 50 },
   { key: 'aesthetics', label: 'Aesthetics', expectedLength: 32 },
   { key: 'music', label: 'Music', expectedLength: 20 },
+  { key: 'delivery', label: 'Delivery', expectedLength: 30 },
   { key: 'communication', label: 'Communication', expectedLength: 20 }
 ];
 

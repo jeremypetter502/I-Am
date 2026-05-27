@@ -1,11 +1,11 @@
 import { scoreAesthetics as bundledScoreAesthetics } from '../../lib/scorer/aestheticsScorer.js';
 import { scoreMusic as bundledScoreMusic } from '../../lib/scorer/musicScorer.js';
+import { scoreDelivery as bundledScoreDelivery } from '../../lib/scorer/deliveryScorer.js';
 import { scoreCommunication as bundledScoreCommunication } from '../../lib/scorer/communicationScorer.js';
 import { scoreSkills as bundledScoreSkills } from '../../lib/scorer/skillsScorer.js';
 import { buildIam } from '../../lib/iam/iam.js';
 import { scoreIpip } from '../../lib/scorer/ipipScorer.js';
 import { toContextFile as libToContextFile } from '../../lib/serializer/toContextFile.js';
-import { toPbtxt as libToPbtxt } from '../../lib/serializer/toPbtxt.js';
 
 export async function loadQuestions() {
   // Attempt to fetch the question bank at runtime first (dev server static asset).
@@ -58,19 +58,53 @@ export function scoreResponses(responses) {
   return scoreIpip(responses);
 }
 
-export function scoreSkills(responses, testAnswers = {}) {
+export function scoreSkills(responses) {
   if (typeof bundledScoreSkills === 'function') {
-    return bundledScoreSkills(responses, testAnswers);
+    return bundledScoreSkills(responses);
   }
   return { raw: [], normalized: [], filtered: [], fullAssessment: [] };
+}
+
+function resolveIpipModule(ipipModuleLike, fallbackResponses = []) {
+  if (ipipModuleLike && typeof ipipModuleLike === 'object' && !Array.isArray(ipipModuleLike)) {
+    return {
+      responses: Array.isArray(ipipModuleLike.responses)
+        ? ipipModuleLike.responses
+        : (Array.isArray(fallbackResponses) ? fallbackResponses : []),
+      ...(ipipModuleLike.disabled === true ? { disabled: true } : {})
+    };
+  }
+
+  if (Array.isArray(ipipModuleLike)) {
+    return { responses: ipipModuleLike };
+  }
+
+  return {
+    responses: Array.isArray(fallbackResponses) ? fallbackResponses : []
+  };
+}
+
+function personalityScoresFromModule(profileScores, ipipModule) {
+  const disabled = ipipModule?.disabled === true;
+  const scores = profileScores && typeof profileScores === 'object' ? profileScores : {};
+  return {
+    normalized: {
+      O: disabled ? 0 : Number(scores.openness ?? 0),
+      C: disabled ? 0 : Number(scores.conscientiousness ?? 0),
+      E: disabled ? 0 : Number(scores.extraversion ?? 0),
+      A: disabled ? 0 : Number(scores.agreeableness ?? 0),
+      N: disabled ? 0 : Number(scores.neuroticism ?? 0)
+    }
+  };
 }
 
 
 export function scoreAndExport(responses, moduleResponses = {}) {
   const scored = scoreResponses(responses);
+  const ipipPayload = resolveIpipModule(moduleResponses.ipip, responses);
   return toContextFile(scored, {
     ...moduleResponses,
-    ipip: Array.isArray(responses) ? responses : (moduleResponses.ipip || [])
+    ipip: ipipPayload
   });
 }
 
@@ -97,132 +131,136 @@ export function sanitizeContextFile(contextFile) {
   return sanitized;
 }
 
-export function toPbtxt(json) {
-  return libToPbtxt(json);
+function deriveIamFromProfile(profile) {
+  let iam = profile && profile.iam && profile.iam.code ? profile.iam.code : '';
+  if (iam) return iam;
+
+  try {
+    const scored = personalityScoresFromModule(profile?.scores, profile?.modules?.ipip);
+    const modules = filterDisabledModules({
+      ...(profile && profile.modules && typeof profile.modules === 'object' ? profile.modules : {}),
+      base: profile && profile.base && typeof profile.base === 'object' ? profile.base : undefined,
+      state: profile?.modules?.state,
+      skills: Array.isArray(profile?.modules?.skills?.filtered)
+        ? profile.modules.skills.filtered
+        : profile?.modules?.skills
+    });
+    const derived = buildIam(scored, modules);
+    if (derived && derived.code) {
+      iam = derived.code;
+      profile.iam = { code: derived.code, version: derived.version || '0.1' };
+    }
+  } catch (e) {
+    // Keep export resilient and fall back to placeholder.
+  }
+
+  return iam;
 }
 
-export function toIamMarkdown(contextFile) {
+function withModuleMetadata(moduleData, metadata) {
+  if (!moduleData || typeof moduleData !== 'object' || Array.isArray(moduleData)) return moduleData;
+  return {
+    ...moduleData,
+    ...(metadata?.disabled ? { disabled: true } : {})
+  };
+}
+
+function filterDisabledModules(modules) {
+  if (!modules || typeof modules !== 'object') return {};
+
+  const nextModules = { ...modules };
+  for (const key of ['ipip', 'aesthetics', 'music', 'delivery', 'communication', 'state']) {
+    if (nextModules[key] && typeof nextModules[key] === 'object' && nextModules[key].disabled === true) {
+      delete nextModules[key];
+    }
+  }
+
+  if (modules.skills && typeof modules.skills === 'object' && !Array.isArray(modules.skills) && modules.skills.disabled === true) {
+    delete nextModules.skills;
+  }
+
+  return nextModules;
+}
+
+function removeDuplicateExportSections(contextFile) {
+  const sanitizedContextFile = sanitizeContextFile(contextFile);
+  const profile = sanitizedContextFile?.profile && typeof sanitizedContextFile.profile === 'object'
+    ? { ...sanitizedContextFile.profile }
+    : {};
+
+  function normalizeSkillsForStorage(skillsModule) {
+    if (!skillsModule || typeof skillsModule !== 'object') return skillsModule;
+    const source = Array.isArray(skillsModule.responses)
+      ? skillsModule.responses
+      : Array.isArray(skillsModule.filtered)
+        ? skillsModule.filtered
+        : [];
+
+    const responses = source
+      .filter((item) => item && typeof item === 'object')
+      .map((item) => ({
+        ...(item.name ? { name: item.name } : {}),
+        ...(Number.isFinite(Number(item.index)) ? { index: Number(item.index) } : {}),
+        ...(item.category ? { category: item.category } : {}),
+        ...(Number.isFinite(Number(item.raw_score)) ? { raw_score: Number(item.raw_score) } : {})
+      }));
+
+    return {
+      responses,
+      completed: skillsModule.completed === true,
+      last_updated: skillsModule.last_updated
+    };
+  }
+
+  // `iam` is emitted as the top-level first field in storage JSON.
+  if (profile.iam) delete profile.iam;
+
+  // `preferences.skills` duplicates module-level skill responses.
+  if (profile.preferences && typeof profile.preferences === 'object') {
+    delete profile.preferences.skills;
+    if (Object.keys(profile.preferences).length === 0) delete profile.preferences;
+  }
+
+  if (profile.modules && typeof profile.modules === 'object' && profile.modules.skills) {
+    profile.modules = { ...profile.modules, skills: normalizeSkillsForStorage(profile.modules.skills) };
+  }
+
+  const out = {
+    schema_version: sanitizedContextFile?.schema_version,
+    generated_at: sanitizedContextFile?.generated_at,
+    profile
+  };
+
+  // `raw_responses` duplicates module-level responses and is excluded from storage JSON.
+  return out;
+}
+
+export function toIamDataStorageObject(contextFile) {
   const sanitizedContextFile = sanitizeContextFile(contextFile);
   const profile = sanitizedContextFile && sanitizedContextFile.profile ? sanitizedContextFile.profile : {};
-  let iam = profile && profile.iam && profile.iam.code ? profile.iam.code : '';
-  if (!iam) {
-    try {
-      const scores = profile && profile.scores && typeof profile.scores === 'object' ? profile.scores : {};
-      const scored = {
-        normalized: {
-          O: Number(scores.openness ?? 0),
-          C: Number(scores.conscientiousness ?? 0),
-          E: Number(scores.extraversion ?? 0),
-          A: Number(scores.agreeableness ?? 0),
-          N: Number(scores.neuroticism ?? 0)
-        }
-      };
-      const modules = {
-        ...(profile && profile.modules && typeof profile.modules === 'object' ? profile.modules : {}),
-        base: profile && profile.base && typeof profile.base === 'object' ? profile.base : undefined,
-        state: profile?.modules?.state,
-        skills: Array.isArray(profile?.modules?.skills?.filtered)
-          ? profile.modules.skills.filtered
-          : profile?.modules?.skills
-      };
-      const derived = buildIam(scored, modules);
-      if (derived && derived.code) {
-        iam = derived.code;
-        profile.iam = { code: derived.code, version: derived.version || '0.1' };
+  // Only emit top-level iam when at least one module is completed
+  const modulesObj = sanitizedContextFile?.profile?.modules;
+  let hasCompletedModule = false;
+  if (modulesObj && typeof modulesObj === 'object') {
+    for (const k of Object.keys(modulesObj)) {
+      const m = modulesObj[k];
+      if (m && typeof m === 'object' && m.completed === true) {
+        hasCompletedModule = true;
+        break;
       }
-    } catch (e) {
-      // Keep markdown export resilient and fall back to placeholder.
     }
   }
-  if (!iam) iam = 'IAM code unavailable';
-  const skills = profile?.modules?.skills;
-  const payload = JSON.stringify(sanitizedContextFile || {}, null, 2);
+  const iam = hasCompletedModule ? (deriveIamFromProfile(profile) || 'IAM code unavailable') : undefined;
+  const cleaned = removeDuplicateExportSections(sanitizedContextFile);
 
-  function pushBaseLine(lines, key, value) {
-    if (value == null || value === '') return;
-    lines.push(`- ${key}: ${String(value)}`);
-  }
+  const out = (typeof iam === 'string' && iam.length)
+    ? { iam, ...cleaned }
+    : { ...cleaned };
+  return out;
+}
 
-  // Prepare base context section if present
-  let baseContextSection = '';
-  if (profile.base && Object.keys(profile.base).length > 0) {
-    const base = profile.base;
-    const baseLines = [
-      '## Basic Context',
-      '',
-      'Use this section for human-readable background context and simple parsing.',
-      '',
-      '<!-- IAM_BASE_CONTEXT_START -->'
-    ];
-
-    pushBaseLine(baseLines, 'job_title', base.job_title);
-    pushBaseLine(baseLines, 'company', base.company);
-    pushBaseLine(baseLines, 'name', base.name);
-    pushBaseLine(baseLines, 'skills', base.skills);
-    pushBaseLine(baseLines, 'years_experience', base.years_experience);
-    pushBaseLine(baseLines, 'education_level', base.education_level);
-    pushBaseLine(baseLines, 'timezone', base.timezone);
-    pushBaseLine(baseLines, 'locale', base.locale);
-    pushBaseLine(baseLines, 'communication_style', base.communication_style);
-    pushBaseLine(baseLines, 'short_bio', base.short_bio);
-    pushBaseLine(baseLines, 'onet.soc_code', base.onet && base.onet.soc_code);
-    pushBaseLine(baseLines, 'onet.title', base.onet && base.onet.title);
-
-    baseLines.push('<!-- IAM_BASE_CONTEXT_END -->', '');
-    baseContextSection = [
-      baseLines.join('\n')
-    ].join('\n');
-  }
-
-  let skillsSection = '';
-  if (skills && typeof skills === 'object') {
-    const lines = ['## Skills Assessment', ''];
-    const list = Array.isArray(skills.filtered)
-      ? skills.filtered
-      : Array.isArray(skills.responses)
-        ? skills.responses
-        : [];
-    if (list.length) {
-      for (const item of list) {
-        const status = item.listed_status || item.threshold_status || 'included';
-        lines.push(`- ${item.name}: ${Math.round(Number(item.normalized_score) || 0)} (${status})`);
-      }
-    } else {
-      lines.push('- No confirmed skills available yet.');
-    }
-    lines.push('');
-    skillsSection = lines.join('\n');
-  }
-
-  return [
-    '# IAM Context File',
-    '',
-    '## Compact IAM String',
-    '',
-    '`' + iam + '`',
-    '',
-    baseContextSection,
-    skillsSection,
-    '## How To Use This In An LLM',
-    '',
-    '- Treat the IAM string as the highest-priority compact behavioral signal.',
-    '- Use OCEAN + module segments to adapt tone, structure, pacing, and detail depth.',
-    '- For IAM v0.6 Career segments (`/CARXXXXXXXXSnnpp...`), decode `S01..S35` using the canonical O*NET map and interpret `pp` as 00-99 proficiency.',
-    '- IAM Career segment is sparse: only included skills should be treated as active/relevant skill signals.',
-    '- If a `STATE` segment is present, treat it as the highest-priority runtime modifier for depth, rigor, and response style.',
-    '- Combine `profile.base.onet` and skills proficiency to tailor role-specific recommendations and examples.',
-    '- Use `profile.base` for practical user context (role/job/timezone/locale) when present.',
-    '- Use `profile.raw_scores` and module `raw_trait_scores` only as diagnostics; prioritize normalized scores for behavior tuning.',
-    "- Ignore `raw_responses` for direct prompting style decisions unless you are performing audit/review tasks.",
-    '- If fields conflict, prefer explicit user instructions over profile data.',
-    '',
-    '## Machine-Readable Context Payload (JSON)',
-    '',
-    '```json',
-    payload,
-    '```',
-    ''
-  ].join('\n');
+export function toIamDataStorageJson(contextFile) {
+  return JSON.stringify(toIamDataStorageObject(contextFile), null, 2);
 }
 
 export function toContextFile(scored, moduleResponses = {}) {
@@ -242,7 +280,7 @@ export function toContextFile(scored, moduleResponses = {}) {
   const base = libToContextFile(
     { id: null, summary: '', traits },
     {
-      ipipResponses: (moduleResponses.ipip || []),
+      ipip: resolveIpipModule(moduleResponses.ipip),
       lastUpdated: now,
       baseContext: moduleResponses.base && typeof moduleResponses.base === 'object' ? { ...moduleResponses.base } : undefined
     }
@@ -260,7 +298,7 @@ export function toContextFile(scored, moduleResponses = {}) {
     }
     base.profile.modules.aesthetics = Object.assign(
       { responses: aestResp || [], last_updated: now, completed: Array.isArray(aestResp) ? aestResp.length >= 1 : false },
-      withoutRawScores(computed || {})
+      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.aesthetics)
     );
   }
 
@@ -272,7 +310,19 @@ export function toContextFile(scored, moduleResponses = {}) {
     }
     base.profile.modules.music = Object.assign(
       { responses: musicResp || [], last_updated: now, completed: Array.isArray(musicResp) ? musicResp.length >= 1 : false },
-      withoutRawScores(computed || {})
+      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.music)
+    );
+  }
+
+  if (moduleResponses.delivery) {
+    const deliveryResp = Array.isArray(moduleResponses.delivery) ? moduleResponses.delivery : (moduleResponses.delivery.responses || []);
+    let computed = (!Array.isArray(moduleResponses.delivery) && moduleResponses.delivery.result) ? moduleResponses.delivery.result : null;
+    if (!computed && typeof bundledScoreDelivery === 'function') {
+      try { computed = bundledScoreDelivery(deliveryResp); } catch(e) { computed = null; }
+    }
+    base.profile.modules.delivery = Object.assign(
+      { responses: deliveryResp || [], last_updated: now, completed: Array.isArray(deliveryResp) ? deliveryResp.length >= 1 : false },
+      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.delivery)
     );
   }
 
@@ -287,42 +337,32 @@ export function toContextFile(scored, moduleResponses = {}) {
       try { computed = bundledScoreCommunication(commResp); } catch (e) { computed = null; }
     }
     if (computed) {
-      base.profile.modules.communication = {
+      base.profile.modules.communication = withModuleMetadata({
         responses: computed.responses || commResp || [],
         raw_trait_scores: computed.raw_trait_scores || {},
         normalized_trait_scores: computed.normalized_trait_scores || {},
         completed: computed.completed === true,
         last_updated: computed.last_updated || now
-      };
+      }, moduleResponses.communication);
     }
   }
 
   if (moduleResponses.skills) {
     const provided = moduleResponses.skills;
     const responses = Array.isArray(provided.responses) ? provided.responses : (Array.isArray(provided) ? provided : []);
-    const tests = provided.testAnswers && typeof provided.testAnswers === 'object' ? provided.testAnswers : {};
     let computed = provided.result || null;
     if (!computed && typeof bundledScoreSkills === 'function') {
-      try { computed = bundledScoreSkills(responses, tests); } catch (e) { computed = null; }
+      try { computed = bundledScoreSkills(responses); } catch (e) { computed = null; }
     }
     if (computed) {
-      const canonicalTestAnswers = tests && typeof tests === 'object'
-        ? Object.fromEntries(
-            Object.entries(tests).map(([indexKey, value]) => [indexKey, {
-              interview_defense: Boolean(value?.interview_defense),
-              day_one_autonomy: Boolean(value?.day_one_autonomy),
-              relevance_recency: Boolean(value?.relevance_recency)
-            }])
-          )
-        : {};
-      base.profile.modules.skills = {
+      base.profile.modules.skills = withModuleMetadata({
         responses: computed.fullAssessment || [],
         filtered: computed.filtered || [],
         normalized: computed.normalized || [],
-        testAnswers: canonicalTestAnswers,
+        ...(provided.testAnswers ? { testAnswers: provided.testAnswers } : {}),
         completed: responses.length >= 35,
         last_updated: now
-      };
+      }, provided);
       base.profile.preferences = base.profile.preferences || {};
       base.profile.preferences.skills = (computed.filtered || []).map((item) => ({
         name: item.name,
@@ -344,28 +384,29 @@ export function toContextFile(scored, moduleResponses = {}) {
         ? moduleResponses.state.result
         : moduleResponses.state;
     if (providedState && typeof providedState === 'object') {
-      base.profile.modules.state = {
+      base.profile.modules.state = withModuleMetadata({
         bandwidth: Number.isFinite(Number(providedState.bandwidth)) ? Math.max(0, Math.min(100, Math.round(Number(providedState.bandwidth)))) : 50,
         mode: providedState.mode === 'divergent' ? 'divergent' : 'convergent',
         horizon: providedState.horizon === 'now' ? 'now' : 'long',
         stakes: providedState.stakes === 'critical' ? 'critical' : 'casual',
         completed: true,
         last_updated: now
-      };
+      }, moduleResponses.state);
     }
   }
 
   // Recompute IAM where possible
   try {
-    const iamInput = {
+    const iamScored = personalityScoresFromModule(base.profile?.scores, base.profile?.modules?.ipip);
+    const iamInput = filterDisabledModules({
       ...base.profile.modules,
       base: base.profile.base,
       state: base.profile.modules?.state,
       skills: Array.isArray(base.profile.modules?.skills?.filtered)
         ? base.profile.modules.skills.filtered
         : base.profile.modules?.skills
-    };
-    const iamObj = buildIam(scored, iamInput);
+    });
+    const iamObj = buildIam(iamScored, iamInput);
     if (iamObj && iamObj.code) base.profile.iam = { code: iamObj.code, version: iamObj.version || '0.1' };
   } catch (e) { /* ignore */ }
 
@@ -375,6 +416,7 @@ export function toContextFile(scored, moduleResponses = {}) {
 // Bundle module scorers for browser builds
 let externalAesthetics = (typeof bundledScoreAesthetics === 'function') ? bundledScoreAesthetics : null;
 let externalMusic = (typeof bundledScoreMusic === 'function') ? bundledScoreMusic : null;
+let externalDelivery = (typeof bundledScoreDelivery === 'function') ? bundledScoreDelivery : null;
 let externalCommunication = (typeof bundledScoreCommunication === 'function') ? bundledScoreCommunication : null;
 let externalSkills = (typeof bundledScoreSkills === 'function') ? bundledScoreSkills : null;
 
@@ -388,13 +430,18 @@ export function scoreMusicIfAvailable(responses){
   return null;
 }
 
+export function scoreDeliveryIfAvailable(responses){
+  if (typeof externalDelivery === 'function') return externalDelivery(responses);
+  return null;
+}
+
 export function scoreCommunicationIfAvailable(responses){
   if (typeof externalCommunication === 'function') return externalCommunication(responses);
   return null;
 }
 
-export function scoreSkillsIfAvailable(responses, testAnswers = {}) {
-  if (typeof externalSkills === 'function') return externalSkills(responses, testAnswers);
+export function scoreSkillsIfAvailable(responses) {
+  if (typeof externalSkills === 'function') return externalSkills(responses);
   return null;
 }
 

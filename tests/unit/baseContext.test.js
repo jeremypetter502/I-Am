@@ -19,6 +19,10 @@ describe('baseContext helpers', () => {
   it('normalizes and trims base context text', () => {
     const normalized = normalizeBaseContext({
       name: '  Jeremy Doe  ',
+      birth_month: ' 2 ',
+      birth_day: ' 9 ',
+      birth_year: ' 1988 ',
+      gender: '  male  ',
       job_title: '  Engineer  ',
       company: '  Acme  ',
       skills: '  JavaScript, Design  ',
@@ -26,10 +30,26 @@ describe('baseContext helpers', () => {
       years_experience: '4'
     });
     expect(normalized.name).toBe('Jeremy Doe');
+    expect(normalized.birth_month).toBe(2);
+    expect(normalized.birth_day).toBe(9);
+    expect(normalized.birth_year).toBe(1988);
+    expect(normalized.gender).toBe('male');
     expect(normalized.job_title).toBe('Engineer');
     expect(normalized.company).toBe('Acme');
     expect(normalized.skills).toBe('JavaScript, Design');
     expect(normalized.years_experience).toBe(4);
+  });
+
+  it('validates birth date ranges', () => {
+    const invalid = validateBaseContext({
+      birth_month: 13,
+      birth_day: 0,
+      birth_year: 1800
+    });
+    expect(invalid.valid).toBe(false);
+    expect(invalid.errors.some((e) => e.includes('birth_month'))).toBe(true);
+    expect(invalid.errors.some((e) => e.includes('birth_day'))).toBe(true);
+    expect(invalid.errors.some((e) => e.includes('birth_year'))).toBe(true);
   });
 
   it('validates length bounds for name and skills', () => {
