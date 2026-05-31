@@ -31,7 +31,7 @@
   }
 </script>
 <div class="exports">
-  <button class="primary" on:click={downloadIamJson}>Download IAM JSON</button>
+  <button class="primary" on:click={downloadIamJson}>Download I-AM JSON</button>
 </div>
 <style>
   .exports button {

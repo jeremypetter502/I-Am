@@ -123,6 +123,90 @@ describe('importer', () => {
     expect(root.modules.communication.disabled).toBe(true);
     expect(root.modules.communication.responses).toHaveLength(20);
   });
+
+  it('preserves disabled flags for skills and state on import', async () => {
+    const filePath = path.join(os.tmpdir(), `importer-disabled-rt-${Date.now()}.json`);
+    const contextFile = toContextFile(
+      { id: 'p1', summary: 's', traits: { O: 10, C: 20, E: 30, A: 40, N: 50 } },
+      {
+        ipipResponses: Array(50).fill(3),
+        skills: {
+          responses: [
+            { name: 'Reading Comprehension', index: 1, raw_score: 9 }
+          ],
+          disabled: true
+        },
+        state: {
+          bandwidth: 30,
+          mode: 'convergent',
+          horizon: 'now',
+          stakes: 'critical',
+          disabled: true
+        }
+      }
+    );
+
+    fs.writeFileSync(filePath, JSON.stringify(contextFile, null, 2), 'utf8');
+    const result = await importJson(filePath);
+    const root = resolveRoot(result);
+
+    expect(root.modules.skills.disabled).toBe(true);
+    expect(root.modules.state.disabled).toBe(true);
+  });
+
+  it('imports compact skills raw-score arrays without mutation', async () => {
+    const filePath = path.join(os.tmpdir(), `importer-compact-skills-${Date.now()}.json`);
+    const payload = {
+      schema_version: '0.1',
+      generated_at: new Date().toISOString(),
+      profile: {
+        modules: {
+          skills: {
+            responses: [9, 6, 6, 4, 6],
+            completed: false
+          }
+        }
+      }
+    };
+
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+    const result = await importJson(filePath);
+    const root = resolveRoot(result);
+
+    expect(root.modules.skills.responses).toEqual([9, 6, 6, 4, 6]);
+    expect(root.modules.skills.disabled).toBe(false);
+  });
+
+  it('normalizes missing disabled flags to false for module objects', async () => {
+    const filePath = path.join(os.tmpdir(), `importer-disabled-defaults-${Date.now()}.json`);
+    const payload = {
+      schema_version: '0.1',
+      generated_at: new Date().toISOString(),
+      profile: {
+        modules: {
+          ipip: {
+            responses: Array(50).fill(3),
+            raw_trait_scores: {},
+            normalized_trait_scores: {},
+            completed: true,
+            last_updated: new Date().toISOString()
+          },
+          music: {
+            responses: [1, 2, 3],
+            completed: false,
+            last_updated: new Date().toISOString()
+          }
+        }
+      }
+    };
+
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+    const result = await importJson(filePath);
+    const root = resolveRoot(result);
+
+    expect(root.modules.ipip.disabled).toBe(false);
+    expect(root.modules.music.disabled).toBe(false);
+  });
 });
 
 

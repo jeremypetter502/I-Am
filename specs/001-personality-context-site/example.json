@@ -134,6 +134,7 @@
     },
     "tags": { "prefers_minimal": true, "prefers_photos": true },
     "preferences": { "aesthetics": { "minimalism": 82.5 } },
-    "iam": { "code": "IAM/0.6:O78C70E30A65N25/COMM/DRV80ANC80EXP35AMB65/CAR15125200S0190S1899S2345S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical", "version": "0.6" }
+    "iam": { "code": "IAM/0.6:O78C70E30A65N25/COMM:DRV80ANC80EXP35AMB65/CAR:15125200S0190S1899S2345S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical", "version": "0.6" }
   }
 }
+

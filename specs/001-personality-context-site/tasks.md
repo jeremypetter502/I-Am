@@ -253,8 +253,8 @@ Task counts
 - [X] T122 [US3] [P] Add parser compatibility tests: add tests for parsing markdown/context files with v0.4 Career-encoded IAM strings (sparse S01–S35 format with `/CAR` prefix) and verifying no regression for older v0.1–v0.3 strings lacking Career segments (lenient backward compatibility).
 
 - [X] T123 [US3] Update docs and quickstart: update `specs/001-personality-context-site/quickstart.md` and `docs/developer/ui.md` with v0.4 Career segment format, O*NET skill position map (S01–S35 with names), sparse encoding explanation, and sample strings:
-  - Minimal: `IAM/0.4:O72C88E55A60N22/.../.../CAR15113200S0190S1899`
-  - Full: `IAM/0.4:O72C88E55A60N22/.../CAR15113200S0190S1899S2485S3360`
+  - Minimal: `IAM/0.4:O72C88E55A60N22/.../.../CAR:15113200S0190S1899`
+  - Full: `IAM/0.4:O72C88E55A60N22/.../CAR:15113200S0190S1899S2485S3360`
 
 Career extension dependency notes (updated for v0.4):
 

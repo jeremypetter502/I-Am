@@ -7,7 +7,7 @@ describe('IAM JSON export', () => {
     const stale = {
       profile: {
         iam: {
-          code: 'IAM/0.7:O70C60E50A40N30/DELIVERY/DEF55PEER60CHL70DNS50AUD40STR80ABS65FMT60VBS55EMP70CND68HMR52AUT72BUR45'
+          code: 'IAM/0.7:O70C60E50A40N30/DELIVERY:DEF55PEER60CHL70DNS50AUD40STR80ABS65FMT60VBS55EMP70CND68HMR52AUT72BUR45'
         },
         modules: {
           ipip: {
@@ -86,19 +86,13 @@ describe('IAM JSON export', () => {
     expect(topLevelKeys[0]).toBe('iam');
     expect(payload.iam.startsWith('IAM/0.7')).toBe(true);
     expect(payload.profile.modules.ipip.responses).toEqual([3, 3]);
+    expect(payload.profile.modules.ipip.disabled).toBe(false);
     expect(payload.profile.modules.delivery.normalized.aut).toBe(72);
-    expect(payload.profile.modules.skills.responses).toHaveLength(1);
-    expect(payload.profile.modules.skills.responses[0]).toEqual({
-      name: 'Critical Thinking',
-      index: 7,
-      category: 'Cognitive & Analysis',
-      raw_score: 8
-    });
+    expect(payload.profile.modules.delivery.disabled).toBe(false);
+    expect(payload.profile.modules.skills.responses).toEqual([8]);
+    expect(payload.profile.modules.skills.disabled).toBe(false);
     expect(payload.profile.modules.skills.filtered).toBeUndefined();
     expect(payload.profile.modules.skills.normalized).toBeUndefined();
-    expect(payload.profile.modules.skills.responses[0].normalized_score).toBeUndefined();
-    expect(payload.profile.modules.skills.responses[0].threshold_status).toBeUndefined();
-    expect(payload.profile.modules.skills.responses[0].listed_status).toBeUndefined();
     expect(payload.profile.preferences).toBeUndefined();
     expect(payload.profile.iam).toBeUndefined();
     expect(payload.raw_responses).toBeUndefined();
@@ -163,7 +157,7 @@ describe('IAM JSON export', () => {
 
     const payload = toIamDataStorageObject(contextWithoutIam);
     expect(typeof payload.iam).toBe('string');
-    expect(payload.iam.includes('STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical')).toBe(true);
+    expect(payload.iam.includes('/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical')).toBe(true);
   });
 
   it('keeps all answers and scores in storage object generated from scoreAndExport', () => {
@@ -180,3 +174,4 @@ describe('IAM JSON export', () => {
     expect(storage.profile.modules.delivery.normalized).toBeTruthy();
   });
 });
+

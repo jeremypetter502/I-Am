@@ -81,7 +81,7 @@
 
 **Goal**: Delivery data exports in ContextFile and IAM includes optional Delivery segment per canonical IAM spec.
 
-**Independent Test**: Export includes `profile.modules.universal.delivery` and IAM includes `/DELIVERY/...` segment when Delivery exists.
+**Independent Test**: Export includes `profile.modules.universal.delivery` and IAM includes `/DELIVERY:...` segment when Delivery exists.
 
 ### Tests for User Story 3
 

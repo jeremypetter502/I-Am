@@ -81,7 +81,7 @@
 
 **Goal**: Export contains communication-aware IAM compact code and clear LLM usage directions in a markdown file with embedded JSON payload.
 
-**Independent Test**: Exported markdown contains IAM compact string with `/COMM/DRV..ANC..EXP..AMB..` when communication is present, plus embedded JSON with base/raw details.
+**Independent Test**: Exported markdown contains IAM compact string with `/COMM:DRV..ANC..EXP..AMB..` when communication is present, plus embedded JSON with base/raw details.
 
 ### Tests for User Story 3
 

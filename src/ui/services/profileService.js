@@ -71,7 +71,7 @@ function resolveIpipModule(ipipModuleLike, fallbackResponses = []) {
       responses: Array.isArray(ipipModuleLike.responses)
         ? ipipModuleLike.responses
         : (Array.isArray(fallbackResponses) ? fallbackResponses : []),
-      ...(ipipModuleLike.disabled === true ? { disabled: true } : {})
+      disabled: ipipModuleLike.disabled === true
     };
   }
 
@@ -133,7 +133,22 @@ export function sanitizeContextFile(contextFile) {
 
 function deriveIamFromProfile(profile) {
   let iam = profile && profile.iam && profile.iam.code ? profile.iam.code : '';
-  if (iam) return iam;
+
+  const communicationModule = profile?.modules?.communication;
+  const communicationScores = communicationModule && typeof communicationModule === 'object'
+    ? (communicationModule.normalized_trait_scores
+      || communicationModule.normalized
+      || communicationModule.result?.normalized_trait_scores
+      || communicationModule.result?.normalized)
+    : null;
+  const hasCommunicationScores = communicationScores && typeof communicationScores === 'object'
+    ? ['driver', 'analytical', 'expressive', 'amiable'].some((key) => Number.isFinite(Number(communicationScores[key])))
+    : false;
+  const hasExplicitCommMetrics = /\/COMM:DRV\d+ANC\d+EXP\d+AMB\d+/.test(iam);
+  const hasMalformedCommSegment = /\/COMM(?::|$)/.test(iam) && !hasExplicitCommMetrics;
+  const needsCommRefresh = hasCommunicationScores && !hasExplicitCommMetrics;
+  const canReuseExistingIam = Boolean(iam) && !hasMalformedCommSegment && !needsCommRefresh;
+  if (canReuseExistingIam) return iam;
 
   try {
     const scored = personalityScoresFromModule(profile?.scores, profile?.modules?.ipip);
@@ -161,7 +176,7 @@ function withModuleMetadata(moduleData, metadata) {
   if (!moduleData || typeof moduleData !== 'object' || Array.isArray(moduleData)) return moduleData;
   return {
     ...moduleData,
-    ...(metadata?.disabled ? { disabled: true } : {})
+    disabled: metadata?.disabled === true
   };
 }
 
@@ -197,19 +212,34 @@ function removeDuplicateExportSections(contextFile) {
         : [];
 
     const responses = source
-      .filter((item) => item && typeof item === 'object')
-      .map((item) => ({
-        ...(item.name ? { name: item.name } : {}),
-        ...(Number.isFinite(Number(item.index)) ? { index: Number(item.index) } : {}),
-        ...(item.category ? { category: item.category } : {}),
-        ...(Number.isFinite(Number(item.raw_score)) ? { raw_score: Number(item.raw_score) } : {})
-      }));
+      .map((item) => {
+        if (Number.isFinite(Number(item))) return Number(item);
+        if (item && typeof item === 'object' && Number.isFinite(Number(item.raw_score))) {
+          return Number(item.raw_score);
+        }
+        return null;
+      })
+      .filter((item) => item !== null);
 
     return {
       responses,
       completed: skillsModule.completed === true,
+      disabled: skillsModule.disabled === true,
       last_updated: skillsModule.last_updated
     };
+  }
+
+  function normalizeModuleDisabledFlags(modules) {
+    if (!modules || typeof modules !== 'object') return modules;
+    const normalizedModules = { ...modules };
+    for (const [key, value] of Object.entries(normalizedModules)) {
+      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
+      normalizedModules[key] = {
+        ...value,
+        disabled: value.disabled === true
+      };
+    }
+    return normalizedModules;
   }
 
   // `iam` is emitted as the top-level first field in storage JSON.
@@ -223,6 +253,9 @@ function removeDuplicateExportSections(contextFile) {
 
   if (profile.modules && typeof profile.modules === 'object' && profile.modules.skills) {
     profile.modules = { ...profile.modules, skills: normalizeSkillsForStorage(profile.modules.skills) };
+  }
+  if (profile.modules && typeof profile.modules === 'object') {
+    profile.modules = normalizeModuleDisabledFlags(profile.modules);
   }
 
   const out = {
@@ -250,7 +283,7 @@ export function toIamDataStorageObject(contextFile) {
       }
     }
   }
-  const iam = hasCompletedModule ? (deriveIamFromProfile(profile) || 'IAM code unavailable') : undefined;
+  const iam = hasCompletedModule ? (deriveIamFromProfile(profile) || 'I-AM string unavailable') : undefined;
   const cleaned = removeDuplicateExportSections(sanitizedContextFile);
 
   const out = (typeof iam === 'string' && iam.length)

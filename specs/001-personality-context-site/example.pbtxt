@@ -132,5 +132,6 @@ profile {
   }
   tags { key: "prefers_minimal" value: true }
   preferences { key: "aesthetics" value: "{\"minimalism\":82.5}" }
-  iam { code: "IAM/0.2:O78C70E30A65N25/COMM/DRV80ANC80EXP35AMB65" version: "0.2" }
+  iam { code: "IAM/0.2:O78C70E30A65N25/COMM:DRV80ANC80EXP35AMB65" version: "0.2" }
 }
+

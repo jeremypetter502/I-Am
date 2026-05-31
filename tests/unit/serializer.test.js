@@ -26,6 +26,7 @@ describe('Serializer + schema', () => {
     const valid = ajv.validate(schema, ctx);
     if (!valid) console.error(ajv.errors);
     expect(valid).toBe(true);
+    expect(ctx.profile.raw_scores).toBeUndefined();
   });
 
   it('accepts optional base context and communication module fields', () => {
@@ -87,7 +88,7 @@ describe('Serializer + schema', () => {
     expect(importedRoot.modules.skills.responses).toHaveLength(4);
     expect(importedRoot.modules.skills.responses[0].name).toBe('Reading Comprehension');
 
-    const decoded = decodeCareerSegment('/CAR15125200S0190S1899S2485S3360');
+    const decoded = decodeCareerSegment('/CAR:15125200S0190S1899S2485S3360');
     expect(decoded.soc8).toBe('15125200');
     expect(decoded.skills.map((skill) => skill.name)).toEqual([
       'Reading Comprehension',
@@ -173,3 +174,4 @@ describe('Serializer + schema', () => {
     expect(sample.profile.modules.state.disabled).toBe(true);
   });
 });
+

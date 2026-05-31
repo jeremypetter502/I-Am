@@ -21,8 +21,9 @@
 	- Base context helpers + O*NET seed index
 	- Communication scorer + UI module flow
 - Export integration:
-	- IAM `0.2` communication segment `/COMM/DRV..ANC..EXP..AMB..`
+	- IAM `0.2` communication segment `/COMM:DRV..ANC..EXP..AMB..`
 	- JSON-first export/import retains base context and module raw data
 - Test run:
 	- `npm test -- --run --silent`
 	- Result: all tests passed (32 tests)
+

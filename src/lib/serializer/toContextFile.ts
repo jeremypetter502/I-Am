@@ -44,12 +44,12 @@ export function toContextFile(input: SerializerInput, options: SerializerOptions
     id: input?.id ?? null,
     summary: input?.summary || '',
     scores: remapTraits(normalized, map),
-    raw_scores: remapTraits(raw, map),
     modules: {
       ipip: {
         responses: options.ipipResponses || [],
         raw_trait_scores: remapTraits(raw, map),
         normalized_trait_scores: remapTraits(normalized, map),
+        disabled: false,
         completed: Array.isArray(options.ipipResponses) && options.ipipResponses.length >= 50,
         last_updated: now
       }
@@ -61,13 +61,16 @@ export function toContextFile(input: SerializerInput, options: SerializerOptions
   }
 
   if (options.communication && typeof options.communication === 'object') {
-    (profile.modules as Record<string, unknown>).communication = { ...options.communication };
+    (profile.modules as Record<string, unknown>).communication = {
+      ...options.communication,
+      disabled: options.communication.disabled === true
+    };
   }
 
   if (options.skills && typeof options.skills === 'object') {
     (profile.modules as Record<string, unknown>).skills = Array.isArray(options.skills)
       ? [...options.skills]
-      : { ...options.skills as Record<string, unknown> };
+      : { ...(options.skills as Record<string, unknown>), disabled: (options.skills as Record<string, unknown>).disabled === true };
   }
 
   if (options.state && typeof options.state === 'object') {
@@ -77,6 +80,7 @@ export function toContextFile(input: SerializerInput, options: SerializerOptions
       mode: source.mode === 'divergent' ? 'divergent' : 'convergent',
       horizon: source.horizon === 'now' ? 'now' : 'long',
       stakes: source.stakes === 'critical' ? 'critical' : 'casual',
+      disabled: source.disabled === true,
       completed: source.completed === undefined ? true : Boolean(source.completed),
       last_updated: source.last_updated || now
     };

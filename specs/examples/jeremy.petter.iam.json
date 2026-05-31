@@ -1,16 +1,16 @@
 {
-  "iam": "IAM/0.7:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33/MIN50CLR38WRM75MOT63/MEL56SOP69UNP69INT69CON50/COMM/DRV75ANC80EXP80AMB55/DELIVERY/DEF13PEER75CHL92DNS75AUD0STR50ABS88FMT50VBS25EMP50CND100HMR75AUT75BUR25/CAR15125200S0190S0260S0360S0560S0670S0780S08100S0970S1260S1560S1780S1870S1970S2090S2160S23100S2470S2660S2770S3190S3260S3360S3460S3590/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual",
+  "iam": "IAM/0.7:Jeremy:1975:Male:en-US:EST/AES:MIN50CLR38WRM75MOT63/MUS:MEL56SOP69UNP69INT69CON50/COMM:DRV75ANC80EXP80AMB55/DELIVERY:DEF13PEER75CHL92DNS75AUD0STR50ABS88FMT50VBS25EMP50CND100HMR75AUT75BUR25/CAR:15125200S0190S0260S0360S0560S0670S0780S08100S0970S1260S1560S1780S1870S1970S2090S2160S23100S2470S2660S2770S3190S3260S3360S3460S3590/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual",
   "schema_version": "0.1",
-  "generated_at": "2026-05-22T23:10:45.703Z",
+  "generated_at": "2026-05-27T19:06:39.206Z",
   "profile": {
     "id": null,
     "summary": "",
     "scores": {
-      "openness": 82.5,
-      "conscientiousness": 60,
-      "extraversion": 45,
-      "agreeableness": 77.5,
-      "neuroticism": 32.5
+      "openness": null,
+      "conscientiousness": null,
+      "extraversion": null,
+      "agreeableness": null,
+      "neuroticism": null
     },
     "modules": {
       "ipip": {
@@ -66,22 +66,11 @@
           4,
           4
         ],
-        "raw_trait_scores": {
-          "openness": 43,
-          "conscientiousness": 34,
-          "extraversion": 28,
-          "agreeableness": 41,
-          "neuroticism": 23
-        },
-        "normalized_trait_scores": {
-          "openness": 82.5,
-          "conscientiousness": 60,
-          "extraversion": 45,
-          "agreeableness": 77.5,
-          "neuroticism": 32.5
-        },
+        "raw_trait_scores": {},
+        "normalized_trait_scores": {},
+        "disabled": true,
         "completed": true,
-        "last_updated": "2026-05-22T23:10:45.703Z"
+        "last_updated": "2026-05-27T19:06:39.206Z"
       },
       "aesthetics": {
         "responses": [
@@ -118,7 +107,7 @@
           4,
           4
         ],
-        "last_updated": "2026-05-22T23:10:45.703Z",
+        "last_updated": "2026-05-27T19:06:39.206Z",
         "completed": true,
         "normalized": {
           "minimalism": 50,
@@ -154,7 +143,8 @@
           "likes_motion": true,
           "typography_priority_readability": true
         },
-        "count": 32
+        "count": 32,
+        "disabled": false
       },
       "music": {
         "responses": [
@@ -179,7 +169,7 @@
           4,
           3
         ],
-        "last_updated": "2026-05-22T23:10:45.703Z",
+        "last_updated": "2026-05-27T19:06:39.206Z",
         "completed": true,
         "normalized": {
           "mellow": 56.25,
@@ -188,7 +178,8 @@
           "contemporary": 50,
           "unpretentious": 68.75
         },
-        "count": 20
+        "count": 20,
+        "disabled": false
       },
       "delivery": {
         "responses": [
@@ -223,7 +214,7 @@
           4,
           2
         ],
-        "last_updated": "2026-05-22T23:10:45.703Z",
+        "last_updated": "2026-05-27T19:06:39.206Z",
         "completed": true,
         "normalized": {
           "def": 12.5,
@@ -241,7 +232,8 @@
           "aut": 75,
           "bur": 25
         },
-        "count": 30
+        "count": 30,
+        "disabled": false
       },
       "communication": {
         "responses": [
@@ -279,223 +271,50 @@
           "amiable": 55
         },
         "completed": true,
-        "last_updated": "2026-05-22T23:10:45.704Z"
+        "last_updated": "2026-05-27T19:06:39.206Z",
+        "disabled": false
       },
       "skills": {
         "responses": [
-          {
-            "name": "Reading Comprehension",
-            "index": 1,
-            "category": "Cognitive & Analysis",
-            "raw_score": 9
-          },
-          {
-            "name": "Active Listening",
-            "index": 2,
-            "category": "Communication & Interpersonal",
-            "raw_score": 6
-          },
-          {
-            "name": "Writing",
-            "index": 3,
-            "category": "Communication & Interpersonal",
-            "raw_score": 6
-          },
-          {
-            "name": "Speaking",
-            "index": 4,
-            "category": "Communication & Interpersonal",
-            "raw_score": 4
-          },
-          {
-            "name": "Mathematics",
-            "index": 5,
-            "category": "Cognitive & Analysis",
-            "raw_score": 6
-          },
-          {
-            "name": "Science",
-            "index": 6,
-            "category": "Cognitive & Analysis",
-            "raw_score": 7
-          },
-          {
-            "name": "Critical Thinking",
-            "index": 7,
-            "category": "Cognitive & Analysis",
-            "raw_score": 8
-          },
-          {
-            "name": "Active Learning",
-            "index": 8,
-            "category": "Cognitive & Analysis",
-            "raw_score": 10
-          },
-          {
-            "name": "Learning Strategies",
-            "index": 9,
-            "category": "Cognitive & Analysis",
-            "raw_score": 7
-          },
-          {
-            "name": "Monitoring",
-            "index": 10,
-            "category": "Cognitive & Analysis",
-            "raw_score": 5
-          },
-          {
-            "name": "Social Perceptiveness",
-            "index": 11,
-            "category": "Communication & Interpersonal",
-            "raw_score": 5
-          },
-          {
-            "name": "Coordination",
-            "index": 12,
-            "category": "Communication & Interpersonal",
-            "raw_score": 6
-          },
-          {
-            "name": "Persuasion",
-            "index": 13,
-            "category": "Communication & Interpersonal",
-            "raw_score": 4
-          },
-          {
-            "name": "Negotiation",
-            "index": 14,
-            "category": "Communication & Interpersonal",
-            "raw_score": 5
-          },
-          {
-            "name": "Instructing",
-            "index": 15,
-            "category": "Communication & Interpersonal",
-            "raw_score": 6
-          },
-          {
-            "name": "Service Orientation",
-            "index": 16,
-            "category": "Communication & Interpersonal",
-            "raw_score": 4
-          },
-          {
-            "name": "Complex Problem Solving",
-            "index": 17,
-            "category": "Cognitive & Analysis",
-            "raw_score": 8
-          },
-          {
-            "name": "Troubleshooting",
-            "index": 18,
-            "category": "Technical & Specialized",
-            "raw_score": 7
-          },
-          {
-            "name": "Operations Analysis",
-            "index": 19,
-            "category": "Business & Process",
-            "raw_score": 7
-          },
-          {
-            "name": "Technology Design",
-            "index": 20,
-            "category": "Technical & Specialized",
-            "raw_score": 9
-          },
-          {
-            "name": "Equipment Selection",
-            "index": 21,
-            "category": "Business & Process",
-            "raw_score": 6
-          },
-          {
-            "name": "Installation",
-            "index": 22,
-            "category": "Technical & Specialized",
-            "raw_score": 5
-          },
-          {
-            "name": "Programming",
-            "index": 23,
-            "category": "Technical & Specialized",
-            "raw_score": 10
-          },
-          {
-            "name": "Quality Control Analysis",
-            "index": 24,
-            "category": "Technical & Specialized",
-            "raw_score": 7
-          },
-          {
-            "name": "Equipment Maintenance",
-            "index": 25,
-            "category": "Technical & Specialized",
-            "raw_score": 5
-          },
-          {
-            "name": "Repairing",
-            "index": 26,
-            "category": "Technical & Specialized",
-            "raw_score": 6
-          },
-          {
-            "name": "Time Management",
-            "index": 27,
-            "category": "Business & Process",
-            "raw_score": 7
-          },
-          {
-            "name": "Management of Financial Resources",
-            "index": 28,
-            "category": "Business & Process",
-            "raw_score": 4
-          },
-          {
-            "name": "Management of Material Resources",
-            "index": 29,
-            "category": "Business & Process",
-            "raw_score": 5
-          },
-          {
-            "name": "Management of Personnel Resources",
-            "index": 30,
-            "category": "Leadership & Management",
-            "raw_score": 5
-          },
-          {
-            "name": "Identify Patterns",
-            "index": 31,
-            "category": "Cognitive & Analysis",
-            "raw_score": 9
-          },
-          {
-            "name": "Data Analysis",
-            "index": 32,
-            "category": "Cognitive & Analysis",
-            "raw_score": 6
-          },
-          {
-            "name": "Systems Evaluation",
-            "index": 33,
-            "category": "Cognitive & Analysis",
-            "raw_score": 6
-          },
-          {
-            "name": "Judgment & Decision Making",
-            "index": 34,
-            "category": "Cognitive & Analysis",
-            "raw_score": 6
-          },
-          {
-            "name": "Creativity & Innovation",
-            "index": 35,
-            "category": "Creative & Innovation",
-            "raw_score": 9
-          }
+          9,
+          6,
+          6,
+          4,
+          6,
+          7,
+          8,
+          10,
+          7,
+          5,
+          5,
+          6,
+          4,
+          5,
+          6,
+          4,
+          8,
+          7,
+          7,
+          9,
+          6,
+          5,
+          10,
+          7,
+          5,
+          6,
+          7,
+          4,
+          5,
+          5,
+          9,
+          6,
+          6,
+          6,
+          9
         ],
         "completed": true,
-        "last_updated": "2026-05-22T23:10:45.703Z"
+        "last_updated": "2026-05-27T19:06:39.206Z",
+        "disabled": false
       },
       "state": {
         "bandwidth": 50,
@@ -503,7 +322,8 @@
         "horizon": "long",
         "stakes": "casual",
         "completed": true,
-        "last_updated": "2026-05-22T23:10:45.703Z"
+        "last_updated": "2026-05-27T19:06:39.206Z",
+        "disabled": false
       }
     },
     "base": {
@@ -523,13 +343,8 @@
       "birth_year": 1975,
       "birth_day": 25,
       "gender": "Male"
-    },
-    "raw_scores": {
-      "openness": 43,
-      "conscientiousness": 34,
-      "extraversion": 28,
-      "agreeableness": 41,
-      "neuroticism": 23
     }
   }
 }
+
+

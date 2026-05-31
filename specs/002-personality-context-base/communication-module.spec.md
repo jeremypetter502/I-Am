@@ -77,13 +77,13 @@ Add communication data under `profile.modules.communication`:
 
 Communication extension is represented as a dedicated trailing segment:
 
-`/COMM/DRV{d}ANC{a}EXP{e}AMB{m}`
+`/COMM:DRV{d}ANC{a}EXP{e}AMB{m}`
 
 Where each token value is integer `0..100`.
 
 ### Full example
 
-`IAM/0.2:O79C85E42A60N35/MIN90CLR20WRM40MOT10IMG30TYP55LAY70/MEL40SOP70UNP55INT20CON65/COMM/DRV85ANC40EXP20AMB15`
+`IAM/0.2:O79C85E42A60N35/AES:MIN90CLR20WRM40MOT10IMG30TYP55LAY70/MUS:MEL40SOP70UNP55INT20CON65/COMM:DRV85ANC40EXP20AMB15`
 
 ## LLM interpretation guidance
 
@@ -146,3 +146,5 @@ The module is advisory, not diagnostic. LLM behavior should be adaptive and non-
 - Do not infer mental health or clinical traits from communication scores.
 - Use scores only to adapt formatting, pacing, detail level, and collaboration style.
 - Allow user override in UI and easy module reset.
+
+
