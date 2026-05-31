@@ -1,4 +1,4 @@
-# <img src="public/images/iam-logo-trans.png" alt="I-Am Logo"> I-Am Personal Context
+# <img src="public/images/iam-icon.png" alt="I-Am Logo"> I-Am Personal Context
 
 [![Node.js](https://img.shields.io/badge/node-%3E%3D20-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?logo=vite&logoColor=white)](https://vite.dev/)
@@ -7,12 +7,20 @@
 [![Schema](https://img.shields.io/badge/contract-JSON%20Schema-1f6feb)](specs/001-personality-context-site/contextfile.schema.json)
 [![I-AM String Spec](https://img.shields.io/badge/I--AM%20string-spec%20v0.7-0A66C2)](specs/personality-specs/personality_code.spec.md)
 
+## Overview
+
+I-AM is a compact personal context [format](docs/iam.md) that turns personality and preference inputs into a portable I-AM string for AI systems.
+
+The goal is to help AI [adapt responses](docs/iam-usecase.md) to a specific person in a way that is structured, repeatable, and easy to reuse across sessions and tools.
+
+This project is experimental. The core format and scoring pipeline are implemented and tested, but segment behavior and version details may continue to evolve as we validate and [discuss](https://github.com/jeremypetter502/I-Am/discussions) real-world usage.
+
 ## Project Status
 
 - Status: Active development (experimental I-AM string format and scoring iteration).
 - Stability: I-AM string core format and module scoring are implemented and test-covered; segment/version behavior may continue to evolve.
 - Current storage output: `.iam.json` (machine-readable export and storage artifact).
-- Contribution focus: scorer correctness, and I-AM string usage quality, pluggable modules, bug squash 🐛
+- Contribution focus: I-AM string usage quality, scorer correctness, pluggable modules, bug squash 🐛
 
 ## Quick Start
 
@@ -40,11 +48,7 @@ npm run test
 npm run build:ui
 ```
 
-## What I-AM String Solves
-
-The primary focus of this project is the [I-AM string format](docs/iam.md): a compact, portable profile format that helps AI (primarily LLMs) adapt responses to a specific person. It is created from a combination of psychometric and preference questions that are reduced to metrics. There are other [potential use cases](docs/iam-usecase.md) for the I-AM string that can be experimented with.
-
-## Ziggy <img src="public/images/ziggy-iam-intro.png" style="float: right; max-width: 34%; margin: 0 14px 10px 0;" alt="I-Am Logo"> 
+## Ziggy <img src="public/images/ziggy-stand-laptop.png" align="right" alt="I-Am Logo"> 
 
 Say hi to Ziggy, our resident psychometrician, creative partner, and full-time vibe translator for I-AM.
 

@@ -1,4 +1,4 @@
-# Use Cases, Experimenting and Risks
+# Use Cases
 
 ## Software
 **Question:**
@@ -69,9 +69,6 @@ Other useful applications include:
 - Product and UX persona creation for marketing, design, and research teams.
 - Onboarding support for new assistants, agents, or tools that need to adapt quickly.
 - Self-reflection prompts that help you notice patterns in motivation, focus, and communication.
-
-# Experiment
-This method of personal context is in the experimental stages. There may be some overlap or redundancy in the metrics that could be combined. The questions could be better fined tuned to create more useable values for the LLM.
 
 # Risks and Concerns
 Personality and preference systems can be useful, but they can also be misused. I-AM string outputs should never be treated as a hiring, promotion, medical, legal, or high-stakes decision tool on their own. I-AM string quality also depends on honest and current user input, so stale or inaccurate profiles can produce poor guidance.

@@ -41,7 +41,7 @@ Provide the I-AM string to an LLM with a short instruction such as:
 - prefer explicit user instructions if they conflict with older I-AM string data
 - IAM schema segment descriptions
 
-This lets responses stay personalized while remaining consistent and auditable. Experiment with including explanation about the segments in the I-AM. Most LLMs can decode the string without help, but it has to think about it.
+This lets responses stay personalized while remaining consistent and auditable. Experiment with including explanation about the segments in the I-AM. Most LLMs can decode the string without help, but they have to think about it.
 
 Note: The website will generate LLM instructions when generating an I-AM string.
 
@@ -53,7 +53,7 @@ Note: The website will generate LLM instructions when generating an I-AM string.
 - Related module help:
   - [Base Context help](src/ui/help/base.md)
 
-### 2) Optional Identity Prefix
+### 2) Identity Prefix
 When present, these fields are inserted before OCEAN in this order:
 - `firstName`
 - `birthYear`
@@ -74,7 +74,7 @@ Timezone abbreviations are normalized from IANA timezone names where available (
 - Related module help:
   - [Personality help](src/ui/help/ipip.md)
 
-### 4) Aesthetics Segment (optional)
+### 4) Aesthetics Segment
 - Compact tokens such as:
   - `MIN` (minimalism)
   - `CLR` (colorfulness)
@@ -86,7 +86,7 @@ Timezone abbreviations are normalized from IANA timezone names where available (
 - Related module help:
   - [Aesthetics help](src/ui/help/aesthetics.md)
 
-### 5) Music Segment (optional)
+### 5) Music Segment
 - Compact tokens:
   - `MEL` (mellow)
   - `SOP` (sophisticated)
@@ -96,7 +96,7 @@ Timezone abbreviations are normalized from IANA timezone names where available (
 - Related module help:
   - [Music help](src/ui/help/music.md)
 
-### 6) Communication Segment (optional)
+### 6) Communication Segment
 - Marker: `/COMM/`
 - Tokens:
   - `DRV` (driver)
@@ -106,7 +106,7 @@ Timezone abbreviations are normalized from IANA timezone names where available (
 - Related module help:
   - [Communication help](src/ui/help/communication.md)
 
-### 7) Delivery Segment (optional)
+### 7) Delivery Segment
 - Marker: `/DELIVERY/`
 - Compact tokens may include:
   - `DEF` (deference)
@@ -126,7 +126,7 @@ Timezone abbreviations are normalized from IANA timezone names where available (
 - Related module help:
   - [Delivery help](src/ui/help/delivery.md)
 
-### 8) Career/Skills Segment (optional)
+### 8) Career/Skills Segment
 - Marker: `/CAR`
 - Begins with normalized 8-digit SOC code (for example `15-1252 -> 15125200`)
 - Followed by sparse skill pairs:
@@ -139,7 +139,7 @@ Only skills meeting inclusion threshold are emitted.
   - [Skills help](src/ui/help/skills.md)
   - [Base Context help](src/ui/help/base.md)
 
-### 9) State Segment (optional)
+### 9) State Segment
 - Marker: `/STATE:`
 - Canonical key/value payload, for example:
   - `STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual`
