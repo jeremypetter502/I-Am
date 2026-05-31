@@ -1,9 +1,9 @@
 # I-AM String Format Overview
 
-## Why I-AM String<img src="../public/images/ziggy-sit-laptop.png" style="float: right; max-width: 34%; margin: 0 14px 10px 0;" alt="I-Am Logo"> 
+## Why I-AM String 
 
 
-- Compact: profile context is encoded in a short string instead of long prose.
+- Compact: profile context is encoded in a short string instead of long prose.<img src="../public/images/ziggy-sit-laptop.png" align="right" style="float: right; max-width: 34%; margin: 0 14px 10px 0;" alt="I-Am Logo">
 - Structured: segments are predictable and parseable by tools and prompts.
 - Portable: users can move I-AM string context between sessions, assistants, and workflows.
 - Composable: modules are optional, so users can start small and enrich over time. Experimentation with different combinations or dropping modules is encouraged. Additional modules can be added to the system.
