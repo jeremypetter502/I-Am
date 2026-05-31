@@ -188,7 +188,7 @@ This feature adds one Delivery-specific delta to that canonical contract:
 
 Proposed compact segment format:
 
-- `/DELIVERY/DEFxxPEERxxCHLxxDNSxxAUDxxSTRxxABSxxFMTxxVBSxxEMPxxCNDxxHMRxxAUTxxBURxx`
+- `/DELIVERY:DEFxxPEERxxCHLxxDNSxxAUDxxSTRxxABSxxFMTxxVBSxxEMPxxCNDxxHMRxxAUTxxBURxx`
 
 Where `xx` is a rounded 0-100 integer score.
 

@@ -12,12 +12,10 @@ function toContextFile({ id, summary, traits }, options) {
   const raw = traits && traits.raw ? traits.raw : null;
 
   const scores = {};
-  const raw_scores = {};
   for (const k of Object.keys(map)) {
     const normVal = normalized && typeof normalized[k] === 'number' ? normalized[k] : null;
     const rawVal = raw && typeof raw[k] === 'number' ? raw[k] : null;
     scores[map[k]] = normVal;
-    raw_scores[map[k]] = rawVal;
   }
 
   function remapTraits(obj) {
@@ -45,7 +43,7 @@ function toContextFile({ id, summary, traits }, options) {
         responses: ipipResponses,
         raw_trait_scores: remapTraits(raw) || {},
         normalized_trait_scores: remapTraits(normalized) || {},
-        ...(ipipModule.disabled === true ? { disabled: true } : {}),
+        disabled: ipipModule.disabled === true,
         completed: Array.isArray(ipipResponses) && ipipResponses.length >= 50,
         last_updated: (options && options.lastUpdated) ? options.lastUpdated : new Date().toISOString()
       }
@@ -57,11 +55,13 @@ function toContextFile({ id, summary, traits }, options) {
   }
 
   if (options && options.communication && typeof options.communication === 'object') {
-    profile.modules.communication = { ...options.communication };
+    profile.modules.communication = { ...options.communication, disabled: options.communication.disabled === true };
   }
 
   if (options && options.skills && typeof options.skills === 'object') {
-    profile.modules.skills = Array.isArray(options.skills) ? [...options.skills] : { ...options.skills };
+    profile.modules.skills = Array.isArray(options.skills)
+      ? [...options.skills]
+      : { ...options.skills, disabled: options.skills.disabled === true };
   }
 
   if (options && options.state && typeof options.state === 'object') {
@@ -71,7 +71,7 @@ function toContextFile({ id, summary, traits }, options) {
       mode: state.mode === 'divergent' ? 'divergent' : 'convergent',
       horizon: state.horizon === 'now' ? 'now' : 'long',
       stakes: state.stakes === 'critical' ? 'critical' : 'casual',
-      ...(state.disabled === true ? { disabled: true } : {}),
+      disabled: state.disabled === true,
       completed: state.completed === undefined ? true : Boolean(state.completed),
       last_updated: state.last_updated || ((options && options.lastUpdated) ? options.lastUpdated : new Date().toISOString())
     };
@@ -84,16 +84,12 @@ function toContextFile({ id, summary, traits }, options) {
   };
 
   // Append raw_responses block (application state only). LLMs should ignore this section.
-  // Keep raw scores only in profile.raw_scores to avoid duplicated sections.
   const rawResponsesData = (options && options.rawResponses && typeof options.rawResponses === 'object') ? options.rawResponses : {};
   const { raw_scores: _ignoreRawScores, ipip: _ignoreIpip, ...rawResponsesWithoutScores } = rawResponsesData;
   result.raw_responses = {
     note: "NOTE: The 'raw_responses' block at the end of this file is for application state only. Disregard it entirely when tailoring your responses.",
     data: rawResponsesWithoutScores
   };
-
-  // Canonical raw-score section.
-  result.profile.raw_scores = raw_scores;
 
   return result;
 }

@@ -18,7 +18,7 @@
           <strong>{profile.iam.version || 'latest'}</strong>
         </div>
         <div class="iam-quickref">
-          <strong>IAM Code Quick Reference (for LLMs):</strong><br>
+          <strong>I-AM String Quick Reference (for LLMs):</strong><br>
           <span><b>OCEAN</b>: Big Five trait scores (O=Openness, C=Conscientiousness, E=Extraversion, A=Agreeableness, N=Neuroticism)</span><br>
           <span><b>AES</b>: Aesthetic Preferences (MIN=Minimalism, CLR=Colorfulness, WRM=Warmth, MOT=Motion, IMG=Imagery, TYP=Typography, LAY=Layout)</span><br>
           <span><b>MUS</b>: Music Preferences (MEL=Mellow, SOP=Sophisticated, UNP=Unpretentious, INT=Intense, CON=Contemporary)</span><br>

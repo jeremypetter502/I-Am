@@ -115,12 +115,12 @@ export function buildCareerSegment(soc8, skills) {
     .sort((a, b) => a.index - b.index)
     .map((s) => `S${pad2(s.index)}${pad2(skillProficiency(s))}`)
     .join('');
-  return `CAR${soc8}${pairs}`;
+  return `CAR:${soc8}${pairs}`;
 }
 
 export function decodeCareerSegment(code) {
   if (!code || typeof code !== 'string') return null;
-  const match = code.match(/\/CAR(?<soc8>\d{8})(?<payload>(?:S\d{4})*)/);
+  const match = code.match(/\/CAR:(?<soc8>\d{8})(?<payload>(?:S\d{4})*)/);
   if (!match || !match.groups) return null;
 
   const byIndex = new Map(skillPositionMap.map((entry, zeroBasedIndex) => [zeroBasedIndex + 1, entry.name]));
@@ -207,7 +207,7 @@ export function buildIam(scored, modules) {
       else if (typeof an.texture === 'number') seg.push(`IMG${round(an.texture)}`);
       if (typeof an.typography === 'object' && typeof an.typography.prefers_serif === 'number') seg.push(`TYP${round(an.typography.prefers_serif)}`);
       if (typeof an.layout === 'object' && typeof an.layout.grid_consistency === 'number') seg.push(`LAY${round(an.layout.grid_consistency)}`);
-      if (seg.length) code += '/' + seg.join('');
+      if (seg.length) code += `/AES:${seg.join('')}`;
     }
   } catch(e) {}
 
@@ -220,7 +220,7 @@ export function buildIam(scored, modules) {
       if (typeof mn.unpretentious === 'number') seg.push(`UNP${round(mn.unpretentious)}`);
       if (typeof mn.intense === 'number') seg.push(`INT${round(mn.intense)}`);
       if (typeof mn.contemporary === 'number') seg.push(`CON${round(mn.contemporary)}`);
-      if (seg.length) code += '/' + seg.join('');
+      if (seg.length) code += `/MUS:${seg.join('')}`;
     }
   } catch(e) {}
 
@@ -229,14 +229,18 @@ export function buildIam(scored, modules) {
       ? (modules.communication.normalized_trait_scores || modules.communication.normalized)
       : null;
     if (cn && typeof cn === 'object') {
-      const drv = typeof cn.driver === 'number' ? round(cn.driver) : null;
-      const anc = typeof cn.analytical === 'number' ? round(cn.analytical) : null;
-      const exp = typeof cn.expressive === 'number' ? round(cn.expressive) : null;
-      const amb = typeof cn.amiable === 'number' ? round(cn.amiable) : null;
+      const readMetric = (value) => {
+        const numeric = Number(value);
+        return Number.isFinite(numeric) ? round(numeric) : null;
+      };
+      const drv = readMetric(cn.driver);
+      const anc = readMetric(cn.analytical);
+      const exp = readMetric(cn.expressive);
+      const amb = readMetric(cn.amiable);
       if (drv !== null || anc !== null || exp !== null || amb !== null) {
         ver = hasPrefix ? '0.6' : '0.2';
         code = code.replace('IAM/0.1', 'IAM/0.2');
-        code += `/COMM/DRV${drv ?? 0}ANC${anc ?? 0}EXP${exp ?? 0}AMB${amb ?? 0}`;
+        code += `/COMM:DRV${drv ?? 0}ANC${anc ?? 0}EXP${exp ?? 0}AMB${amb ?? 0}`;
       }
     }
   } catch(e) {}
@@ -260,7 +264,7 @@ export function buildIam(scored, modules) {
       if (typeof dn.aut === 'number') seg.push(`AUT${round(dn.aut)}`);
       if (typeof dn.bur === 'number') seg.push(`BUR${round(dn.bur)}`);
       if (seg.length) {
-        code += `/DELIVERY/${seg.join('')}`;
+        code += `/DELIVERY:${seg.join('')}`;
         code = code.replace(/^IAM\/0\.[0-9]+/, 'IAM/0.7');
         ver = '0.7';
       }

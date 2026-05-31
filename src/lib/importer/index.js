@@ -28,7 +28,7 @@ export function importJson(input) {
   if (profile.modules.skills && typeof profile.modules.skills === 'object') {
     const skills = profile.modules.skills;
     if (Array.isArray(skills.responses)) {
-      skills.responses = skills.responses.map((item) => ({ ...item }));
+      skills.responses = skills.responses.map((item) => (item && typeof item === 'object' ? { ...item } : item));
     }
     if (Array.isArray(skills.filtered)) {
       skills.filtered = skills.filtered.map((item) => ({ ...item }));
@@ -42,6 +42,9 @@ export function importJson(input) {
         }])
       );
     }
+    if (skills.disabled === true) {
+      skills.disabled = true;
+    }
   }
 
   if (profile.modules.state && typeof profile.modules.state === 'object') {
@@ -52,7 +55,15 @@ export function importJson(input) {
       horizon: state.horizon === 'now' ? 'now' : 'long',
       stakes: state.stakes === 'critical' ? 'critical' : 'casual',
       completed: state.completed === undefined ? true : Boolean(state.completed),
+      disabled: state.disabled === true,
       last_updated: state.last_updated
+    };
+  }
+  for (const [moduleKey, moduleValue] of Object.entries(profile.modules)) {
+    if (!moduleValue || typeof moduleValue !== 'object' || Array.isArray(moduleValue)) continue;
+    profile.modules[moduleKey] = {
+      ...moduleValue,
+      disabled: moduleValue.disabled === true
     };
   }
   return { valid, errors: validate.errors || null, profile, inferred };

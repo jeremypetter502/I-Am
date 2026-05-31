@@ -34,18 +34,18 @@ Notes
 - Import: JSON with AJV validation and best-effort module restoration
 
 ## IAM v0.7 Delivery + Career + State Segments
-- Career segment prefix: `/CAR`
-- Delivery segment prefix: `/DELIVERY/`
-- Shape: `/CAR{soc8}S{idx}{score}...`
+- Career segment prefix: `/CAR:`
+- Delivery segment prefix: `/DELIVERY:`
+- Shape: `/CAR:{soc8}S{idx}{score}...`
 - `soc8` is normalized O*NET SOC (`XX-XXXX.XX` -> `XXXXXXXX`)
 - Skills use canonical O*NET positions `S01..S35`
 - Sparse encoding: only non-zero/kept skills are emitted
 
 Example (minimal):
-- `IAM/0.6:O72C88E55A60N22/CAR15113200S0190S1899`
+- `IAM/0.6:O72C88E55A60N22/CAR:15113200S0190S1899`
 
 Example (full):
-- `IAM/0.7:O72C88E55A60N22/COMM/DRV80ANC80EXP35AMB65/DELIVERY/DEF40PEER70CHL80DNS75AUD20STR85ABS78FMT82VBS55EMP62CND74HMR30AUT68BUR52/CAR15113200S0190S1899S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical`
+- `IAM/0.7:O72C88E55A60N22/COMM:DRV80ANC80EXP35AMB65/DELIVERY:DEF40PEER70CHL80DNS75AUD20STR85ABS78FMT82VBS55EMP62CND74HMR30AUT68BUR52/CAR:15113200S0190S1899S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical`
 
 STATE canonical snapshot notes:
 - Persist using the full snapshot pattern (not shorthand deltas).
@@ -67,4 +67,5 @@ STATE canonical snapshot notes:
 - `npm test` (unit tests)
 - `npm run lint` (if linting is added)
 - `npm run format` (optional code formatting step)
+
 

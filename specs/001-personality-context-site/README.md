@@ -30,4 +30,4 @@ A user preparing for interviews completes the skills module and exports:
 - Omitted skills are excluded from concise IAM signals to reduce noise.
 
 Example Career segment:
-- /CAR15125200S0190S1899S2485S3360
+- /CAR:15125200S0190S1899S2485S3360

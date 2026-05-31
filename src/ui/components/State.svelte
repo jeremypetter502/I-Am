@@ -119,6 +119,16 @@
     color: #fff;
     box-shadow: 0 14px 26px rgba(99, 102, 241, 0.25);
   }
+
+  :global(.state-card .group-box button.active) {
+    background: radial-gradient(
+      ellipse at 50% 30%,
+      color-mix(in srgb, var(--iam-button-bg) 40%, white 60%) 0%,
+      var(--iam-button-bg) 50%,
+      color-mix(in srgb, var(--iam-button-bg) 80%, black 20%) 100%
+    ) !important;
+    color: #fff !important;
+  }
   @media (max-width: 768px) {
     .state-shell { gap: 12px; }
     .state-card { padding: 16px; }

@@ -123,7 +123,7 @@
       "onet": { "soc_code": "15-1252", "title": "Software Developers" }
     },
     "iam": {
-      "code": "IAM/0.6:O52C55E53A45N53/CAR15125200S0190S1899S2345S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical",
+      "code": "IAM/0.6:O52C55E53A45N53/CAR:15125200S0190S1899S2345S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical",
       "version": "0.6"
     }
   }

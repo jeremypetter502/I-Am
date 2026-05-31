@@ -23,14 +23,14 @@
   import { canonicalizeState, DEFAULT_STATE } from '../../lib/state/stateManager.js';
 
   const moduleOrder = [
+    { key: 'state', label: 'State', emoji: '⚡', blurb: 'Dynamic runtime context for this session', tone: 'amber', expectedLength: 0 },
     { key: 'base', label: 'Base Context', emoji: '🪪', blurb: 'Role and personal context metadata', tone: 'teal', expectedLength: 1 },
     { key: 'ipip', label: 'Personality', emoji: '🧠', blurb: 'Core personality baseline', tone: 'violet', expectedLength: 50 },
     { key: 'aesthetics', label: 'Aesthetics', emoji: '🎨', blurb: 'Visual taste and style signals', tone: 'teal', expectedLength: 32 },
     { key: 'music', label: 'Music', emoji: '🎵', blurb: 'Listening preferences and vibe', tone: 'amber', expectedLength: 20 },
     { key: 'delivery', label: 'Delivery', emoji: '🔎', blurb: 'Unified interaction preference delivery', tone: 'teal', expectedLength: 30 },
     { key: 'skills', label: 'Skills Assessment', emoji: '🛠️', blurb: 'Transferable professional skills and validation checks', tone: 'teal', expectedLength: 35 },
-    { key: 'communication', label: 'Communication', emoji: '🗣️', blurb: 'How you prefer responses to be structured and delivered', tone: 'violet', expectedLength: 20 },
-    { key: 'state', label: 'State', emoji: '⚡', blurb: 'Dynamic runtime context for this session', tone: 'amber', expectedLength: 0 }
+    { key: 'communication', label: 'Communication', emoji: '🗣️', blurb: 'How you prefer responses to be structured and delivered', tone: 'violet', expectedLength: 20 }
   ];
 
   const HELP_SESSION_KEY = 'iam_help_seen_v1';
@@ -501,6 +501,10 @@
     return false;
   }
 
+  function isFoundationalModule(moduleKey) {
+    return moduleKey === 'state' || moduleKey === 'base';
+  }
+
   function parseContextUpload(text) {
     if (!text || typeof text !== 'string') throw new Error('Uploaded file is empty.');
     const trimmed = text.trim();
@@ -640,11 +644,11 @@
     const disabled = (moduleKey) => profileFile?.profile?.modules?.[moduleKey]?.disabled === true;
     return {
       personality: !disabled('ipip') && (Boolean(completedModules.ipip) || hasToken(/(?:^|\/)O\d+C\d+E\d+A\d+N\d+(?:\/|$)/)),
-      aesthetics: !disabled('aesthetics') && (Boolean(completedModules.aesthetics) || hasToken(/\/(?:MIN\d+|CLR\d+|WRM\d+|MOT\d+|IMG\d+|TYP\d+|LAY\d+)/)),
-      music: !disabled('music') && (Boolean(completedModules.music) || hasToken(/\/(?:MEL\d+|SOP\d+|UNP\d+|INT\d+|CON\d+)/)),
-      delivery: !disabled('delivery') && (Boolean(completedModules.delivery) || hasToken(/\/DELIVERY\/[A-Z0-9]+/)),
-      communication: !disabled('communication') && (Boolean(completedModules.communication) || hasToken(/\/COMM\/DRV\d+ANC\d+EXP\d+AMB\d+/)),
-      career: !disabled('skills') && (Boolean(completedModules.skills) || hasToken(/\/CAR\d{8}(?:S\d{4})*/)),
+      aesthetics: !disabled('aesthetics') && (Boolean(completedModules.aesthetics) || hasToken(/\/AES:[A-Z0-9]+/)),
+      music: !disabled('music') && (Boolean(completedModules.music) || hasToken(/\/MUS:[A-Z0-9]+/)),
+      delivery: !disabled('delivery') && (Boolean(completedModules.delivery) || hasToken(/\/DELIVERY:[A-Z0-9]+/)),
+      communication: !disabled('communication') && (Boolean(completedModules.communication) || hasToken(/\/COMM:DRV\d+ANC\d+EXP\d+AMB\d+/)),
+      career: !disabled('skills') && (Boolean(completedModules.skills) || hasToken(/\/CAR:\d{8}(?:S\d{4})*/)),
       state: !disabled('state') && (Boolean(completedModules.state) || hasToken(/\/STATE:[^/]+/))
     };
   }
@@ -659,7 +663,7 @@
       lines.push(`- ${label}: ${text}`);
     };
 
-    // Exclude fields already encoded in IAM string: name, birth_year, gender, locale, timezone.
+    // Exclude fields already encoded in the I-AM string: name, birth_year, gender, locale, timezone.
     pushIfPresent('Birth Month', source.birth_month);
     pushIfPresent('Birth Day', source.birth_day);
     pushIfPresent('Company', source.company);
@@ -714,19 +718,19 @@
     const additionalBaseContextLines = buildBaseContextLinesForIam(base);
 
     const parts = [
-      `IAM: ${iamCode || 'IAM code unavailable'}`,
+      `I-AM string: ${iamCode || 'I-AM string unavailable'}`,
       '',
       'Instructions for the LLM:',
-      '1. Treat the IAM string above as authoritative structured profile context for the user.',
+      '1. Treat the I-AM string above as authoritative structured profile context for the user.',
       '2. Use it to adapt tone, communication style, preferences, and response framing.',
-      '3. Do not rewrite, compress, or reinterpret the IAM string unless explicitly asked to explain it.',
-      '4. If additional context conflicts with the IAM string, prefer the most recent user instruction while retaining IAM as the baseline profile.',
-      '5. Apply the IAM guidance silently in your responses instead of repeatedly restating the profile.',
+      '3. Do not rewrite, compress, or reinterpret the I-AM string unless explicitly asked to explain it.',
+      '4. If additional context conflicts with the I-AM string, prefer the most recent user instruction while retaining it as the baseline profile.',
+      '5. Apply the I-AM guidance silently in your responses instead of repeatedly restating the profile.',
       ...sectionInstructions,
       '',
       ...(quickReference.length
         ? ['Quick Reference:', ...quickReference]
-        : ['Quick Reference: No completed IAM sections detected yet.'])
+        : ['Quick Reference: No completed I-AM sections detected yet.'])
     ];
 
     if (additionalBaseContextLines.length) {
@@ -1029,7 +1033,9 @@
     const { module, responses, result, testAnswers } = e.detail;
     const moduleMeta = moduleOrder.find((mod) => mod.key === module);
     const expectedLength = moduleMeta?.expectedLength || responses.length;
-    const wasAlreadyComplete = Boolean(completedModules[module]);
+    // Progress handlers can mark a module complete before the completion event fires,
+    // so use prior completion-result presence to decide whether this is a new completion.
+    const wasAlreadyComplete = Boolean(moduleResults[module]);
 
     try {
       sessionService.saveProgress(module, {
@@ -1331,6 +1337,8 @@
     persistCurrentProfile();
   }
 
+  $: activeIsFoundational = isFoundationalModule(active);
+
   function toggleHeaderMenu() {
     headerMenuOpen = !headerMenuOpen;
     if (headerMenuOpen) {
@@ -1455,9 +1463,9 @@
   <div class="survey-hero">
     <div class="hero-toolbar">
       <div class="toolbar-left">
-        <img src="/iam-logo.png" alt="IAM" class="logo-icon" />
+        <img src="/images/iam-logo.png" alt="I-AM" class="logo-icon" />
         <div class="modules-dropdown">
-          <button bind:this={modulesToggleEl} class={`modules-toggle module-chip tone-${activeMeta.tone} ${completedModules[active] ? 'done' : ''}`} type="button" aria-haspopup="menu" aria-expanded={modulesOpen} on:click={toggleModules}>
+          <button bind:this={modulesToggleEl} class={`modules-toggle module-chip ${activeIsFoundational ? 'foundational' : `tone-${activeMeta.tone}`} ${!activeIsFoundational && completedModules[active] ? 'done' : ''}`} type="button" aria-haspopup="menu" aria-expanded={modulesOpen} on:click={toggleModules}>
             <span class="module-chip__emoji">{activeMeta.emoji}</span>
             <span class="module-chip__label">{activeMeta.label}</span>
             <!-- progress/count and completion are shown in the modules popover chips -->
@@ -1467,7 +1475,7 @@
             <div class="module-rail">
               {#each moduleOrder as mod}
                 <button
-                  class={`module-chip ${active === mod.key ? 'active' : ''} ${completedModules[mod.key] ? 'done' : ''} tone-${mod.tone}`}
+                  class={`module-chip ${active === mod.key ? 'active' : ''} ${!isFoundationalModule(mod.key) && completedModules[mod.key] ? 'done' : ''} ${isFoundationalModule(mod.key) ? 'foundational' : `tone-${mod.tone}`}`}
                   on:click={() => setActiveModule(mod.key)}
                 >
                   <span class="module-chip__emoji">{mod.emoji}</span>
@@ -1480,6 +1488,9 @@
                     {/if}
                   {/if}
                 </button>
+                {#if mod.key === 'base'}
+                  <div class="module-divider" role="separator" aria-hidden="true"></div>
+                {/if}
               {/each}
             </div>
           </div>
@@ -1498,10 +1509,10 @@
       </div>
       <div bind:this={heroToolbarActionsEl} id="hero-toolbar-actions" class={`toolbar-actions ${headerMenuOpen ? 'mobile-open' : ''}`} style={heroToolbarActionsStyle}> 
         <input bind:this={importInput} class="hidden-input" type="file" accept="application/json,.json" on:change={handleImportFile} />
-        <button class="mini-btn topbar-btn" on:click={() => { triggerImportPicker(); closeHeaderMenu(); }}>Open</button>
-        <button class="mini-btn topbar-btn" on:click={() => { showIamPopup = true; iamCopyStatus = ''; closeHeaderMenu(); }} disabled={!canGenerateIam}>Generate</button>
-        <button class="mini-btn topbar-btn" on:click={() => { downloadCurrent(); closeHeaderMenu(); }} disabled={!canSaveProfile}>Save</button>
         <button class="mini-btn topbar-btn" on:click={() => { showMainResetDialog = true; closeHeaderMenu(); }}>Reset</button>
+        <button class="mini-btn topbar-btn" on:click={() => { triggerImportPicker(); closeHeaderMenu(); }}>Open</button>
+        <button class="mini-btn topbar-btn" on:click={() => { downloadCurrent(); closeHeaderMenu(); }} disabled={!canSaveProfile}>Save</button>
+        <button class="mini-btn topbar-btn" on:click={() => { showIamPopup = true; iamCopyStatus = ''; closeHeaderMenu(); }} disabled={!canGenerateIam}>Generate</button>
         <button class="mini-btn topbar-btn" on:click={() => { showHelp = true; closeHeaderMenu(); }} aria-haspopup="dialog" aria-expanded={showHelp}>Help</button>
       </div>
     </div>
@@ -1574,7 +1585,7 @@
         <h3 id="completion-popup-title">{completionPopup.title}</h3>
         <p>{completionPopup.message}</p>
         <div class="panel-actions">
-          <button class="primary" on:click={downloadPartial}>Save IAM JSON</button>
+          <button class="primary" on:click={downloadPartial}>Save I-AM JSON</button>
           <button class="primary" on:click={() => completionPopup = null}>Close</button>
         </div>
       </div>
@@ -1654,9 +1665,9 @@
     <div class="popup-backdrop" role="dialog" aria-modal="true" aria-labelledby="iam-popup-title">
       <div class="popup-card">
         <p class="panel-eyebrow">Current profile</p>
-        <h3 id="iam-popup-title">Current IAM String</h3>
-        <p>This block includes model-facing instructions that travel with the current IAM string.</p>
-        <textarea class="iam-popup-text" readonly value={iamPopupText} aria-label="Current IAM text"></textarea>
+        <h3 id="iam-popup-title">Current I-AM String</h3>
+        <p>This block includes model-facing instructions that travel with the current I-AM string.</p>
+        <textarea class="iam-popup-text" readonly value={iamPopupText} aria-label="Current I-AM text"></textarea>
         {#if iamCopyStatus}
           <p class="iam-copy-status">{iamCopyStatus}</p>
         {/if}
@@ -2001,10 +2012,34 @@
     color: #fff;
   }
 
+  .module-chip.foundational {
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.24);
+    color: var(--iam-text-primary);
+  }
+
+  .module-chip.foundational:hover,
+  .module-chip.foundational:focus-visible {
+    background: rgba(148, 163, 184, 0.2);
+    border-color: rgba(148, 163, 184, 0.36);
+  }
+
+  .module-chip.foundational.active {
+    background: rgba(148, 163, 184, 0.22);
+    border-color: rgba(148, 163, 184, 0.4);
+    color: var(--iam-text-primary);
+  }
+
   .module-chip.done {
     background: rgba(132, 204, 22, 0.2);
     border-color: var(--iam-green);
     color: var(--iam-green);
+  }
+
+  .module-divider {
+    height: 1px;
+    margin: 2px 4px 4px;
+    background: rgba(148, 163, 184, 0.26);
   }
 
   .module-chip__done-icon {

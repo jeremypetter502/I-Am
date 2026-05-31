@@ -1,0 +1,107 @@
+{
+  "iam": "IAM/0.6:Ziggy:O85C75E80A88N35/CAR:15125200/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual",
+  "schema_version": "0.1",
+  "generated_at": "2026-05-30T22:34:31.518Z",
+  "profile": {
+    "id": null,
+    "summary": "",
+    "scores": {
+      "openness": 85,
+      "conscientiousness": 75,
+      "extraversion": 80,
+      "agreeableness": 87.5,
+      "neuroticism": 35
+    },
+    "modules": {
+      "ipip": {
+        "responses": [
+          5,
+          2,
+          5,
+          1,
+          4,
+          2,
+          5,
+          3,
+          4,
+          3,
+          1,
+          5,
+          1,
+          4,
+          2,
+          4,
+          2,
+          5,
+          4,
+          5,
+          4,
+          2,
+          4,
+          1,
+          2,
+          1,
+          4,
+          2,
+          4,
+          4,
+          3,
+          4,
+          3,
+          2,
+          1,
+          2,
+          3,
+          2,
+          2,
+          2,
+          5,
+          1,
+          4,
+          2,
+          4,
+          2,
+          5,
+          4,
+          4,
+          5
+        ],
+        "raw_trait_scores": {
+          "openness": 44,
+          "conscientiousness": 40,
+          "extraversion": 42,
+          "agreeableness": 45,
+          "neuroticism": 24
+        },
+        "normalized_trait_scores": {
+          "openness": 85,
+          "conscientiousness": 75,
+          "extraversion": 80,
+          "agreeableness": 87.5,
+          "neuroticism": 35
+        },
+        "disabled": false,
+        "completed": true,
+        "last_updated": "2026-05-30T22:34:31.518Z"
+      },
+      "state": {
+        "bandwidth": 50,
+        "mode": "convergent",
+        "horizon": "long",
+        "stakes": "casual",
+        "completed": true,
+        "last_updated": "2026-05-30T22:34:31.518Z",
+        "disabled": false
+      }
+    },
+    "base": {
+      "name": "Ziggy",
+      "onet": {
+        "soc_code": "15-1252",
+        "title": "Software Developers"
+      },
+      "job_title": "Software Developers",
+      "skills": "Python, Jupyter, DuckDB"
+    }
+  }
+}

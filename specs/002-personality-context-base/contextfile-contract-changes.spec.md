@@ -6,7 +6,7 @@ This document defines planned contract-level changes for:
 
 - `profile.base` (job/role and basic context metadata)
 - `profile.modules.communication` (Merrill-Reimann communication psychometrics)
-- IAM compact extension guidance for communication (`/COMM/...`)
+- IAM compact extension guidance for communication (`/COMM:...`)
 
 These are specification artifacts only. No implementation is included here.
 
@@ -179,11 +179,11 @@ Encoding into IAM compact uses integer-rounded normalized values.
 
 When communication data is included, IAM code can include a trailing segment:
 
-`/COMM/DRV{d}ANC{a}EXP{e}AMB{m}`
+`/COMM:DRV{d}ANC{a}EXP{e}AMB{m}`
 
 Example:
 
-`IAM/0.2:O79C85E42A60N35/MIN90CLR20WRM40MOT10IMG30TYP55LAY70/MEL40SOP70UNP55INT20CON65/COMM/DRV85ANC40EXP20AMB15`
+`IAM/0.2:O79C85E42A60N35/AES:MIN90CLR20WRM40MOT10IMG30TYP55LAY70/MUS:MEL40SOP70UNP55INT20CON65/COMM:DRV85ANC40EXP20AMB15`
 
 ## Backward compatibility
 
@@ -198,3 +198,4 @@ Example:
 - Communication response length exactly 20.
 - Communication normalized values bounded in `0..100`.
 - Serializer includes/excludes `base` by export toggle.
+

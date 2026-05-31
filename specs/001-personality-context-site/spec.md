@@ -127,12 +127,12 @@ See `specs/personality-specs/personality_code.spec.md` for the full normative sp
 - Sparse encoding: only include skills with non-zero proficiency to minimize string length
 
 **DELIVERY segment** encoding:
-- Canonical pattern: `/DELIVERY/DEFxxPEERxxCHLxxDNSxxAUDxxSTRxxABSxxFMTxxVBSxxEMPxxCNDxxHMRxxAUTxxBURxx`
+- Canonical pattern: `/DELIVERY:DEFxxPEERxxCHLxxDNSxxAUDxxSTRxxABSxxFMTxxVBSxxEMPxxCNDxxHMRxxAUTxxBURxx`
 
 **STATE segment** encoding:
 - Canonical pattern: `STATE:bandwidth{bb},mode:{convergent|divergent},horizon:{now|long},stakes:{critical|casual}`
 - Segment order requirement: OCEAN -> AES -> MUS -> COM -> DELIVERY -> CAR -> STATE
-- Example full suffix: `/DELIVERY/DEF40PEER70CHL80DNS75AUD20STR85ABS78FMT82VBS55EMP62CND74HMR30AUT68BUR52/CAR15113200S0190S1899S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical`
+- Example full suffix: `/DELIVERY:DEF40PEER70CHL80DNS75AUD20STR85ABS78FMT82VBS55EMP62CND74HMR30AUT68BUR52/CAR:15113200S0190S1899S2485S3360/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical`
 
 **IAM Decoder Reference** (for LLMs receiving IAM codes):
 - Use skill index to look up skill name from the O*NET 35-skill position map (do not guess abbreviations)
@@ -145,7 +145,7 @@ For ContextFile JSON export, the skill data is preserved verbatim (name, score, 
 - **FR-018**: All business logic (scorers, serializer, IAM generator, import/export rules) MUST be implemented only in the canonical library under `src/lib/` (for example, `src/lib/scorer`, `src/lib/serializer`, `src/lib/iam`). The UI layer (`src/ui/`) MUST import and call these library functions and MUST NOT duplicate scoring or serialization logic. Any duplication discovered during review must be removed and replaced by calls to the canonical implementations. (Traceability: enforces code organization and maintainability.)
 - **FR-019**: The IAM compact string MUST support a Career segment using the canonical `CAR{soc8}S{idx}{score}...` pattern, where `soc8` is an 8-digit normalized O*NET-SOC code and each score is `00-99`.
 - **FR-020**: Career/skills IAM encoding MUST use O*NET position indices (`S01`-`S35`) with sparse emission (only retained skills encoded).
-- **FR-021**: When Delivery data is present and enabled, IAM generation MUST include a `/DELIVERY/...` segment and promote version to at least `0.7`.
+- **FR-021**: When Delivery data is present and enabled, IAM generation MUST include a `/DELIVERY:...` segment and promote version to at least `0.7`.
 - **FR-022**: Career and Delivery segment parsing/generation MUST be lossless for defined fields across import/export round-trips.
 
 ### Key Entities *(include if feature involves data)*
@@ -784,6 +784,7 @@ This normative section captures required security & privacy requirements that im
 - spec.md (this document)
 - scoring rules and versioned question-set definitions
 - export format definition for ContextFile
+
 
 
 

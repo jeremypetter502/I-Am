@@ -1,9 +1,13 @@
-# I-Am Context Code (IAM) Specification v0.7
+# I-Am Context String (IAM) Specification v0.7
 
 ## Purpose
 
-The IAM code is a compact, labeled, single-line encoding of a user's personality,
+The I-AM string is a compact, labeled, single-line encoding of a user's personality,
 preferences, skills, and runtime state.
+
+Terminology note:
+- "I-AM" is the product term ("I am" personality context), not an acronym.
+- The wire-encoded string prefix remains `IAM/<version>` for compatibility.
 
 It is designed for efficient LLM consumption:
 - Self-documenting (readable labels, no decoder preamble required)
@@ -16,7 +20,7 @@ It is designed for efficient LLM consumption:
 ## Canonical Format
 
 ```
-IAM/<version>[:<prefix_fields>:]OCEAN[/AES][/MUS][/COMM][/CAR][/DELIVERY][/STATE]
+IAM/<version>[:<prefix_fields>:]OCEAN[/AES:<aes_tokens>][/MUS:<mus_tokens>][/COMM:<comm_tokens>][/CAR:<car_payload>][/DELIVERY:<delivery_tokens>][/STATE:<state_snapshot>]
 ```
 
 Where:
@@ -52,13 +56,13 @@ IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33
 ## Full Example (v0.6)
 
 ```
-IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33/MIN50CLR38WRM75MOT63/MEL56SOP69UNP69INT69CON50/COMM/DRV75ANC80EXP80AMB55/CAR15125200S0190S0260S0360S0560S0670S0780S08100S0970S1260S1560S1780S1870S1970S2090S2160S23100S2470S2660S2770S3190S3260S3360S3460S3590/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
+IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33/AES:MIN50CLR38WRM75MOT63/MUS:MEL56SOP69UNP69INT69CON50/COMM:DRV75ANC80EXP80AMB55/CAR:15125200S0190S0260S0360S0560S0670S0780S08100S0970S1260S1560S1780S1870S1970S2090S2160S23100S2470S2660S2770S3190S3260S3360S3460S3590/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
 ```
 
 ## Full Example (v0.7 with Delivery)
 
 ```
-IAM/0.7:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33/MIN50CLR38WRM75MOT63/MEL56SOP69UNP69INT69CON50/COMM/DRV75ANC80EXP80AMB55/CAR15125200S0190S08100S23100/DELIVERY/DEF38PEER82CHL90DNS86AUD75STR92ABS88FMT79VBS58EMP62CND91HMR46AUT84BUR60/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
+IAM/0.7:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33/AES:MIN50CLR38WRM75MOT63/MUS:MEL56SOP69UNP69INT69CON50/COMM:DRV75ANC80EXP80AMB55/CAR:15125200S0190S08100S23100/DELIVERY:DEF38PEER82CHL90DNS86AUD75STR92ABS88FMT79VBS58EMP62CND91HMR46AUT84BUR60/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
 ```
 
 ---
@@ -78,7 +82,7 @@ Interpretation thresholds:
 
 ### AES - Aesthetic Preferences
 
-Pattern: `MIN{mm}CLR{cc}WRM{ww}MOT{mo}[IMG{im}][TYP{ty}][LAY{la}]`
+Pattern: `AES:MIN{mm}CLR{cc}WRM{ww}MOT{mo}[IMG{im}][TYP{ty}][LAY{la}]`
 
 Common tokens:
 - `MIN` minimalism
@@ -90,13 +94,13 @@ Common tokens:
 - `LAY` layout/grid preference
 
 Notes:
-- `IMG`, `TYP`, and `LAY` may be absent in partial or legacy outputs.
+- `IMG`, `TYP`, and `LAY` may be absent in partial outputs.
 
 ---
 
 ### MUS - Music Preferences (STOMP-derived)
 
-Pattern: `MEL{ml}SOP{sp}UNP{un}INT{in}CON{cn}`
+Pattern: `MUS:MEL{ml}SOP{sp}UNP{un}INT{in}CON{cn}`
 
 Tokens:
 - `MEL` mellow
@@ -109,7 +113,7 @@ Tokens:
 
 ### COMM - Communication Preferences (Merrill-Reimann)
 
-Pattern: `COMM/DRV{dr}ANC{an}EXP{ex}AMB{am}`
+Pattern: `COMM:DRV{dr}ANC{an}EXP{ex}AMB{am}`
 
 Tokens:
 - `DRV` driver
@@ -125,7 +129,7 @@ Note:
 
 ### CAR - Career and Standardized Transferable Skills (O*NET-SOC)
 
-Pattern: `CAR{soc8}(S{skill_idx}{proficiency})*`
+Pattern: `CAR:{soc8}(S{skill_idx}{proficiency})*`
 
 Components:
 - `soc8`: normalized 8-digit SOC code (`15-1252` -> `15125200`, `15-1132.00` -> `15113200`)
@@ -138,7 +142,7 @@ Sparse encoding rules:
 - Current inclusion threshold is `normalized_score >= 60`.
 
 Example:
-- `CAR15125200S0190S08100S23100`
+- `CAR:15125200S0190S08100S23100`
 
 ---
 
@@ -146,7 +150,7 @@ Example:
 
 Pattern:
 
-`DELIVERY/DEF{dd}PEER{pp}CHL{cc}DNS{dn}AUD{au}STR{st}ABS{ab}FMT{fm}VBS{vb}EMP{em}CND{cn}HMR{hm}AUT{at}BUR{br}`
+`DELIVERY:DEF{dd}PEER{pp}CHL{cc}DNS{dn}AUD{au}STR{st}ABS{ab}FMT{fm}VBS{vb}EMP{em}CND{cn}HMR{hm}AUT{at}BUR{br}`
 
 Delivery combines metrics from one unified questionnaire across REL, CAP, COG, PER, and ENV constructs.
 
@@ -184,7 +188,7 @@ Optional shorthand deltas (transport convenience):
 - `STATE:stakes_critical`
 - `STATE:stakes_casual`
 
-Canonical persisted IAM SHOULD use full snapshot form.
+Canonical persisted I-AM strings SHOULD use full snapshot form.
 
 ---
 
@@ -197,9 +201,9 @@ When present, segments follow this order:
 Prefix fields (if present) appear before OCEAN.
 
 Version emission rules:
--- If `DELIVERY` is present, IAM version MUST be at least `0.7`.
--- If canonical `STATE` is present and `DELIVERY` is absent, IAM version MUST be at least `0.6`.
--- If `CAR` is present without `STATE` and without `DELIVERY`, IAM version MUST be at least `0.4`.
+- If `DELIVERY` is present, I-AM string version MUST be at least `0.7`.
+- If canonical `STATE` is present and `DELIVERY` is absent, I-AM string version MUST be at least `0.6`.
+- If `CAR` is present without `STATE` and without `DELIVERY`, I-AM string version MUST be at least `0.4`.
 
 ---
 
@@ -211,18 +215,18 @@ Examples:
 
 ```
 IAM/0.6:O72C88E55A60N22
-IAM/0.6:O72C88E55A60N22/MIN80CLR35WRM60MOT45
-IAM/0.6:O72C88E55A60N22/MIN80CLR35WRM60MOT45/MEL40SOP70UNP55INT20CON65
-IAM/0.6:O72C88E55A60N22/MIN80CLR35WRM60MOT45/MEL40SOP70UNP55INT20CON65/COMM/DRV85ANC40EXP20AMB15
-IAM/0.6:O72C88E55A60N22/MIN80CLR35WRM60MOT45/MEL40SOP70UNP55INT20CON65/COMM/DRV85ANC40EXP20AMB15/CAR15113200S0190S1899S2485S3360
-IAM/0.7:O72C88E55A60N22/MIN80CLR35WRM60MOT45/MEL40SOP70UNP55INT20CON65/COMM/DRV85ANC40EXP20AMB15/CAR15113200S0190S1899S2485S3360/DELIVERY/DEF40PEER70CHL80DNS75AUD20STR85ABS78FMT82VBS55EMP62CND74HMR30AUT68BUR52/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical
+IAM/0.6:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45
+IAM/0.6:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45/MUS:MEL40SOP70UNP55INT20CON65
+IAM/0.6:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45/MUS:MEL40SOP70UNP55INT20CON65/COMM:DRV85ANC40EXP20AMB15
+IAM/0.6:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45/MUS:MEL40SOP70UNP55INT20CON65/COMM:DRV85ANC40EXP20AMB15/CAR:15113200S0190S1899S2485S3360
+IAM/0.7:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45/MUS:MEL40SOP70UNP55INT20CON65/COMM:DRV85ANC40EXP20AMB15/CAR:15113200S0190S1899S2485S3360/DELIVERY:DEF40PEER70CHL80DNS75AUD20STR85ABS78FMT82VBS55EMP62CND74HMR30AUT68BUR52/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical
 ```
 
 Career-only edge case (supported):
 
 ```
-/CAR15125200S0190S23100
-/CAR15125200S0190S23100/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
+/CAR:15125200S0190S23100
+/CAR:15125200S0190S23100/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
 ```
 
 ---
@@ -298,3 +302,4 @@ Validation scope notes:
 - Parsers MUST ignore unknown future segments rather than fail hard.
 
 This staged approach is recommended for maintainability and forward compatibility.
+

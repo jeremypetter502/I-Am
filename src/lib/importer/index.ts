@@ -7,7 +7,9 @@ export async function importJson(path: string) {
 
   if (modules.skills && typeof modules.skills === 'object') {
     if (Array.isArray(modules.skills.responses)) {
-      modules.skills.responses = modules.skills.responses.map((item: Record<string, unknown>) => ({ ...item }));
+      modules.skills.responses = modules.skills.responses.map((item: unknown) => (
+        item && typeof item === 'object' ? { ...(item as Record<string, unknown>) } : item
+      ));
     }
     if (Array.isArray(modules.skills.filtered)) {
       modules.skills.filtered = modules.skills.filtered.map((item: Record<string, unknown>) => ({ ...item }));
@@ -21,6 +23,9 @@ export async function importJson(path: string) {
         }])
       );
     }
+    if ((modules.skills as Record<string, unknown>).disabled === true) {
+      (modules.skills as Record<string, unknown>).disabled = true;
+    }
   }
 
   if (modules.state && typeof modules.state === 'object') {
@@ -31,7 +36,16 @@ export async function importJson(path: string) {
       horizon: state.horizon === 'now' ? 'now' : 'long',
       stakes: state.stakes === 'critical' ? 'critical' : 'casual',
       completed: state.completed === undefined ? true : Boolean(state.completed),
+      disabled: state.disabled === true,
       last_updated: state.last_updated
+    };
+  }
+
+  for (const [moduleKey, moduleValue] of Object.entries(modules)) {
+    if (!moduleValue || typeof moduleValue !== 'object' || Array.isArray(moduleValue)) continue;
+    modules[moduleKey] = {
+      ...(moduleValue as Record<string, unknown>),
+      disabled: (moduleValue as Record<string, unknown>).disabled === true
     };
   }
 

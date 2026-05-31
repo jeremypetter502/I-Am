@@ -33,7 +33,7 @@ For skills with normalized score >=50, include only when all are true:
 - idx: 2-digit skill index (01..35)
 - score: 2-digit normalized proficiency (00..99)
 - Sparse encoding: only included skills are serialized
-- Example: /CAR15125200S0190S1899S2485S3360
+- Example: /CAR:15125200S0190S1899S2485S3360
 
 7) Extensibility
 - Domain-specific subsets may be derived from fullAssessment without changing canonical indices.

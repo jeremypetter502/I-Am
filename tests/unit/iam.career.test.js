@@ -18,11 +18,11 @@ describe('iam career segment', () => {
       { index: 2, normalized_score: 59 }
     ]);
 
-    expect(seg).toBe('CAR15125200S0190S1899S2485S3360');
+    expect(seg).toBe('CAR:15125200S0190S1899S2485S3360');
   });
 
   it('decodes Career segment skill names from positions', () => {
-    const decoded = decodeCareerSegment('/CAR15125200S0190S1899S2485S3360');
+    const decoded = decodeCareerSegment('/CAR:15125200S0190S1899S2485S3360');
     expect(decoded.soc8).toBe('15125200');
     expect(decoded.skills.map((skill) => skill.index)).toEqual([1, 18, 24, 33]);
     expect(decoded.skills.map((skill) => skill.name)).toEqual([
@@ -45,7 +45,7 @@ describe('iam career segment', () => {
     });
 
     expect(iam.version).toBe('0.4');
-    expect(iam.code).toBe('/CAR15125200S0190S1899S2485S3360');
+    expect(iam.code).toBe('/CAR:15125200S0190S1899S2485S3360');
   });
 
   it('includes OCEAN + Career segment when personality scores are present', () => {
@@ -63,6 +63,7 @@ describe('iam career segment', () => {
     );
 
     expect(iam.version).toBe('0.4');
-    expect(iam.code).toBe('IAM/0.4:O72C88E55A60N22/CAR15125200S0190S1899S2485S3360');
+    expect(iam.code).toBe('IAM/0.4:O72C88E55A60N22/CAR:15125200S0190S1899S2485S3360');
   });
 });
+
