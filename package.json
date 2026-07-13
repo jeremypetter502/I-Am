@@ -9,7 +9,7 @@
     "lint": "eslint . --ext .js,.ts",
     "format": "prettier --write .",
     "dev:ui": "vite --config vite.config.mjs",
-    "build:ui": "node scripts/generate-sitemap.js && vite build --config vite.config.mjs",
+    "build:ui": "node scripts/generate-sitemap.js && node ./node_modules/vite/bin/vite.js build --config vite.config.mjs",
     "preview:ui": "vite preview --config vite.config.mjs"
   },
   "devDependencies": {
