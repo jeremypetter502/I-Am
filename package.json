@@ -9,7 +9,7 @@
     "lint": "eslint . --ext .js,.ts",
     "format": "prettier --write .",
     "dev:ui": "vite --config vite.config.mjs",
-    "build:ui": "npx --yes vite@6.4.2 build --config vite.config.mjs",
+    "build:ui": "npm exec --yes --package=vite@6.4.2 -- node -e \"import('vite').then(({ build }) => build({ configFile: 'vite.config.mjs' }))\"",
     "preview:ui": "vite preview --config vite.config.mjs"
   },
   "devDependencies": {
