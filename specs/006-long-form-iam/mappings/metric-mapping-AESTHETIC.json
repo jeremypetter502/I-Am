@@ -1,0 +1,7 @@
+{
+  "min": "minimalism",
+  "col": "colorfulness",
+  "warm": "warmth",
+  "mot": "motion",
+  "notes": "Per-segment metric mapping. Use compact codes as keys if present; otherwise add mappings keyed by the current metric identifier."
+}

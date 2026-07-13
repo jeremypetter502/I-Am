@@ -4,6 +4,7 @@
   import Aesthetics from '../components/Aesthetics.svelte';
   import Music from '../components/Music.svelte';
   import Delivery from '../components/Delivery.svelte';
+  import Delivery2 from '../components/Delivery2.svelte';
   import Skills from '../components/Skills.svelte';
   import Communication from '../components/Communication.svelte';
   import State from '../components/State.svelte';
@@ -14,6 +15,7 @@
   import aestheticsHelpMd from '../help/aesthetics.md?raw';
   import musicHelpMd from '../help/music.md?raw';
   import deliveryHelpMd from '../help/delivery.md?raw';
+  import delivery2HelpMd from '../help/delivery2.md?raw';
   import skillsHelpMd from '../help/skills.md?raw';
   import communicationHelpMd from '../help/communication.md?raw';
   import stateHelpMd from '../help/state.md?raw';
@@ -29,6 +31,7 @@
     { key: 'aesthetics', label: 'Aesthetics', emoji: '🎨', blurb: 'Visual taste and style signals', tone: 'teal', expectedLength: 32 },
     { key: 'music', label: 'Music', emoji: '🎵', blurb: 'Listening preferences and vibe', tone: 'amber', expectedLength: 20 },
     { key: 'delivery', label: 'Delivery', emoji: '🔎', blurb: 'Unified interaction preference delivery', tone: 'teal', expectedLength: 30 },
+    { key: 'delivery2', label: 'Delivery v2', emoji: '🧭', blurb: 'Standalone presentation and initiative preferences', tone: 'violet', expectedLength: 24 },
     { key: 'skills', label: 'Skills Assessment', emoji: '🛠️', blurb: 'Transferable professional skills and validation checks', tone: 'teal', expectedLength: 35 },
     { key: 'communication', label: 'Communication', emoji: '🗣️', blurb: 'How you prefer responses to be structured and delivered', tone: 'violet', expectedLength: 20 }
   ];
@@ -41,6 +44,7 @@
     aesthetics: { title: 'Aesthetics', summary: '', howToAnswer: [], metrics: [], metricMeaning: '', aiUse: '' },
     music: { title: 'Music', summary: '', howToAnswer: [], metrics: [], metricMeaning: '', aiUse: '' },
     delivery: { title: 'Delivery', summary: '', howToAnswer: [], metrics: [], metricMeaning: '', aiUse: '' },
+    delivery2: { title: 'Delivery v2', summary: '', howToAnswer: [], metrics: [], metricMeaning: '', aiUse: '' },
     skills: { title: 'Skills Assessment', summary: '', howToAnswer: [], metrics: [], metricMeaning: '', aiUse: '' },
     communication: { title: 'Communication', summary: '', howToAnswer: [], metrics: [], metricMeaning: '', aiUse: '' },
     state: { title: 'State', summary: '', howToAnswer: [], metrics: [], metricMeaning: '', aiUse: '' }
@@ -235,6 +239,7 @@
     aesthetics: aestheticsHelpMd,
     music: musicHelpMd,
     delivery: deliveryHelpMd,
+    delivery2: delivery2HelpMd,
     skills: skillsHelpMd,
     communication: communicationHelpMd,
     state: stateHelpMd
@@ -247,12 +252,37 @@
     ])
   );
 
+  const COMPLETE_IMAGES = [
+    '/images/ziggy-complete1.png',
+    '/images/ziggy-complete2.png',
+    '/images/ziggy-complete3.png'
+  ];
+
+  function chooseRandomCompleteImage() {
+    try {
+      const idx = Math.floor(Math.random() * COMPLETE_IMAGES.length);
+      return COMPLETE_IMAGES[idx];
+    } catch (e) {
+      return COMPLETE_IMAGES[0];
+    }
+  }
+
+  // Local metric name maps used by browser fallback to ensure Long Form uses full words.
+  const LOCAL_METRIC_MAPS = {
+    AES: { MIN: 'minimalism', CLR: 'colorfulness', WRM: 'warmth', MOT: 'motion', IMG: 'imagery', TYP: 'typography', LAY: 'layout' },
+    MUS: { MEL: 'mellow', SOP: 'sophisticated', UNP: 'unpretentious', INT: 'intense', CON: 'contemporary' },
+    COMM: { DRV: 'driver', ANC: 'analytical', EXP: 'expressive', AMB: 'amiable' },
+    DELIVERY: { DEF: 'deference', PEER: 'peer', CHL: 'challenge', DNS: 'density', AUD: 'audience', STR: 'structure', ABS: 'abstraction', FMT: 'format', VBS: 'verbosity', EMP: 'empathy', CND: 'candor', HMR: 'humor', AUT: 'autonomy', BUR: 'burden' },
+    DELIVERY2: { STR: 'structure', DNS: 'density', FRM: 'framing', FMT: 'format', EMP: 'empathy', AUT: 'autonomy' }
+  };
+
   const INTRO_HELP = parseIntroHelpMarkdown(introHelpMd);
 
   let resumeData = null;
   let active = 'base';
-  let completedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, skills: false, communication: false, state: false };
-  let moduleResults = { ipip: null, aesthetics: null, music: null, delivery: null, skills: null, communication: null, state: null };
+  let completedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, delivery2: false, skills: false, communication: false, state: false };
+  let moduleResults = { ipip: null, aesthetics: null, music: null, delivery: null, delivery2: null, skills: null, communication: null, state: null };
+  let moduleNotes = { ipip: '', aesthetics: '', music: '', delivery: '', delivery2: '', skills: '', communication: '', state: '' };
   let partialProfile = null;
   let partialModule = null;
   let storedProfile = null;
@@ -262,6 +292,8 @@
   let moduleHelpKey = 'base';
   let showIamPopup = false;
   let modulesOpen = false;
+  let currentIamCode = '';
+  let generatedIamProfile = null;
   let modulesToggleEl;
   let modulesPopoverStyle = '';
   let modulesPopoverEl;
@@ -282,18 +314,19 @@
   let surveyResetKey = 0;
   let currentModuleDisabled = false;
   let showModuleActionButtons = false;
-  let touchedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, skills: false, communication: false, state: false };
+  let touchedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, delivery2: false, skills: false, communication: false, state: false };
   let moduleProgress = {
     base: { answered: 0, expected: 1 },
     ipip: { answered: 0, expected: 50 },
     aesthetics: { answered: 0, expected: 32 },
     music: { answered: 0, expected: 20 },
     delivery: { answered: 0, expected: 30 },
+    delivery2: { answered: 0, expected: 24 },
     skills: { answered: 0, expected: 35 },
     communication: { answered: 0, expected: 20 },
     state: { answered: 0, expected: 0 }
   };
-  let moduleProgressLabels = { base: '0/1', ipip: '0/50', aesthetics: '0/32', music: '0/20', delivery: '0/30', skills: '0/35', communication: '0/20', state: '0/1' };
+  let moduleProgressLabels = { base: '0/1', ipip: '0/50', aesthetics: '0/32', music: '0/20', delivery: '0/30', delivery2: '0/24', skills: '0/35', communication: '0/20', state: '0/1' };
   let runtimeState = canonicalizeState(DEFAULT_STATE);
   let baseContext = {};
   let baseContextKey = 0; // Used to force remount of BaseContextPicker
@@ -304,7 +337,7 @@
 
   function hasBaseContextData(ctx) {
     if (!ctx || typeof ctx !== 'object') return false;
-    const keys = ['name', 'birth_month', 'birth_day', 'birth_year', 'gender', 'job_title', 'company', 'years_experience', 'education_level', 'timezone', 'locale', 'communication_style', 'short_bio'];
+    const keys = ['name', 'birth_month', 'birth_day', 'birth_year', 'gender', 'job_title', 'company', 'years_experience', 'education_level', 'timezone', 'locale', 'short_bio'];
     if (ctx.onet && typeof ctx.onet === 'object' && ctx.onet.soc_code && ctx.onet.title) return true;
     return keys.some((key) => {
       const value = ctx[key];
@@ -328,6 +361,7 @@
       aesthetics: isModuleComplete('aesthetics', modules.aesthetics),
       music: isModuleComplete('music', modules.music),
       delivery: isModuleComplete('delivery', modules.delivery),
+      delivery2: isModuleComplete('delivery2', modules.delivery2),
       skills: isModuleComplete('skills', modules.skills),
       communication: isModuleComplete('communication', modules.communication),
       state: false
@@ -354,6 +388,10 @@
         answered: sessionService.countAnsweredResponses(modules.delivery?.responses),
         expected: modules.delivery?.expectedLength || 30
       },
+      delivery2: {
+        answered: sessionService.countAnsweredResponses(modules.delivery2?.responses),
+        expected: modules.delivery2?.expectedLength || 24
+      },
       skills: {
         answered: sessionService.countAnsweredResponses(modules.skills?.responses),
         expected: modules.skills?.expectedLength || 35
@@ -373,10 +411,18 @@
       aesthetics: touchedModules.aesthetics || sessionService.countAnsweredResponses(modules.aesthetics?.responses) > 0 || (modules.aesthetics?.current || 0) > 0,
       music: touchedModules.music || sessionService.countAnsweredResponses(modules.music?.responses) > 0 || (modules.music?.current || 0) > 0,
       delivery: touchedModules.delivery || sessionService.countAnsweredResponses(modules.delivery?.responses) > 0 || (modules.delivery?.current || 0) > 0,
+      delivery2: touchedModules.delivery2 || sessionService.countAnsweredResponses(modules.delivery2?.responses) > 0 || (modules.delivery2?.current || 0) > 0,
       skills: touchedModules.skills || sessionService.countAnsweredResponses(modules.skills?.responses) > 0 || (modules.skills?.current || 0) > 0,
       communication: touchedModules.communication || sessionService.countAnsweredResponses(modules.communication?.responses) > 0 || (modules.communication?.current || 0) > 0,
       state: true
     };
+    // load module notes from resume or stored profile
+    try {
+      const storedModules = resumeData?.modules || (storedProfile?.profile && storedProfile.profile.modules) || {};
+      for (const key of Object.keys(moduleNotes)) {
+        moduleNotes[key] = (resumeData?.modules?.[key]?.note) || (storedModules?.[key]?.note) || (moduleResults[key]?.note) || '';
+      }
+    } catch (e) {}
   }
 
   function refreshStoredProfile() {
@@ -433,9 +479,8 @@
   $: activeMeta = moduleOrder.find((mod) => mod.key === active) || moduleOrder[0];
   $: fallbackExportProfile = buildFallbackExportProfile();
   $: exportProfile = fallbackExportProfile || partialProfile || storedProfile;
-  $: currentIamCode = normalizeIamCodeForPopup(exportProfile?.profile?.iam?.code || deriveCurrentIamCode(exportProfile), exportProfile);
-  $: iamInstructionSections = getIamInstructionSections(currentIamCode, exportProfile);
-  $: iamPopupText = buildIamPopupText(currentIamCode, iamInstructionSections, exportProfile?.profile?.base || baseContext);
+  $: iamInstructionSections = getIamInstructionSections(currentIamCode, generatedIamProfile || exportProfile);
+  $: iamPopupText = buildIamPopupText(currentIamCode, iamInstructionSections, (generatedIamProfile || exportProfile)?.profile?.base || baseContext);
   $: canGenerateIam = completedCount > 0;
   $: canSaveProfile = completedCount > 0 || !!exportProfile;
   $: moduleProgressLabels = Object.fromEntries(moduleOrder.map((mod) => {
@@ -643,12 +688,13 @@
     const hasToken = (pattern) => pattern.test(code);
     const disabled = (moduleKey) => profileFile?.profile?.modules?.[moduleKey]?.disabled === true;
     return {
-      personality: !disabled('ipip') && (Boolean(completedModules.ipip) || hasToken(/(?:^|\/)O\d+C\d+E\d+A\d+N\d+(?:\/|$)/)),
-      aesthetics: !disabled('aesthetics') && (Boolean(completedModules.aesthetics) || hasToken(/\/AES:[A-Z0-9]+/)),
-      music: !disabled('music') && (Boolean(completedModules.music) || hasToken(/\/MUS:[A-Z0-9]+/)),
-      delivery: !disabled('delivery') && (Boolean(completedModules.delivery) || hasToken(/\/DELIVERY:[A-Z0-9]+/)),
-      communication: !disabled('communication') && (Boolean(completedModules.communication) || hasToken(/\/COMM:DRV\d+ANC\d+EXP\d+AMB\d+/)),
-      career: !disabled('skills') && (Boolean(completedModules.skills) || hasToken(/\/CAR:\d{8}(?:S\d{4})*/)),
+      personality: !disabled('ipip') && (Boolean(completedModules.ipip) || hasToken(/(?:^|\/)PERSONALITY:/i) || hasToken(/(?:^|\/)O\d+C\d+E\d+A\d+N\d+(?:\/|$)/)),
+      aesthetics: !disabled('aesthetics') && (Boolean(completedModules.aesthetics) || hasToken(/(?:^|\/)AESTHETIC(?:\([^)]+\))?:/i) || hasToken(/\/AES:[A-Z0-9]+/)),
+      music: !disabled('music') && (Boolean(completedModules.music) || hasToken(/(?:^|\/)MUSIC(?:\([^)]+\))?:/i) || hasToken(/\/MUS:[A-Z0-9]+/)),
+      delivery: !disabled('delivery') && (Boolean(completedModules.delivery) || hasToken(/(?:^|\/)DELIVERY(?:\([^)]+\))?:/i) || hasToken(/\/DELIVERY:[A-Z0-9]+/)),
+      delivery2: !disabled('delivery2') && (Boolean(completedModules.delivery2) || hasToken(/(?:^|\/)DELIVERY2(?:\([^)]+\))?:/i) || hasToken(/\/DELIVERY2\/[A-Z0-9]+/)),
+      communication: !disabled('communication') && (Boolean(completedModules.communication) || hasToken(/(?:^|\/)COMMUNICATION(?:\([^)]+\))?:/i) || hasToken(/\/COMM:DRV\d+ANC\d+EXP\d+AMB\d+/)),
+      career: !disabled('skills') && (Boolean(completedModules.skills) || hasToken(/\/(?:SKILL|SKILLS)(?:\([^)]+\))?:/i) || hasToken(/\/(?:CAR|SKL)(?:\([^)]+\))?:\d{8}(?:S\d{4})*/)),
       state: !disabled('state') && (Boolean(completedModules.state) || hasToken(/\/STATE:[^/]+/))
     };
   }
@@ -669,9 +715,7 @@
     pushIfPresent('Company', source.company);
     pushIfPresent('Years Experience', source.years_experience);
     pushIfPresent('Education Level', source.education_level);
-    pushIfPresent('Skills', source.skills);
-    pushIfPresent('Communication Style', source.communication_style);
-    pushIfPresent('Favorites', source.favorites);
+    // Skills, Communication Style, and Favorites are no longer exported from Base module
     pushIfPresent('Short Bio', source.short_bio);
 
     return lines;
@@ -782,98 +826,54 @@
       return false;
     };
     return {
-      ipip: {
-        responses: resumeData?.modules?.ipip?.responses || moduleResults.ipip?.responses || storedModules?.ipip?.responses || [],
-        ...(getDisabled('ipip') ? { disabled: true } : {})
-      },
-      aesthetics: moduleResults.aesthetics
-        ? { responses: moduleResults.aesthetics.responses, result: moduleResults.aesthetics.result, ...(getDisabled('aesthetics') ? { disabled: true } : {}) }
-        : (resumeData?.modules?.aesthetics
-          ? { responses: resumeData.modules.aesthetics.responses, ...(getDisabled('aesthetics') ? { disabled: true } : {}) }
-          : (storedModules?.aesthetics
-            ? {
-                responses: Array.isArray(storedModules.aesthetics.responses) ? storedModules.aesthetics.responses : [],
-                result: storedModules.aesthetics,
-                ...(getDisabled('aesthetics') ? { disabled: true } : {})
-              }
-            : (getDisabled('aesthetics') ? { responses: [], disabled: true } : null))),
-      music: moduleResults.music
-        ? { responses: moduleResults.music.responses, result: moduleResults.music.result, ...(getDisabled('music') ? { disabled: true } : {}) }
-        : (resumeData?.modules?.music
-          ? { responses: resumeData.modules.music.responses, ...(getDisabled('music') ? { disabled: true } : {}) }
-          : (storedModules?.music
-            ? {
-                responses: Array.isArray(storedModules.music.responses) ? storedModules.music.responses : [],
-                result: storedModules.music,
-                ...(getDisabled('music') ? { disabled: true } : {})
-              }
-            : (getDisabled('music') ? { responses: [], disabled: true } : null))),
-      delivery: moduleResults.delivery
-        ? { responses: moduleResults.delivery.responses, result: moduleResults.delivery.result, ...(getDisabled('delivery') ? { disabled: true } : {}) }
-        : (resumeData?.modules?.delivery
-          ? { responses: resumeData.modules.delivery.responses, ...(getDisabled('delivery') ? { disabled: true } : {}) }
-          : (storedModules?.delivery
-            ? {
-                responses: Array.isArray(storedModules.delivery.responses) ? storedModules.delivery.responses : [],
-                result: storedModules.delivery,
-                ...(getDisabled('delivery') ? { disabled: true } : {})
-              }
-            : (getDisabled('delivery') ? { responses: [], disabled: true } : null))),
-      skills: moduleResults.skills
-        ? {
-            responses: moduleResults.skills.responses,
-            result: moduleResults.skills.result,
-            testAnswers: moduleResults.skills.testAnswers || {},
-            ...(getDisabled('skills') ? { disabled: true } : {})
-          }
-        : (resumeData?.modules?.skills
-          ? {
-              responses: resumeData.modules.skills.responses,
-              testAnswers: resumeData.modules.skills.testAnswers || {},
-              ...(getDisabled('skills') ? { disabled: true } : {})
-            }
-          : (storedModules?.skills
-            ? {
-                responses: Array.isArray(storedModules.skills.responses) ? storedModules.skills.responses : [],
-                result: storedModules.skills,
-                testAnswers: storedModules.skills.testAnswers || {},
-                ...(getDisabled('skills') ? { disabled: true } : {})
-              }
-            : (getDisabled('skills') ? { responses: [], testAnswers: {}, disabled: true } : null))),
-      communication: moduleResults.communication
-        ? { responses: moduleResults.communication.responses, result: moduleResults.communication.result, ...(getDisabled('communication') ? { disabled: true } : {}) }
-        : (resumeData?.modules?.communication
-          ? { responses: resumeData.modules.communication.responses, ...(getDisabled('communication') ? { disabled: true } : {}) }
-          : (storedModules?.communication
-            ? {
-                responses: Array.isArray(storedModules.communication.responses) ? storedModules.communication.responses : [],
-                result: storedModules.communication,
-                ...(getDisabled('communication') ? { disabled: true } : {})
-              }
-            : (getDisabled('communication') ? { responses: [], disabled: true } : null))),
-      state: moduleResults.state
-        ? {
-            responses: moduleResults.state.responses,
-            result: moduleResults.state.result,
-            state: moduleResults.state.state || moduleResults.state.result,
-            ...(getDisabled('state') ? { disabled: true } : {})
-          }
-        : (resumeData?.modules?.state
-          ? {
-              responses: resumeData.modules.state.responses,
-              state: resumeData.modules.state.state || resumeData.modules.state.result,
-              ...(getDisabled('state') ? { disabled: true } : {})
-            }
-          : (storedModules?.state
-            ? {
-                responses: Array.isArray(storedModules.state.responses) ? storedModules.state.responses : [],
-                state: storedModules.state.state || storedModules.state,
-                ...(getDisabled('state') ? { disabled: true } : {})
-              }
-            : {
-                responses: [],
-                state: canonicalizeState(runtimeState || DEFAULT_STATE)
-              })),
+      ipip: Object.assign(
+        { responses: resumeData?.modules?.ipip?.responses || moduleResults.ipip?.responses || storedModules?.ipip?.responses || [] },
+        getDisabled('ipip') ? { disabled: true } : {},
+        (resumeData?.modules?.ipip?.note || storedModules?.ipip?.note || moduleResults.ipip?.note || moduleNotes.ipip)
+          ? { note: resumeData?.modules?.ipip?.note || storedModules?.ipip?.note || moduleResults.ipip?.note || moduleNotes.ipip }
+          : {}
+      ),
+      aesthetics: (function(){
+        const existing = moduleResults.aesthetics ? { responses: moduleResults.aesthetics.responses, result: moduleResults.aesthetics.result } : (resumeData?.modules?.aesthetics ? { responses: resumeData.modules.aesthetics.responses } : (storedModules?.aesthetics ? { responses: Array.isArray(storedModules.aesthetics.responses) ? storedModules.aesthetics.responses : [], result: storedModules.aesthetics } : null));
+        if (!existing) return getDisabled('aesthetics') ? { responses: [], disabled: true } : null;
+        return Object.assign(
+          existing,
+          getDisabled('aesthetics') ? { disabled: true } : {},
+          (resumeData?.modules?.aesthetics?.note || storedModules?.aesthetics?.note || moduleResults.aesthetics?.note || moduleNotes.aesthetics)
+            ? { note: resumeData?.modules?.aesthetics?.note || storedModules?.aesthetics?.note || moduleResults.aesthetics?.note || moduleNotes.aesthetics }
+            : {}
+        );
+      })(),
+      music: (function(){
+        const existing = moduleResults.music ? { responses: moduleResults.music.responses, result: moduleResults.music.result } : (resumeData?.modules?.music ? { responses: resumeData.modules.music.responses } : (storedModules?.music ? { responses: Array.isArray(storedModules.music.responses) ? storedModules.music.responses : [], result: storedModules.music } : null));
+        if (!existing) return getDisabled('music') ? { responses: [], disabled: true } : null;
+        return Object.assign(existing, getDisabled('music') ? { disabled: true } : {}, (resumeData?.modules?.music?.note || storedModules?.music?.note || moduleResults.music?.note || moduleNotes.music) ? { note: resumeData?.modules?.music?.note || storedModules?.music?.note || moduleResults.music?.note || moduleNotes.music } : {});
+      })(),
+      delivery: (function(){
+        const existing = moduleResults.delivery ? { responses: moduleResults.delivery.responses, result: moduleResults.delivery.result } : (resumeData?.modules?.delivery ? { responses: resumeData.modules.delivery.responses } : (storedModules?.delivery ? { responses: Array.isArray(storedModules.delivery.responses) ? storedModules.delivery.responses : [], result: storedModules.delivery } : null));
+        if (!existing) return getDisabled('delivery') ? { responses: [], disabled: true } : null;
+        return Object.assign(existing, getDisabled('delivery') ? { disabled: true } : {}, (resumeData?.modules?.delivery?.note || storedModules?.delivery?.note || moduleResults.delivery?.note || moduleNotes.delivery) ? { note: resumeData?.modules?.delivery?.note || storedModules?.delivery?.note || moduleResults.delivery?.note || moduleNotes.delivery } : {});
+      })(),
+      delivery2: (function(){
+        const existing = moduleResults.delivery2 ? { responses: moduleResults.delivery2.responses, result: moduleResults.delivery2.result } : (resumeData?.modules?.delivery2 ? { responses: resumeData.modules.delivery2.responses } : (storedModules?.delivery2 ? { responses: Array.isArray(storedModules.delivery2.responses) ? storedModules.delivery2.responses : [], result: storedModules.delivery2 } : null));
+        if (!existing) return getDisabled('delivery2') ? { responses: [], disabled: true } : null;
+        return Object.assign(existing, getDisabled('delivery2') ? { disabled: true } : {}, (resumeData?.modules?.delivery2?.note || storedModules?.delivery2?.note || moduleResults.delivery2?.note || moduleNotes.delivery2) ? { note: resumeData?.modules?.delivery2?.note || storedModules?.delivery2?.note || moduleResults.delivery2?.note || moduleNotes.delivery2 } : {});
+      })(),
+      skills: (function(){
+        const existing = moduleResults.skills ? { responses: moduleResults.skills.responses, result: moduleResults.skills.result, testAnswers: moduleResults.skills.testAnswers || {} } : (resumeData?.modules?.skills ? { responses: resumeData.modules.skills.responses, testAnswers: resumeData.modules.skills.testAnswers || {} } : (storedModules?.skills ? { responses: Array.isArray(storedModules.skills.responses) ? storedModules.skills.responses : [], result: storedModules.skills, testAnswers: storedModules.skills.testAnswers || {} } : null));
+        if (!existing) return getDisabled('skills') ? { responses: [], testAnswers: {}, disabled: true } : null;
+        return Object.assign(existing, getDisabled('skills') ? { disabled: true } : {}, (resumeData?.modules?.skills?.note || storedModules?.skills?.note || moduleResults.skills?.note || moduleNotes.skills) ? { note: resumeData?.modules?.skills?.note || storedModules?.skills?.note || moduleResults.skills?.note || moduleNotes.skills } : {});
+      })(),
+      communication: (function(){
+        const existing = moduleResults.communication ? { responses: moduleResults.communication.responses, result: moduleResults.communication.result } : (resumeData?.modules?.communication ? { responses: resumeData.modules.communication.responses } : (storedModules?.communication ? { responses: Array.isArray(storedModules.communication.responses) ? storedModules.communication.responses : [], result: storedModules.communication } : null));
+        if (!existing) return getDisabled('communication') ? { responses: [], disabled: true } : null;
+        return Object.assign(existing, getDisabled('communication') ? { disabled: true } : {}, (resumeData?.modules?.communication?.note || storedModules?.communication?.note || moduleResults.communication?.note || moduleNotes.communication) ? { note: resumeData?.modules?.communication?.note || storedModules?.communication?.note || moduleResults.communication?.note || moduleNotes.communication } : {});
+      })(),
+      state: (function(){
+        const existing = moduleResults.state ? { responses: moduleResults.state.responses, result: moduleResults.state.result, state: moduleResults.state.state || moduleResults.state.result } : (resumeData?.modules?.state ? { responses: resumeData.modules.state.responses, state: resumeData.modules.state.state || resumeData.modules.state.result } : (storedModules?.state ? { responses: Array.isArray(storedModules.state.responses) ? storedModules.state.responses : [], state: storedModules.state.state || storedModules.state } : { responses: [], state: canonicalizeState(runtimeState || DEFAULT_STATE) }));
+        if (!existing) return existing;
+        return Object.assign(existing, getDisabled('state') ? { disabled: true } : {}, (resumeData?.modules?.state?.note || storedModules?.state?.note || moduleResults.state?.note || moduleNotes.state) ? { note: resumeData?.modules?.state?.note || storedModules?.state?.note || moduleResults.state?.note || moduleNotes.state } : {});
+      })(),
       base: baseContext || {}
     };
   }
@@ -911,40 +911,227 @@
     }
   }
 
+  // Helpers to build BASE prefix parts locally (avoid importing buildPrefixSegment here)
+  function titleCase(value) {
+    const text = String(value || '').trim();
+    if (!text) return '';
+    return text
+      .split(/\s+/)
+      .map((part) => part ? part[0].toUpperCase() + part.slice(1).toLowerCase() : '')
+      .join(' ');
+  }
+
+  function getFirstnameFromBase(base) {
+    const explicit = String(base?.first_name || base?.firstname || '').trim();
+    if (explicit) return explicit;
+    const name = String(base?.name || '').trim();
+    if (!name) return '';
+    return name.split(/\s+/)[0] || '';
+  }
+
+  function getTimezoneAbbreviationForBase(timezone) {
+    const text = String(timezone || '').trim();
+    if (!text) return '';
+    if (/^[A-Z]{2,5}$/.test(text)) return text;
+
+    const map = {
+      UTC: 'UTC',
+      'Etc/UTC': 'UTC',
+      'Etc/GMT': 'GMT',
+      'America/New_York': 'EST',
+      'America/Chicago': 'CST',
+      'America/Denver': 'MST',
+      'America/Los_Angeles': 'PST',
+      'Europe/London': 'GMT',
+      'Europe/Paris': 'CET',
+      'Asia/Tokyo': 'JST',
+      'Australia/Sydney': 'AEST'
+    };
+
+    return map[text] || text;
+  }
+
+  function buildBasePartsFromBase(base) {
+    const b = base && typeof base === 'object' ? base : {};
+    const parts = [];
+    const firstName = getFirstnameFromBase(b);
+    if (firstName) parts.push(firstName);
+    if (Number.isInteger(Number(b.birth_year))) parts.push(String(Math.round(Number(b.birth_year))));
+    if (b.gender) parts.push(titleCase(b.gender));
+    if (b.locale) parts.push(String(b.locale));
+    if (b.timezone) parts.push(getTimezoneAbbreviationForBase(b.timezone));
+    return parts;
+  }
+
   function deriveCurrentIamCode(profileFile) {
-    if (!profileFile?.profile) return '';
-    try {
-      const profile = profileFile.profile;
-      const ipipDisabled = profile?.modules?.ipip?.disabled === true;
-      const scored = profile.scores && typeof profile.scores === 'object'
-        ? {
-            normalized: {
-              O: ipipDisabled ? 0 : Number(profile.scores.openness ?? 0),
-              C: ipipDisabled ? 0 : Number(profile.scores.conscientiousness ?? 0),
-              E: ipipDisabled ? 0 : Number(profile.scores.extraversion ?? 0),
-              A: ipipDisabled ? 0 : Number(profile.scores.agreeableness ?? 0),
-              N: ipipDisabled ? 0 : Number(profile.scores.neuroticism ?? 0)
-            }
+    // If no explicit profileFile provided, fall back to building one from current UI state
+    if (!profileFile?.profile) {
+      const fb = buildFallbackExportProfile();
+      if (fb && fb.profile) profileFile = fb;
+      else return '';
+    }
+    const profile = profileFile.profile;
+    const ipipDisabled = profile?.modules?.ipip?.disabled === true;
+    const ipipResponses = Array.isArray(profile?.modules?.ipip?.responses)
+      ? profile.modules.ipip.responses
+      : [];
+    const scored = profile.scores && typeof profile.scores === 'object'
+      ? {
+          normalized: {
+            O: ipipDisabled ? 0 : Number(profile.scores.openness ?? 0),
+            C: ipipDisabled ? 0 : Number(profile.scores.conscientiousness ?? 0),
+            E: ipipDisabled ? 0 : Number(profile.scores.extraversion ?? 0),
+            A: ipipDisabled ? 0 : Number(profile.scores.agreeableness ?? 0),
+            N: ipipDisabled ? 0 : Number(profile.scores.neuroticism ?? 0)
           }
-        : { normalized: {} };
-      const modules = {
-        ...(profile.modules && typeof profile.modules === 'object' ? profile.modules : {}),
-        base: profile.base && typeof profile.base === 'object' ? profile.base : undefined,
-        state: profile?.modules?.state,
-        skills: Array.isArray(profile?.modules?.skills?.filtered)
-          ? profile.modules.skills.filtered
-          : profile?.modules?.skills
-      };
-      for (const moduleKey of ['ipip', 'aesthetics', 'music', 'delivery', 'communication', 'state', 'skills']) {
-        if (modules[moduleKey] && typeof modules[moduleKey] === 'object' && !Array.isArray(modules[moduleKey]) && modules[moduleKey].disabled === true) {
-          delete modules[moduleKey];
         }
+      : (!ipipDisabled && ipipResponses.length === 50)
+        ? scoreResponses(ipipResponses)
+        : { normalized: {} };
+    const modules = {
+      ...(profile.modules && typeof profile.modules === 'object' ? profile.modules : {}),
+      base: profile.base && typeof profile.base === 'object' ? profile.base : undefined,
+      state: profile?.modules?.state,
+      // Preserve the skills module object so notes/metadata remain available to builders
+      skills: profile?.modules?.skills
+    };
+    for (const moduleKey of ['ipip', 'aesthetics', 'music', 'delivery', 'delivery2', 'communication', 'state', 'skills']) {
+      if (modules[moduleKey] && typeof modules[moduleKey] === 'object' && !Array.isArray(modules[moduleKey]) && modules[moduleKey].disabled === true) {
+        delete modules[moduleKey];
       }
-      const derived = buildIam(scored, modules);
-      return derived?.code || '';
+    }
+
+    try {
+      const derived = buildIam(scored, modules, { format: 'long_form', lfVersion: 'LF.0.2' });
+      if (derived && derived.code) return derived.code;
+    } catch (err) {
+      // Fall through to local fallback below
+    }
+
+    // If calling the shared `buildIam` failed (e.g. mapping loader not available in browser),
+    // build a simple long-form string here that doesn't rely on external mapping files.
+    try {
+      return buildSimpleLongForm(scored, modules);
     } catch (err) {
       return '';
     }
+  }
+
+  // Local simplified long-form generator — uses metric keys directly and avoids mapping loader.
+  function buildSimpleLongForm(scored, modules) {
+    function localNamed(fullName, moduleObj) {
+      const note = moduleObj && (moduleObj.note || (moduleObj.result && moduleObj.result.note));
+      if (!note) return fullName;
+      const s = String(note).trim().replace(/[/:]+/g, '-').replace(/[()]/g, '').replace(/\s+/g, ' ').slice(0, 60);
+      return s ? `${fullName}(${s})` : fullName;
+    }
+    const segItems = [];
+    const buildStatePairs = (stateObj) => {
+      if (!stateObj || typeof stateObj !== 'object') return [];
+      const pairs = [];
+
+      const bandwidth = Number(stateObj.bandwidth);
+      if (Number.isFinite(bandwidth)) {
+        pairs.push(`bandwidth${Math.round(bandwidth)}`);
+      }
+
+      const mode = String(stateObj.mode || '').toLowerCase();
+      if (mode === 'convergent' || mode === 'divergent') {
+        pairs.push(`mode:${titleCase(mode)}`);
+      }
+
+      const horizon = String(stateObj.horizon || '').toLowerCase();
+      if (horizon === 'now' || horizon === 'long') {
+        pairs.push(`horizon:${titleCase(horizon)}`);
+      }
+
+      const stakes = String(stateObj.stakes || '').toLowerCase();
+      if (stakes === 'critical' || stakes === 'casual') {
+        pairs.push(`stakes:${titleCase(stakes)}`);
+      }
+
+      const domain = String(stateObj.domain || '').toLowerCase();
+      if (domain === 'work' || domain === 'home') {
+        pairs.push(`domain:${titleCase(domain)}`);
+      }
+
+      return pairs;
+    };
+
+    const pushSegment = (fullName, metricsObj) => {
+      if (!metricsObj || typeof metricsObj !== 'object') return;
+      const pairs = [];
+      const metricMap = LOCAL_METRIC_MAPS[String(fullName).toUpperCase()] || null;
+      for (const [k, v] of Object.entries(metricsObj)) {
+        if (v == null) continue;
+        const num = Math.round(Number(v) || 0);
+        const lookup = metricMap && (metricMap[String(k).toUpperCase()] || metricMap[String(k).toLowerCase()]);
+        const metricName = lookup || String(k).toLowerCase();
+        pairs.push(`${metricName}${num}`);
+      }
+      if (pairs.length) {
+        const agg = computeLocalAggregate(metricsObj);
+        segItems.push({ fullName, pairs, score: agg });
+      }
+    };
+
+    // Personality
+    const s = (scored && scored.normalized) ? scored.normalized : {};
+    if (s && Object.keys(s).length) {
+      const map = { O: 'openness', C: 'conscientiousness', E: 'extraversion', A: 'agreeableness', N: 'neuroticism' };
+      const pPairs = [];
+      for (const key of ['O', 'C', 'E', 'A', 'N']) {
+        const val = Math.round(Number(s[key] ?? s[key.toLowerCase()] ?? 0) || 0);
+        pPairs.push(`${map[key]}${val}`);
+      }
+      const agg = Math.round((Number(s.O || 0) + Number(s.C || 0) + Number(s.E || 0) + Number(s.A || 0) + Number(s.N || 0)) / 5 || 0);
+      segItems.push({ fullName: 'PERSONALITY', pairs: pPairs, score: agg });
+    }
+
+    if (modules && modules.aesthetics && modules.aesthetics.normalized) pushSegment(localNamed('AESTHETIC', modules.aesthetics), modules.aesthetics.normalized);
+    if (modules && modules.music && modules.music.normalized) pushSegment(localNamed('MUSIC', modules.music), modules.music.normalized);
+    if (modules && modules.communication && (modules.communication.normalized || modules.communication.normalized_trait_scores)) {
+      const cn = modules.communication.normalized_trait_scores || modules.communication.normalized;
+      pushSegment(localNamed('COMMUNICATION', modules.communication), cn);
+    }
+    if (modules && modules.delivery && modules.delivery.normalized) pushSegment(localNamed('DELIVERY', modules.delivery), modules.delivery.normalized);
+    if (modules && modules.delivery2) {
+      const d2 = modules.delivery2.normalized || modules.delivery2.normalized_trait_scores || (modules.delivery2.result && modules.delivery2.result.normalized) || modules.delivery2;
+      if (d2 && typeof d2 === 'object' && Object.keys(d2).length) pushSegment(localNamed('DELIVERY2', modules.delivery2), d2);
+    }
+    if (modules && modules.state && typeof modules.state === 'object' && Object.keys(modules.state).length) {
+      const statePairs = buildStatePairs(modules.state);
+      if (statePairs.length) {
+        const stateBandwidth = Number(modules.state.bandwidth);
+        const stateScore = Number.isFinite(stateBandwidth) ? Math.round(stateBandwidth) : 0;
+        segItems.push({ fullName: localNamed('STATE', modules.state), pairs: statePairs, score: stateScore });
+      }
+    }
+
+    segItems.sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return String(a.fullName || '').toUpperCase().localeCompare(String(b.fullName || '').toUpperCase());
+    });
+
+    const segmentsText = segItems.map((s) => `${s.fullName}:${s.pairs.join(',')}`).join('/');
+    if (!segmentsText) return '';
+    // Build BASE from modules.base using local helper
+    const prefix = 'IAM-v0.2';
+    const baseParts = buildBasePartsFromBase(modules && modules.base ? modules.base : {});
+    let code = prefix;
+    if (baseParts.length) {
+      code += `/BASE:${baseParts.join(',')}`;
+    }
+    code += `/${segmentsText}`;
+    return code;
+  }
+
+  function computeLocalAggregate(obj) {
+    if (!obj || typeof obj !== 'object') return 0;
+    const vals = Object.values(obj).filter((v) => typeof v === 'number' && Number.isFinite(v));
+    if (!vals.length) return 0;
+    const sum = vals.reduce((a, b) => a + b, 0);
+    return Math.round(sum / vals.length);
   }
 
   function normalizeIamCodeForPopup(iamCode, profileFile) {
@@ -989,6 +1176,7 @@
           current: moduleValue.responses.length,
           expectedLength,
           disabled: moduleValue.disabled === true,
+          note: typeof moduleValue.note === 'string' ? moduleValue.note : undefined,
           completed: isModuleComplete(moduleName, moduleValue)
         });
       };
@@ -997,6 +1185,7 @@
       persistModule('aesthetics', modules.aesthetics);
       persistModule('music', modules.music);
       persistModule('delivery', modules.delivery);
+      persistModule('delivery2', modules.delivery2);
       persistModule('skills', modules.skills);
       persistModule('communication', modules.communication);
       if (modules.state && typeof modules.state === 'object') {
@@ -1007,6 +1196,7 @@
           expectedLength: 0,
           disabled: modules.state.disabled === true,
           completed: false,
+          note: typeof modules.state.note === 'string' ? modules.state.note : undefined,
           state: modules.state.state || modules.state
         });
       }
@@ -1035,7 +1225,11 @@
     const expectedLength = moduleMeta?.expectedLength || responses.length;
     // Progress handlers can mark a module complete before the completion event fires,
     // so use prior completion-result presence to decide whether this is a new completion.
-    const wasAlreadyComplete = Boolean(moduleResults[module]);
+    const wasAlreadyComplete = Boolean(
+      moduleResults[module]
+      || (resumeData && resumeData.modules && resumeData.modules[module] && resumeData.modules[module].completed === true)
+      || (completedModules && completedModules[module] === true)
+    );
 
     try {
       sessionService.saveProgress(module, {
@@ -1069,7 +1263,8 @@
         const moduleLabel = moduleMeta?.label || module;
         completionPopup = {
           title: `${moduleLabel} completed`,
-          message: 'Context file updated and ready to save as JSON.'
+          message: 'Context file updated and ready to save as JSON.',
+          image: chooseRandomCompleteImage()
         };
         try {
           localStorage.setItem('iam_profile', JSON.stringify(partialProfile));
@@ -1084,7 +1279,8 @@
       if (module === 'ipip') setActiveModule('aesthetics');
       else if (module === 'aesthetics') setActiveModule('music');
       else if (module === 'music') setActiveModule('delivery');
-      else if (module === 'delivery') setActiveModule('skills');
+      else if (module === 'delivery') setActiveModule('delivery2');
+      else if (module === 'delivery2') setActiveModule('skills');
       else if (module === 'skills') setActiveModule('communication');
       else if (module === 'communication') {
         setActiveModule('state');
@@ -1108,6 +1304,7 @@
     const detail = payloadOrEvent?.detail || payloadOrEvent || {};
     const { module, responses, current, expectedLength, testAnswers, state } = detail;
     if (!module || !Array.isArray(responses)) return;
+    const wasAlreadyComplete = Boolean(completedModules && completedModules[module] === true);
     try {
       if (module === 'state') {
         runtimeState = canonicalizeState(state || runtimeState);
@@ -1153,6 +1350,31 @@
         expectedLength: isStateModule ? 0 : expectedLength
       });
 
+      // If this progress update caused the module to become complete (and it wasn't before),
+      // show the completion popup so modules that don't dispatch a `complete` event still show it.
+      if (!wasAlreadyComplete && !isStateModule && (answered >= resolvedExpected)) {
+        try {
+          const moduleMeta = moduleOrder.find((mod) => mod.key === module);
+          const moduleLabel = moduleMeta?.label || module;
+          const modulePayload = buildModuleResponses();
+          partialProfile = toContextFile(scoredFromModulePayload(modulePayload), modulePayload);
+          partialModule = module;
+          completionPopup = {
+            title: `${moduleLabel} completed`,
+            message: 'Context file updated and ready to save as JSON.',
+            image: chooseRandomCompleteImage()
+          };
+          try {
+            localStorage.setItem('iam_profile', JSON.stringify(partialProfile));
+            refreshStoredProfile();
+          } catch (err) {
+            console.error('Failed to persist partial profile', err);
+          }
+        } catch (err) {
+          console.error('Failed to prepare partial context on progress completion', err);
+        }
+      }
+
       if (module === 'state') {
         const modulePayload = buildModuleResponses();
         const latest = toContextFile(scoredFromModulePayload(modulePayload), modulePayload);
@@ -1180,6 +1402,8 @@
         setActiveModule('music');
       } else if (resumeData?.modules?.delivery && !isModuleComplete('delivery', resumeData.modules.delivery)) {
         setActiveModule('delivery');
+      } else if (resumeData?.modules?.delivery2 && !isModuleComplete('delivery2', resumeData.modules.delivery2)) {
+        setActiveModule('delivery2');
       } else if (resumeData?.modules?.skills && !isModuleComplete('skills', resumeData.modules.skills)) {
         setActiveModule('skills');
       } else if (resumeData?.modules?.communication && !isModuleComplete('communication', resumeData.modules.communication)) {
@@ -1192,6 +1416,8 @@
         setActiveModule('music');
       } else if (resumeData?.modules?.delivery) {
         setActiveModule('delivery');
+      } else if (resumeData?.modules?.delivery2) {
+        setActiveModule('delivery2');
       } else if (resumeData?.modules?.skills) {
         setActiveModule('skills');
       } else if (resumeData?.modules?.communication) {
@@ -1215,8 +1441,8 @@
       console.error('Failed to clear progress', err);
     }
     resumeData = null;
-    completedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, skills: false, communication: false, state: false };
-    moduleResults = { ipip: null, aesthetics: null, music: null, delivery: null, skills: null, communication: null, state: null };
+    completedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, delivery2: false, skills: false, communication: false, state: false };
+    moduleResults = { ipip: null, aesthetics: null, music: null, delivery: null, delivery2: null, skills: null, communication: null, state: null };
     partialProfile = null;
     partialModule = null;
     storedProfile = null;
@@ -1224,13 +1450,14 @@
     importError = '';
     completionPopup = null;
     active = 'base';
-    touchedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, skills: false, communication: false, state: false };
+    touchedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, delivery2: false, skills: false, communication: false, state: false };
     moduleProgress = {
       base: { answered: 0, expected: 1 },
       ipip: { answered: 0, expected: 50 },
       aesthetics: { answered: 0, expected: 32 },
       music: { answered: 0, expected: 20 },
       delivery: { answered: 0, expected: 30 },
+      delivery2: { answered: 0, expected: 24 },
       skills: { answered: 0, expected: 35 },
       communication: { answered: 0, expected: 20 },
       state: { answered: 0, expected: 0 }
@@ -1457,6 +1684,34 @@
       window.removeEventListener('resize', computePopoverPosition);
     }
   }
+
+  function generateIamFromCurrentSelection() {
+    let sourceProfile = null;
+
+    if (storedProfile?.profile?.iam?.code) {
+      sourceProfile = storedProfile;
+    }
+
+    if (!sourceProfile) {
+      sourceProfile = buildFallbackExportProfile() || partialProfile || storedProfile || exportProfile;
+    }
+
+    generatedIamProfile = sourceProfile || null;
+    if (!sourceProfile) {
+      currentIamCode = '';
+      return;
+    }
+
+    const derivedLong = deriveCurrentIamCode(sourceProfile) || '';
+    currentIamCode = normalizeIamCodeForPopup(derivedLong, sourceProfile);
+  }
+
+  function openGeneratePopup() {
+    iamCopyStatus = '';
+    generateIamFromCurrentSelection();
+    showIamPopup = true;
+  }
+
 </script>
 
 <section class="survey-shell">
@@ -1512,7 +1767,7 @@
         <button class="mini-btn topbar-btn" on:click={() => { showMainResetDialog = true; closeHeaderMenu(); }}>Reset</button>
         <button class="mini-btn topbar-btn" on:click={() => { triggerImportPicker(); closeHeaderMenu(); }}>Open</button>
         <button class="mini-btn topbar-btn" on:click={() => { downloadCurrent(); closeHeaderMenu(); }} disabled={!canSaveProfile}>Save</button>
-        <button class="mini-btn topbar-btn" on:click={() => { showIamPopup = true; iamCopyStatus = ''; closeHeaderMenu(); }} disabled={!canGenerateIam}>Generate</button>
+        <button class="mini-btn topbar-btn" on:click={() => { openGeneratePopup(); closeHeaderMenu(); }} disabled={!canGenerateIam}>Generate</button>
         <button class="mini-btn topbar-btn" on:click={() => { showHelp = true; closeHeaderMenu(); }} aria-haspopup="dialog" aria-expanded={showHelp}>Help</button>
       </div>
     </div>
@@ -1554,7 +1809,24 @@
           {/key}
         {/if}
       </div>
-      
+
+    {#if active !== 'state' && active !== 'base'}
+      <div class="module-note-row">
+        <input
+          class="module-note"
+          type="text"
+          placeholder="Details and examples that represent this module."
+          bind:value={moduleNotes[active]}
+          on:input={() => {
+            try {
+              sessionService.saveProgress(active, { note: moduleNotes[active] });
+              persistCurrentProfile();
+            } catch (e) {}
+          }}
+        />
+      </div>
+    {/if}
+
     </div>
 
     {#key `${active}:${surveyResetKey}`}
@@ -1568,6 +1840,8 @@
         <Music onProgress={handleModuleProgress} on:moduleprogress={handleModuleProgress} on:complete={handleModuleComplete} initialResponses={resumeData?.modules?.music?.responses} initialCurrent={resumeData?.modules?.music?.current} />
       {:else if active === 'delivery'}
         <Delivery onProgress={handleModuleProgress} on:moduleprogress={handleModuleProgress} on:complete={handleModuleComplete} initialResponses={resumeData?.modules?.delivery?.responses} initialCurrent={resumeData?.modules?.delivery?.current} />
+      {:else if active === 'delivery2'}
+        <Delivery2 onProgress={handleModuleProgress} on:moduleprogress={handleModuleProgress} on:complete={handleModuleComplete} initialResponses={resumeData?.modules?.delivery2?.responses} initialCurrent={resumeData?.modules?.delivery2?.current} />
       {:else if active === 'skills'}
         <Skills onProgress={handleModuleProgress} on:moduleprogress={handleModuleProgress} on:complete={handleModuleComplete} initialResponses={resumeData?.modules?.skills?.responses} initialCurrent={resumeData?.modules?.skills?.current} initialConfirmations={resumeData?.modules?.skills?.testAnswers} />
       {:else if active === 'communication'}
@@ -1582,6 +1856,9 @@
     <div class="popup-backdrop" role="dialog" aria-modal="true" aria-labelledby="completion-popup-title">
       <div class="popup-card">
         <p class="panel-eyebrow">Context updated</p>
+        {#if completionPopup.image}
+          <img src={completionPopup.image} alt="Ziggy" style="max-width:160px;margin:0 auto 12px;display:block" />
+        {/if}
         <h3 id="completion-popup-title">{completionPopup.title}</h3>
         <p>{completionPopup.message}</p>
         <div class="panel-actions">
@@ -1667,7 +1944,7 @@
         <p class="panel-eyebrow">Current profile</p>
         <h3 id="iam-popup-title">Current I-AM String</h3>
         <p>This block includes model-facing instructions that travel with the current I-AM string.</p>
-        <textarea class="iam-popup-text" readonly value={iamPopupText} aria-label="Current I-AM text"></textarea>
+        <textarea class="iam-popup-text" readonly bind:value={iamPopupText} aria-label="Current I-AM text"></textarea>
         {#if iamCopyStatus}
           <p class="iam-copy-status">{iamCopyStatus}</p>
         {/if}
@@ -1858,17 +2135,6 @@
     font-weight: 700;
   }
 
-  .modules-toggle small {
-    margin-left: auto;
-    font-size: 0.85rem;
-    opacity: 0.9;
-  }
-
-  /* when the popover is open, hide the small counter on the toggle to avoid duplicate counts */
-  .modules-toggle[aria-expanded="true"] small {
-    display: none;
-  }
-
   .modules-caret {
     margin-left: auto;
     opacity: 0.9;
@@ -1902,6 +2168,19 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
+    /* Limit height and enable scrolling when there are many modules */
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 6px; /* room for scrollbar */
+  }
+
+  /* scrollbar styling */
+  .modules-popover .module-rail::-webkit-scrollbar {
+    width: 10px;
+  }
+  .modules-popover .module-rail::-webkit-scrollbar-thumb {
+    background: rgba(148,163,184,0.12);
+    border-radius: 10px;
   }
 
   /* show per-chip progress inside the popover only when the popover is open */
@@ -2088,6 +2367,25 @@
     width: 100%;
     gap: 12px;
     flex-wrap: wrap;
+  }
+
+  .module-note-row {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .module-note {
+    width: 100%;
+    height: 40px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px dashed rgba(148, 163, 184, 0.18);
+    background: rgba(15, 23, 42, 0.45);
+    color: var(--iam-text-primary);
+    font-size: 0.95rem;
+    line-height: 1.4;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    box-sizing: border-box;
   }
 
   .module-action-row {

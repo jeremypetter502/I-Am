@@ -2,12 +2,16 @@ const DEFAULT_STATE = {
   bandwidth: 50,
   mode: 'convergent',
   horizon: 'long',
-  stakes: 'casual'
+  stakes: 'casual',
+  humor: 'normal'
+  ,domain: 'work'
 };
 
 const MODE_VALUES = new Set(['convergent', 'divergent']);
 const HORIZON_VALUES = new Set(['now', 'long']);
 const STAKES_VALUES = new Set(['critical', 'casual']);
+const HUMOR_VALUES = new Set(['none', 'low', 'normal', 'high']);
+const DOMAIN_VALUES = new Set(['work', 'home']);
 
 function clampBandwidth(value) {
   const num = Number(value);
@@ -27,6 +31,8 @@ export function canonicalizeState(input = {}) {
     mode: MODE_VALUES.has(merged.mode) ? merged.mode : DEFAULT_STATE.mode,
     horizon: HORIZON_VALUES.has(merged.horizon) ? merged.horizon : DEFAULT_STATE.horizon,
     stakes: STAKES_VALUES.has(merged.stakes) ? merged.stakes : DEFAULT_STATE.stakes
+    ,humor: HUMOR_VALUES.has(merged.humor) ? merged.humor : DEFAULT_STATE.humor
+    ,domain: DOMAIN_VALUES.has(merged.domain) ? merged.domain : DEFAULT_STATE.domain
   };
 }
 
@@ -46,8 +52,20 @@ export function applyStateDelta(currentState = DEFAULT_STATE, token = '') {
     'STATE:horizon_now': { key: 'horizon', value: 'now' },
     'STATE:horizon_long': { key: 'horizon', value: 'long' },
     'STATE:stakes_critical': { key: 'stakes', value: 'critical' },
-    'STATE:stakes_casual': { key: 'stakes', value: 'casual' }
+    'STATE:stakes_casual': { key: 'stakes', value: 'casual' },
+    'STATE:humor_none': { key: 'humor', value: 'none' },
+    'STATE:humor_low': { key: 'humor', value: 'low' },
+    'STATE:humor_normal': { key: 'humor', value: 'normal' },
+    'STATE:humor_high': { key: 'humor', value: 'high' }
   };
+  if (normalized === 'STATE:domain_work') {
+    next['domain'] = 'work';
+    return canonicalizeState(next);
+  }
+  if (normalized === 'STATE:domain_home') {
+    next['domain'] = 'home';
+    return canonicalizeState(next);
+  }
 
   const mapped = mapping[normalized];
   if (mapped) {
@@ -64,23 +82,25 @@ export function mergeStateDeltas(currentState = DEFAULT_STATE, deltas = []) {
 
 export function formatStateSegment(input = {}) {
   const state = canonicalizeState(input);
-  return `STATE:bandwidth${state.bandwidth},mode:${state.mode},horizon:${state.horizon},stakes:${state.stakes}`;
+  return `STATE:bandwidth${state.bandwidth},mode:${state.mode},horizon:${state.horizon},stakes:${state.stakes},humor:${state.humor},domain:${state.domain}`;
 }
 
 export function parseStateSegment(segment = '') {
   const value = String(segment || '').trim();
-  const canonicalMatch = value.match(/^STATE:bandwidth(\d{1,3}),mode:(convergent|divergent),horizon:(now|long),stakes:(critical|casual)$/);
+  const canonicalMatch = value.match(/^STATE:bandwidth(\d{1,3}),mode:(convergent|divergent),horizon:(now|long),stakes:(critical|casual),humor:(none|low|normal|high),domain:(work|home)$/);
   if (canonicalMatch) {
     return canonicalizeState({
       bandwidth: Number(canonicalMatch[1]),
       mode: canonicalMatch[2],
       horizon: canonicalMatch[3],
-      stakes: canonicalMatch[4]
+      stakes: canonicalMatch[4],
+      humor: canonicalMatch[5],
+      domain: canonicalMatch[6]
     });
   }
 
   const deltaState = applyStateDelta(DEFAULT_STATE, value);
-  if (value.startsWith('STATE:mode_') || value.startsWith('STATE:horizon_') || value.startsWith('STATE:stakes_') || value.startsWith('STATE:bandwidth')) {
+  if (value.startsWith('STATE:mode_') || value.startsWith('STATE:horizon_') || value.startsWith('STATE:stakes_') || value.startsWith('STATE:humor_') || value.startsWith('STATE:bandwidth') || value.startsWith('STATE:domain_')) {
     return deltaState;
   }
 

@@ -74,10 +74,6 @@ export function validateBaseContext(base) {
     errors.push('name must be <= 120 chars');
   }
 
-  if (base.skills && String(base.skills).length > 400) {
-    errors.push('skills must be <= 400 chars');
-  }
-
   return { valid: errors.length === 0, errors };
 }
 
@@ -129,12 +125,14 @@ export function normalizeBaseContext(base) {
   if (out.company != null) out.company = String(out.company).trim();
   if (out.name != null) out.name = String(out.name).trim().slice(0, 120);
   if (out.first_name != null) out.first_name = String(out.first_name).trim().slice(0, 80);
-  if (out.skills != null) out.skills = String(out.skills).trim().slice(0, 400);
   if (out.culture != null) out.culture = String(out.culture).trim().slice(0, 40);
   if (out.gender != null) out.gender = String(out.gender).trim().slice(0, 60);
   if (out.timezone != null) out.timezone = String(out.timezone).trim();
   if (out.locale != null) out.locale = String(out.locale).trim();
-  if (out.communication_style != null) out.communication_style = String(out.communication_style).trim();
+  // Remove fields that are no longer part of the Base module export/import
+  if (out.communication_style != null) delete out.communication_style;
+  if (out.skills != null) delete out.skills;
+  if (out.favorites != null) delete out.favorites;
   if (out.short_bio != null) out.short_bio = String(out.short_bio).trim().slice(0, 280);
 
   if (out.years_experience != null) {

@@ -15,7 +15,7 @@ describe('State module UI', () => {
     };
 
     const { getByText, container } = render(State, {
-      initialState: { bandwidth: 30, mode: 'convergent', horizon: 'long', stakes: 'casual' },
+      initialState: { bandwidth: 30, mode: 'convergent', horizon: 'long', stakes: 'casual', humor: 'normal' },
       onProgress
     });
 
@@ -28,9 +28,11 @@ describe('State module UI', () => {
     await fireEvent.input(slider);
 
     await fireEvent.click(getByText('Critical'));
+    await fireEvent.click(getByText('High'));
 
     expect(latest.state.bandwidth).toBe(70);
     expect(latest.state.stakes).toBe('critical');
+    expect(latest.state.humor).toBe('high');
   });
 
   it('uses defaults when initial state is missing', () => {
@@ -45,7 +47,9 @@ describe('State module UI', () => {
       bandwidth: 50,
       mode: 'convergent',
       horizon: 'long',
-      stakes: 'casual'
+      stakes: 'casual',
+      humor: 'normal',
+      domain: 'work'
     });
   });
 });

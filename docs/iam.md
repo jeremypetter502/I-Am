@@ -1,159 +1,173 @@
+<img src="../public/images/ziggy-sit-laptop.png" align="right" style="float: right; max-width: 34%; margin: 0 14px 10px 0;" alt="I-Am Logo">
+
 # I-AM String Format Overview
 
-## Why I-AM String 
+
+## Why I-AM String
 
 
-- Compact: profile context is encoded in a short string instead of long prose.<img src="../public/images/ziggy-sit-laptop.png" align="right" style="float: right; max-width: 34%; margin: 0 14px 10px 0;" alt="I-Am Logo">
-- Structured: segments are predictable and parseable by tools and prompts.
-- Portable: users can move I-AM string context between sessions, assistants, and workflows.
-- Composable: modules are optional, so users can start small and enrich over time. Experimentation with different combinations or dropping modules is encouraged. Additional modules can be added to the system.
+- Compact: profile context is encoded in a concise machine-friendly string.
+- Structured: segments follow predictable syntax and can be parsed or explained.
+- Portable: users can move the same profile context between assistants and sessions.
+- Composable: modules are optional and can be enabled/disabled independently.
 - In this project, "I-AM" means "I am" personality context.
-- The portable code is called the I-AM string.
 
-An I-AM string is a versioned, segment-based code:
+## Current Canonical Runtime Format
 
-- Starts with `IAM/<version>`
-- Appends optional segments (Personality, Aesthetics, Music, Communication, Delivery, Career/Skills, State)
-- Uses normalized values so modules can be combined consistently
+The current runtime output format is `IAM-v0.2` with long-form segment names.
 
-See the I-AM Segment Anatomy section below for full segment details and links to module docs.
-
-## How I-AM String Is Generated
-
-1. Collect module responses (user can complete modules progressively).
-2. Score each module using documented normalization/scoring rules.
-3. Build a profile object and compute I-AM segment payloads.
-4. Serialize to I-AM string plus JSON storage format for export/import.
-
-The included website automates these steps, but I-AM string generation can be implemented in any system that follows the same scoring and encoding rules.
-
-## Example I-Am String
+High-level shape:
 
 ```text
-I-AM string: IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33/MIN50CLR38WRM75MOT63/MEL56SOP69UNP69INT69CON50/COMM/DRV75ANC80EXP80AMB55/CAR15125200S0190S0260S0360S0560S0670S0780S08100S0970S1260S1560S1780S1870S1970S2090S2160S23100S2470S2660S2770S3190S3260S3360S3460S3590/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
+IAM-v0.2[/BASE:...]/STATE:.../<other segments...>
 ```
 
-## How to Use I-AM String with an LLM
-Provide the I-AM string to an LLM with a short instruction such as:
+Key rules:
 
-- treat the I-AM string as structured user-context metadata
-- adapt tone, depth, format, and interaction style to I-AM string signals
-- prefer explicit user instructions if they conflict with older I-AM string data
-- IAM schema segment descriptions
+- Prefix is `IAM-v0.2`.
+- `BASE` is optional.
+- `STATE` is always the first segment after `BASE` (if `STATE` exists).
+- Remaining segments are ordered by score magnitude (descending), with tie-break by name.
+- Some segments can include note anchors.
 
-This lets responses stay personalized while remaining consistent and auditable. Experiment with including explanation about the segments in the I-AM. Most LLMs can decode the string without help, but they have to think about it.
+## Segment Note Anchors
+When a module has a note, the segment uses `anchors[...]` immediately after the segment name.
 
-Note: The website will generate LLM instructions when generating an I-AM string.
+Pattern:
 
-## I-AM Segment Anatomy
+```text
+SEGMENT:anchors[item1;item2;item3]:metricA50,metricB70
+```
 
-### 1) Header and Version
-- Format starts with `IAM/<version>:`
-- Current full format is commonly `IAM/0.6:` when state and/or profile prefix are present.
-- Related module help:
-  - [Base Context help](src/ui/help/base.md)
+Rules:
 
-### 2) Identity Prefix
-When present, these fields are inserted before OCEAN in this order:
-- `firstName`
-- `birthYear`
-- `gender`
-- `culture` (or locale fallback)
-- `timezoneAbbreviation`
+- Anchor items are separated by semicolons (`;`).
+- Spaces are removed from anchor tokens.
+- Anchor tokens are deduplicated.
+- Brackets `[]` contain the full anchor list.
 
 Example:
-- `IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33...`
 
-Timezone abbreviations are normalized from IANA timezone names where available (for example `America/New_York -> EST`).
-- Related module help:
-  - [Base Context help](src/ui/help/base.md)
+```text
+AESTHETIC:anchors[2001;ProjectHailMary;Dune;Wes21]:minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75
+```
 
-### 3) OCEAN Personality Core
-- Encoded as `OxxCxxExxAxxNxx`
-- Example: `O83C60E45A78N33`
-- Related module help:
-  - [Personality help](src/ui/help/ipip.md)
+## Example I-AM String
 
-### 4) Aesthetics Segment
-- Compact tokens such as:
-  - `MIN` (minimalism)
-  - `CLR` (colorfulness)
-  - `WRM` (warmth)
-  - `MOT` (motion)
-  - `IMG` (imagery/photos or texture fallback)
-  - `TYP` (typography serif preference)
-  - `LAY` (layout grid consistency)
-- Related module help:
-  - [Aesthetics help](src/ui/help/aesthetics.md)
+```text
+IAM-v0.2/BASE:Ziggy/STATE:bandwidth50,mode:Convergent,horizon:Long,stakes:Casual,humor:Normal,domain:Work/SKILLS:anchors[DataAnalytics;SQL;Python;Snowflake;Jupyter]:comprehension90,listening100,writing70,speaking90,mathematics100,science90,critical90,learning80,strategies70,monitoring60,perceptiveness100,coordination80,persuasion70,negotiation70,instructing80,orientation90,complex90,troubleshooting70,operations70,technology80,equipment70,programming70,analysis90,management70,financial_management70,material_management60,personnel_management80,identify100,data_analysis100,evaluation90,judgment70,creativity80/COMMUNICATION:driver70,analytical85,expressive80,amiable60/PERSONALITY:openness85,conscientiousness75,extraversion80,agreeableness88,neuroticism35/MUSIC:anchors[Debussy;Metallica;Skrillex]:mellow50,intense81,sophisticated69,contemporary63,unpretentious75/AESTHETIC:anchors[2001;ProjectHailMary;Dune;Wes21]:minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75/DELIVERY2:structure75,density31,framing50,format44,empathy50,autonomy63
+```
 
-### 5) Music Segment
-- Compact tokens:
-  - `MEL` (mellow)
-  - `SOP` (sophisticated)
-  - `UNP` (unpretentious)
-  - `INT` (intense)
-  - `CON` (contemporary)
-- Related module help:
-  - [Music help](src/ui/help/music.md)
+## Segment Anatomy (Current)
 
-### 6) Communication Segment
-- Marker: `/COMM/`
-- Tokens:
-  - `DRV` (driver)
-  - `ANC` (analytical)
-  - `EXP` (expressive)
-  - `AMB` (amiable)
-- Related module help:
-  - [Communication help](src/ui/help/communication.md)
+### 1) Header
 
-### 7) Delivery Segment
-- Marker: `/DELIVERY/`
-- Compact tokens may include:
-  - `DEF` (deference)
-  - `PEER` (peer stance)
-  - `CHL` (challenge)
-  - `DNS` (density)
-  - `AUD` (audience adaptation)
-  - `STR` (structure)
-  - `ABS` (abstraction)
-  - `FMT` (format control)
-  - `VBS` (verbosity)
-  - `EMP` (empathy)
-  - `CND` (candor)
-  - `HMR` (humor)
-  - `AUT` (autonomy)
-  - `BUR` (burden sharing)
-- Related module help:
-  - [Delivery help](src/ui/help/delivery.md)
+- Prefix: `IAM-v0.2`
 
-### 8) Career/Skills Segment
-- Marker: `/CAR`
-- Begins with normalized 8-digit SOC code (for example `15-1252 -> 15125200`)
-- Followed by sparse skill pairs:
-  - `Sxxpp`
-  - `xx` = skill index from 01 to 35
-  - `pp` = normalized proficiency from 00 to 99/100 rounded to two digits
+### 2) BASE Segment (optional)
 
-Only skills meeting inclusion threshold are emitted.
-- Related module help:
-  - [Skills help](src/ui/help/skills.md)
-  - [Base Context help](src/ui/help/base.md)
+- Marker: `/BASE:`
+- Order: first name, birth year, gender, locale/culture, timezone abbreviation.
 
-### 9) State Segment
+Example:
+
+```text
+BASE:Ziggy/
+```
+
+### 3) STATE Segment (optional, but ordered first when present)
+
 - Marker: `/STATE:`
-- Canonical key/value payload, for example:
-  - `STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual`
-- Related module help:
-  - [State help](src/ui/help/state.md)
+- Canonical payload keys:
+  - `bandwidth`
+  - `mode`
+  - `horizon`
+  - `stakes`
+  - optional `humor`
+  - optional `domain`
 
----
+Example:
 
-## Version Behavior Notes
+```text
+/STATE:bandwidth50,mode:Convergent,horizon:Long,stakes:Casual
+```
 
-- `0.1`: base OCEAN personality only.
-- `0.2`: adds communication segment.
-- `0.4`: adds career/skills segment.
-- `0.6`: used when state is included and/or identity prefix is present.
-- `0.7`: includes Delivery segment (`/DELIVERY/...`).
+### 4) PERSONALITY Segment
 
-In career-only cases with no personality and no prefix, output may be segment-only (for example `/CAR...`) to preserve compactness.
+- Marker: `/PERSONALITY:`
+- Metrics:
+  - `openness`
+  - `conscientiousness`
+  - `extraversion`
+  - `agreeableness`
+  - `neuroticism`
+
+### 5) AESTHETIC Segment
+
+- Marker: `/AESTHETIC:`
+- Typical metrics:
+  - `minimalism`
+  - `colorfulness`
+  - `warmth`
+  - `motion`
+  - `texture`
+
+### 6) MUSIC Segment
+
+- Marker: `/MUSIC:`
+- Metrics:
+  - `mellow`
+  - `sophisticated`
+  - `unpretentious`
+  - `intense`
+  - `contemporary`
+
+### 7) COMMUNICATION Segment
+
+- Marker: `/COMMUNICATION:`
+- Metrics:
+  - `driver`
+  - `analytical`
+  - `expressive`
+  - `amiable`
+
+### 8) DELIVERY Segment
+
+- Marker: `/DELIVERY:`
+- Typical metrics:
+  - `def`, `peer`, `chl`, `dns`, `aud`, `str`, `abs`, `fmt`, `vbs`, `emp`, `cnd`, `hmr`, `aut`, `bur`
+
+### 9) DELIVERY2 Segment
+
+- Marker: `/DELIVERY2:`
+- Metrics:
+  - `structure`
+  - `density`
+  - `framing`
+  - `format`
+  - `autonomy`
+
+### 10) SKILL and SKILLS Segments
+
+- `SKILL` (compact career payload):
+
+```text
+/SKILL:<soc8>S0190S1899...
+```
+
+- `SKILLS` (readable skill metrics):
+
+```text
+/SKILLS:analysis80,systems_analysis70,time_management65
+```
+
+SKILLS naming rule:
+
+- Prefer one-word labels.
+- When labels collide or are ambiguous, use up to two words separated by underscore.
+
+## Legacy Notes
+
+Older docs/specs may reference `IAM/0.x` compact variants (`0.1`, `0.2`, `0.4`, `0.6`, `0.7`).
+
+Current runtime and tests are aligned to `IAM-v0.2` long-form segment output.

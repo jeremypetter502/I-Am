@@ -87,14 +87,30 @@ function buildPrefixSegment(base) {
   return [firstName, birthYear, gender, culture, timezone].filter(Boolean);
 }
 
+function sanitizeNote(n) {
+  if (n == null) return '';
+  return String(n).trim().replace(/[/:]+/g, '-').replace(/[()]/g, '').replace(/\s+/g, ' ').slice(0, 60);
+}
+
+function namedSegment(baseName, moduleObj) {
+  const note = moduleObj && (moduleObj.note || (moduleObj.result && moduleObj.result.note));
+  if (!note) return baseName;
+  const s = sanitizeNote(note);
+  return s ? `${baseName}(${s})` : baseName;
+}
+
 // --- Career Segment Generator (v0.4) ---
 // O*NET 8-digit SOC + S01–S35 skills, sparse encoding
 import { skillPositionMap } from './skillPositionMap.js';
-import { canonicalizeState, formatStateSegment } from '../state/stateManager.js';
+import { LfMappings } from './lfMappings.js';
 
 function pad2(n) {
   const v = Math.round(Number(n) || 0);
   return v.toString().padStart(2, '0');
+}
+
+function round(n) {
+  return Math.round(Number(n) || 0);
 }
 
 function skillProficiency(scoreEntry) {
@@ -107,7 +123,7 @@ function skillProficiency(scoreEntry) {
   return 0;
 }
 
-export function buildCareerSegment(soc8, skills) {
+export function buildCareerSegment(soc8, skills, moduleObj) {
   // skills: array containing either normalized_score (0-100) or raw_score (1-10)
   if (!soc8 || !/^[0-9]{8}$/.test(soc8)) return '';
   const pairs = skills
@@ -115,177 +131,227 @@ export function buildCareerSegment(soc8, skills) {
     .sort((a, b) => a.index - b.index)
     .map((s) => `S${pad2(s.index)}${pad2(skillProficiency(s))}`)
     .join('');
-  return `CAR:${soc8}${pairs}`;
+  // Use compact prefix `SKL` and include optional module note in parentheses when present
+  const prefix = namedSegment('SKL', moduleObj || {});
+  return `${prefix}:${soc8}${pairs}`;
 }
 
 export function decodeCareerSegment(code) {
-  if (!code || typeof code !== 'string') return null;
-  const match = code.match(/\/CAR:(?<soc8>\d{8})(?<payload>(?:S\d{4})*)/);
-  if (!match || !match.groups) return null;
-
-  const byIndex = new Map(skillPositionMap.map((entry, zeroBasedIndex) => [zeroBasedIndex + 1, entry.name]));
+  if (!code || typeof code !== 'string') return { soc8: '', skills: [] };
+  const m = String(code).match(/(?:CAR|SKL):?(\d{8})(.*)/i);
+  if (!m) return { soc8: '', skills: [] };
+  const soc8 = m[1];
+  const rest = m[2] || '';
   const skills = [];
-  const payload = match.groups.payload || '';
-  const tokenPattern = /S(\d{2})(\d{2})/g;
-  let tokenMatch;
-  while ((tokenMatch = tokenPattern.exec(payload)) !== null) {
-    const index = Number(tokenMatch[1]);
-    const score = Number(tokenMatch[2]);
-    skills.push({
-      index,
-      name: byIndex.get(index) || `S${tokenMatch[1]}`,
-      normalized_score: score
-    });
+  const tokenPattern = /S(\d{2})(\d{2,3})/g;
+  let tk;
+  while ((tk = tokenPattern.exec(rest)) !== null) {
+    const idx = Number(tk[1]);
+    const score = Number(tk[2]);
+    const nameEntry = skillPositionMap.find((e) => Number(e.index.replace(/^S/, '')) === idx);
+    skills.push({ index: idx, name: nameEntry ? nameEntry.name : '', score });
   }
-
-  return {
-    soc8: match.groups.soc8,
-    skills
-  };
+  return { soc8, skills };
 }
 
-// Main buildIam function
-export function buildIam(scored, modules) {
-  const base = modules?.base && typeof modules.base === 'object' ? modules.base : {};
-  const hasSkills = Boolean(
-    Array.isArray(modules?.skills)
-      || Array.isArray(modules?.skills?.filtered)
-      || Array.isArray(modules?.skills?.responses)
-      || Array.isArray(modules?.skills?.fullAssessment)
-  );
-  const hasCareer = Boolean(base?.onet?.soc_code || hasSkills);
-  const prefixParts = buildPrefixSegment(base);
-  const prefix = prefixParts.join(':');
-  const hasPrefix = prefixParts.length > 0;
+export function buildIam(scored, modules, options) {
+  return buildIamLongForm(scored, modules, options);
+}
 
-  const round = (v) => Math.round(Number(v) || 0);
+// Helper: compute a simple aggregate score from a normalized metrics object
+function computeAggregateFromNormalized(obj) {
+  if (!obj || typeof obj !== 'object') return 0;
+  const vals = Object.values(obj).filter((v) => typeof v === 'number' && Number.isFinite(v));
+  if (!vals.length) return 0;
+  const sum = vals.reduce((a, b) => a + b, 0);
+  return Math.round(sum / vals.length);
+}
+
+function titleCaseWord(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  return text[0].toUpperCase() + text.slice(1).toLowerCase();
+}
+
+function buildStatePairs(stateObj) {
+  if (!stateObj || typeof stateObj !== 'object') return [];
+  const pairs = [];
+
+  const bandwidth = Number(stateObj.bandwidth);
+  if (Number.isFinite(bandwidth)) {
+    pairs.push(`bandwidth${Math.round(bandwidth)}`);
+  }
+
+  const mode = String(stateObj.mode || '').toLowerCase();
+  if (mode === 'convergent' || mode === 'divergent') {
+    pairs.push(`mode:${titleCaseWord(mode)}`);
+  }
+
+  const horizon = String(stateObj.horizon || '').toLowerCase();
+  if (horizon === 'now' || horizon === 'long') {
+    pairs.push(`horizon:${titleCaseWord(horizon)}`);
+  }
+
+  const stakes = String(stateObj.stakes || '').toLowerCase();
+  if (stakes === 'critical' || stakes === 'casual') {
+    pairs.push(`stakes:${titleCaseWord(stakes)}`);
+  }
+
+  const domain = String(stateObj.domain || '').toLowerCase();
+  if (domain === 'work' || domain === 'home') {
+    pairs.push(`domain:${titleCaseWord(domain)}`);
+  }
+
+  return pairs;
+}
+
+// Long-form IAM builder
+function buildIamLongForm(scored, modules, options) {
+  const mappings = new LfMappings();
+  const segItems = [];
+
+  const pushSegment = (fullName, metricsObj) => {
+    if (!metricsObj || typeof metricsObj !== 'object') return;
+    const pairs = [];
+    const baseFullName = String(fullName || '').replace(/\(.*\)$/, '');
+    for (const [k, v] of Object.entries(metricsObj)) {
+      if (v == null) continue;
+      const num = Math.round(Number(v) || 0);
+      const metricName = mappings.mapMetric(baseFullName, k) || String(k).toLowerCase();
+      pairs.push(`${metricName}${num}`);
+    }
+    if (pairs.length) {
+      const aggScore = computeAggregateFromNormalized(metricsObj);
+      segItems.push({ fullName, pairs, score: aggScore });
+    }
+  };
+
+  // Personality: prefer scored.normalized
   const s = (scored && scored.normalized) ? scored.normalized : {};
-  const o = round(s.O ?? s.openness ?? 0);
-  const c = round(s.C ?? s.conscientiousness ?? 0);
-  const e = round(s.E ?? s.extraversion ?? 0);
-  const a = round(s.A ?? s.agreeableness ?? 0);
-  const n = round(s.N ?? s.neuroticism ?? 0);
-
-  const hasPersonality = [o, c, e, a, n].some((v) => Number.isFinite(v) && v > 0);
-  const hasState = Boolean(modules?.state && typeof modules.state === 'object');
-  const stateSegment = hasState ? formatStateSegment(canonicalizeState(modules.state)) : '';
-  const soc8 = base?.onet?.soc_code ? normalizeSoc8(base.onet.soc_code) : '';
-  const skillsSource = modules?.skills;
-  const skills = Array.isArray(skillsSource)
-    ? skillsSource
-    : Array.isArray(skillsSource?.filtered)
-      ? skillsSource.filtered
-      : Array.isArray(skillsSource?.responses)
-        ? skillsSource.responses
-        : Array.isArray(skillsSource?.fullAssessment)
-          ? skillsSource.fullAssessment
-          : [];
-  const car = hasCareer ? buildCareerSegment(soc8, skills) : '';
-
-  if (hasCareer && !hasPersonality && !hasPrefix) {
-    let code = car ? `/${car}` : '';
-    if (stateSegment) code += `/${stateSegment}`;
-    return { code, version: stateSegment ? '0.6' : '0.4' };
+  if (s && Object.keys(s).length) {
+    const pPairs = [];
+    const map = { O: 'openness', C: 'conscientiousness', E: 'extraversion', A: 'agreeableness', N: 'neuroticism' };
+    for (const key of ['O', 'C', 'E', 'A', 'N']) {
+      const val = Math.round(Number(s[key] ?? s[key.toLowerCase()] ?? 0) || 0);
+      pPairs.push(`${map[key]}${val}`);
+    }
+    const agg = Math.round((Number(s.O || 0) + Number(s.C || 0) + Number(s.E || 0) + Number(s.A || 0) + Number(s.N || 0)) / 5 || 0);
+    segItems.push({ fullName: 'PERSONALITY', pairs: pPairs, score: agg });
   }
 
-  let ver = hasPrefix ? '0.6' : '0.1';
-  const oceanSegment = hasPersonality ? `O${o}C${c}E${e}A${a}N${n}` : '';
-  const baseSegments = [];
-  if (hasPrefix) baseSegments.push(prefix);
-  if (oceanSegment) baseSegments.push(oceanSegment);
-  let code = `IAM/${ver}${baseSegments.length ? `:${baseSegments.join(':')}` : ''}`;
-
-  try {
-    if (modules && modules.aesthetics && modules.aesthetics.normalized) {
-      const an = modules.aesthetics.normalized;
-      const seg = [];
-      if (typeof an.minimalism === 'number') seg.push(`MIN${round(an.minimalism)}`);
-      if (typeof an.colorfulness === 'number') seg.push(`CLR${round(an.colorfulness)}`);
-      if (typeof an.warmth === 'number') seg.push(`WRM${round(an.warmth)}`);
-      if (typeof an.motion === 'number') seg.push(`MOT${round(an.motion)}`);
-      if (typeof an.imagery === 'object' && typeof an.imagery.photos === 'number') seg.push(`IMG${round(an.imagery.photos)}`);
-      else if (typeof an.texture === 'number') seg.push(`IMG${round(an.texture)}`);
-      if (typeof an.typography === 'object' && typeof an.typography.prefers_serif === 'number') seg.push(`TYP${round(an.typography.prefers_serif)}`);
-      if (typeof an.layout === 'object' && typeof an.layout.grid_consistency === 'number') seg.push(`LAY${round(an.layout.grid_consistency)}`);
-      if (seg.length) code += `/AES:${seg.join('')}`;
-    }
-  } catch(e) {}
-
-  try {
-    if (modules && modules.music && modules.music.normalized) {
-      const mn = modules.music.normalized;
-      const seg = [];
-      if (typeof mn.mellow === 'number') seg.push(`MEL${round(mn.mellow)}`);
-      if (typeof mn.sophisticated === 'number') seg.push(`SOP${round(mn.sophisticated)}`);
-      if (typeof mn.unpretentious === 'number') seg.push(`UNP${round(mn.unpretentious)}`);
-      if (typeof mn.intense === 'number') seg.push(`INT${round(mn.intense)}`);
-      if (typeof mn.contemporary === 'number') seg.push(`CON${round(mn.contemporary)}`);
-      if (seg.length) code += `/MUS:${seg.join('')}`;
-    }
-  } catch(e) {}
-
-  try {
-    const cn = modules && modules.communication
-      ? (modules.communication.normalized_trait_scores || modules.communication.normalized)
-      : null;
-    if (cn && typeof cn === 'object') {
-      const readMetric = (value) => {
-        const numeric = Number(value);
-        return Number.isFinite(numeric) ? round(numeric) : null;
-      };
-      const drv = readMetric(cn.driver);
-      const anc = readMetric(cn.analytical);
-      const exp = readMetric(cn.expressive);
-      const amb = readMetric(cn.amiable);
-      if (drv !== null || anc !== null || exp !== null || amb !== null) {
-        ver = hasPrefix ? '0.6' : '0.2';
-        code = code.replace('IAM/0.1', 'IAM/0.2');
-        code += `/COMM:DRV${drv ?? 0}ANC${anc ?? 0}EXP${exp ?? 0}AMB${amb ?? 0}`;
-      }
-    }
-  } catch(e) {}
-
-  try {
-    if (modules && modules.delivery && modules.delivery.normalized) {
-      const dn = modules.delivery.normalized;
-      const seg = [];
-      if (typeof dn.def === 'number') seg.push(`DEF${round(dn.def)}`);
-      if (typeof dn.peer === 'number') seg.push(`PEER${round(dn.peer)}`);
-      if (typeof dn.chl === 'number') seg.push(`CHL${round(dn.chl)}`);
-      if (typeof dn.dns === 'number') seg.push(`DNS${round(dn.dns)}`);
-      if (typeof dn.aud === 'number') seg.push(`AUD${round(dn.aud)}`);
-      if (typeof dn.str === 'number') seg.push(`STR${round(dn.str)}`);
-      if (typeof dn.abs === 'number') seg.push(`ABS${round(dn.abs)}`);
-      if (typeof dn.fmt === 'number') seg.push(`FMT${round(dn.fmt)}`);
-      if (typeof dn.vbs === 'number') seg.push(`VBS${round(dn.vbs)}`);
-      if (typeof dn.emp === 'number') seg.push(`EMP${round(dn.emp)}`);
-      if (typeof dn.cnd === 'number') seg.push(`CND${round(dn.cnd)}`);
-      if (typeof dn.hmr === 'number') seg.push(`HMR${round(dn.hmr)}`);
-      if (typeof dn.aut === 'number') seg.push(`AUT${round(dn.aut)}`);
-      if (typeof dn.bur === 'number') seg.push(`BUR${round(dn.bur)}`);
-      if (seg.length) {
-        code += `/DELIVERY:${seg.join('')}`;
-        code = code.replace(/^IAM\/0\.[0-9]+/, 'IAM/0.7');
-        ver = '0.7';
-      }
-    }
-  } catch(e) {}
-
-  if (car) {
-    if (ver === '0.1' || ver === '0.2') {
-      ver = '0.4';
-      code = code.replace(/^IAM\/0\.[0-9]+/, 'IAM/0.4');
-    }
-    code += `/${car}`;
+  // Aesthetics
+  if (modules && modules.aesthetics && modules.aesthetics.normalized) pushSegment(namedSegment('AESTHETIC', modules.aesthetics), modules.aesthetics.normalized);
+  // Music
+  if (modules && modules.music && modules.music.normalized) pushSegment(namedSegment('MUSIC', modules.music), modules.music.normalized);
+  // Communication
+  if (modules && modules.communication && (modules.communication.normalized || modules.communication.normalized_trait_scores)) {
+    const cn = modules.communication.normalized_trait_scores || modules.communication.normalized;
+    pushSegment(namedSegment('COMMUNICATION', modules.communication), cn);
   }
-
-  if (stateSegment) {
-    code += `/${stateSegment}`;
-    if (ver !== '0.7') {
-      code = code.replace(/^IAM\/0\.[0-9]+/, 'IAM/0.6');
-      ver = '0.6';
+  // Delivery
+  if (modules && modules.delivery && modules.delivery.normalized) pushSegment(namedSegment('DELIVERY', modules.delivery), modules.delivery.normalized);
+  if (modules && modules.delivery2) {
+    const d2 = modules.delivery2.normalized || modules.delivery2.normalized_trait_scores || (modules.delivery2.result && modules.delivery2.result.normalized) || modules.delivery2;
+    if (d2 && typeof d2 === 'object' && Object.keys(d2).length) pushSegment(namedSegment('DELIVERY2', modules.delivery2), d2);
+  }
+  // State
+  if (modules && modules.state && typeof modules.state === 'object' && Object.keys(modules.state).length) {
+    const statePairs = buildStatePairs(modules.state);
+    if (statePairs.length) {
+      const stateBandwidth = Number(modules.state.bandwidth);
+      const stateScore = Number.isFinite(stateBandwidth) ? Math.round(stateBandwidth) : 0;
+      segItems.push({ fullName: namedSegment('STATE', modules.state), pairs: statePairs, score: stateScore });
     }
   }
 
-  return { code, version: ver };
+  // Order by score desc, tie alphabetic
+  segItems.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const an = String(a.fullName || '').toUpperCase();
+    const bn = String(b.fullName || '').toUpperCase();
+    return an.localeCompare(bn);
+  });
+
+  const segmentsText = segItems.map((s) => `${s.fullName}:${s.pairs.join(',')}`).join('/');
+  // Build BASE segment from modules.base using existing helper `buildPrefixSegment` which returns parts array
+  const baseParts = buildPrefixSegment(modules && modules.base ? modules.base : {});
+  const prefix = 'IAM-v0.2';
+  let code = prefix;
+  if (baseParts.length) {
+    code += `/BASE:${baseParts.join(',')}`;
+  }
+  if (segmentsText) {
+    code += `${baseParts.length ? '/' : '/'}${segmentsText}`;
+  }
+
+  // Include career/skills segment in long-form as `SKILL` (preserve optional module note)
+  try {
+    const soc8Lf = modules && modules.base && modules.base.onet && modules.base.onet.soc_code ? normalizeSoc8(modules.base.onet.soc_code) : '';
+    const skillsSourceLf = modules?.skills;
+    const skillsLf = Array.isArray(skillsSourceLf)
+      ? skillsSourceLf
+      : Array.isArray(skillsSourceLf?.filtered)
+        ? skillsSourceLf.filtered
+        : Array.isArray(skillsSourceLf?.responses)
+          ? skillsSourceLf.responses
+          : Array.isArray(skillsSourceLf?.fullAssessment)
+            ? skillsSourceLf.fullAssessment
+            : [];
+    const skillsModuleObjLf = (modules && modules.skills && typeof modules.skills === 'object' && !Array.isArray(modules.skills)) ? modules.skills : {};
+    const carCompactLf = (soc8Lf || (skillsLf && skillsLf.length)) ? buildCareerSegment(soc8Lf, skillsLf, skillsModuleObjLf) : '';
+    if (carCompactLf) {
+      // Convert compact SKL prefix to long-form SKILL (keep any parentheses note)
+      const skillPrefix = namedSegment('SKILL', skillsModuleObjLf);
+      const carLf = carCompactLf.replace(/^SKL(?:\([^)]+\))?/, skillPrefix);
+      code += `/${carLf}`;
+      // Also include a SKILLS long-form metrics segment: map each skill title to a single-word label
+      try {
+        const posNameMap = new Map(skillPositionMap.map((entry) => [Number(entry.index.replace(/^S/, '')), entry.name]));
+        const shortSkillWord = (name) => {
+          if (!name) return '';
+          const stop = new Set(['and', 'of', 'the', '&', 'to', 'for', 'in']);
+          const parts = String(name).split(/[^A-Za-z]+/).filter(Boolean).map((p) => p.trim()).filter(Boolean);
+          if (!parts.length) return '';
+          const lowParts = parts.map((p) => p.toLowerCase());
+          // Override ambiguous single-word labels with clearer two-word descriptors
+          const overrides = {
+            time: 'time_management',
+            active: 'active_listening',
+            complex: 'problem_solving',
+            identify: 'problem_identification'
+          };
+          for (const p of lowParts) {
+            if (overrides[p]) return overrides[p];
+          }
+          // Prefer the longest meaningful word (avoids duplicate 'active' labels)
+          let best = '';
+          for (const p of lowParts) {
+            if (stop.has(p) || p.length < 3) continue;
+            if (p.length > best.length) best = p;
+          }
+          if (best) return best;
+          // Fallback: return first non-stop part
+          for (const p of lowParts) {
+            if (!stop.has(p)) return p;
+          }
+          return lowParts[0];
+        };
+
+        const skillPairs = skillsLf
+          .map((s) => {
+            const idx = Number(s.index || s.index?.toString?.().replace?.(/^S/, '') || s);
+            const longName = posNameMap.get(idx) || s.name || '';
+            const sval = skillProficiency(s);
+            const shortName = shortSkillWord(longName);
+            return shortName ? `${shortName}${sval}` : null;
+          })
+          .filter(Boolean);
+
+        if (skillPairs.length) {
+          code += `/${namedSegment('SKILLS', modules && modules.skills ? modules.skills : {})}:${skillPairs.join(',')}`;
+        }
+      } catch (e) {}
+    }
+  } catch (e) {}
+  return { code, version: 'LF.0.2' };
 }

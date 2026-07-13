@@ -1,9 +1,49 @@
 <script>
+  import { onMount } from 'svelte';
   import SurveyPage from './pages/SurveyPage.svelte';
+  import DocPage from './pages/DocPage.svelte';
+  import readmeMd from '../../README.md?raw';
+  import iamMd from '../../docs/iam.md?raw';
+  import iamUsecaseMd from '../../docs/iam-usecase.md?raw';
+
+  const docRoutes = {
+    '/readme': { title: 'README', markdown: readmeMd, sourcePath: 'README.md', routePath: '/readme' },
+    '/iam': { title: 'I-AM String Format Overview', markdown: iamMd, sourcePath: 'docs/iam.md', routePath: '/iam' },
+    '/iam-usecase': { title: 'I-AM Use Cases', markdown: iamUsecaseMd, sourcePath: 'docs/iam-usecase.md', routePath: '/iam-usecase' }
+  };
+
+  function normalizePath(value) {
+    const raw = String(value || '/').split('#')[0].split('?')[0] || '/';
+    let out = raw;
+    if (out.length > 1 && out.endsWith('/')) out = out.slice(0, -1);
+    if (out.toLowerCase().endsWith('.html')) out = out.slice(0, -5);
+    return out || '/';
+  }
+
+  let currentPath = normalizePath(typeof window !== 'undefined' ? window.location.pathname : '/');
+
+  onMount(() => {
+    const onPopState = () => {
+      currentPath = normalizePath(window.location.pathname);
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  });
+
+  $: activeDoc = docRoutes[currentPath] || null;
 </script>
 
 <div class="app-shell">
-  <SurveyPage />
+  {#if activeDoc}
+    <DocPage
+      title={activeDoc.title}
+      markdown={activeDoc.markdown}
+      sourcePath={activeDoc.sourcePath}
+      routePath={activeDoc.routePath}
+    />
+  {:else}
+    <SurveyPage />
+  {/if}
 </div>
 
 <style>

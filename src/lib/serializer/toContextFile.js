@@ -58,6 +58,10 @@ function toContextFile({ id, summary, traits }, options) {
     profile.modules.communication = { ...options.communication, disabled: options.communication.disabled === true };
   }
 
+  if (options && options.delivery2 && typeof options.delivery2 === 'object') {
+    profile.modules.delivery2 = { ...options.delivery2, disabled: options.delivery2.disabled === true };
+  }
+
   if (options && options.skills && typeof options.skills === 'object') {
     profile.modules.skills = Array.isArray(options.skills)
       ? [...options.skills]
@@ -65,12 +69,15 @@ function toContextFile({ id, summary, traits }, options) {
   }
 
   if (options && options.state && typeof options.state === 'object') {
-    const state = options.state;
+    const state = options.state.state && typeof options.state.state === 'object'
+      ? options.state.state
+      : options.state;
     profile.modules.state = {
       bandwidth: Number.isFinite(Number(state.bandwidth)) ? Math.max(0, Math.min(100, Math.round(Number(state.bandwidth)))) : 50,
       mode: state.mode === 'divergent' ? 'divergent' : 'convergent',
       horizon: state.horizon === 'now' ? 'now' : 'long',
       stakes: state.stakes === 'critical' ? 'critical' : 'casual',
+      humor: state.humor === 'none' || state.humor === 'low' || state.humor === 'normal' || state.humor === 'high' ? state.humor : 'normal',
       disabled: state.disabled === true,
       completed: state.completed === undefined ? true : Boolean(state.completed),
       last_updated: state.last_updated || ((options && options.lastUpdated) ? options.lastUpdated : new Date().toISOString())

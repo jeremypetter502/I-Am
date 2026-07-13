@@ -1,9 +1,9 @@
 import { scoreAesthetics as bundledScoreAesthetics } from '../../lib/scorer/aestheticsScorer.js';
 import { scoreMusic as bundledScoreMusic } from '../../lib/scorer/musicScorer.js';
 import { scoreDelivery as bundledScoreDelivery } from '../../lib/scorer/deliveryScorer.js';
+import { scoreDelivery2 as bundledScoreDelivery2 } from '../../lib/scorer/delivery2Scorer.ts';
 import { scoreCommunication as bundledScoreCommunication } from '../../lib/scorer/communicationScorer.js';
 import { scoreSkills as bundledScoreSkills } from '../../lib/scorer/skillsScorer.js';
-import { buildIam } from '../../lib/iam/iam.js';
 import { scoreIpip } from '../../lib/scorer/ipipScorer.js';
 import { toContextFile as libToContextFile } from '../../lib/serializer/toContextFile.js';
 
@@ -84,21 +84,6 @@ function resolveIpipModule(ipipModuleLike, fallbackResponses = []) {
   };
 }
 
-function personalityScoresFromModule(profileScores, ipipModule) {
-  const disabled = ipipModule?.disabled === true;
-  const scores = profileScores && typeof profileScores === 'object' ? profileScores : {};
-  return {
-    normalized: {
-      O: disabled ? 0 : Number(scores.openness ?? 0),
-      C: disabled ? 0 : Number(scores.conscientiousness ?? 0),
-      E: disabled ? 0 : Number(scores.extraversion ?? 0),
-      A: disabled ? 0 : Number(scores.agreeableness ?? 0),
-      N: disabled ? 0 : Number(scores.neuroticism ?? 0)
-    }
-  };
-}
-
-
 export function scoreAndExport(responses, moduleResponses = {}) {
   const scored = scoreResponses(responses);
   const ipipPayload = resolveIpipModule(moduleResponses.ipip, responses);
@@ -131,47 +116,6 @@ export function sanitizeContextFile(contextFile) {
   return sanitized;
 }
 
-function deriveIamFromProfile(profile) {
-  let iam = profile && profile.iam && profile.iam.code ? profile.iam.code : '';
-
-  const communicationModule = profile?.modules?.communication;
-  const communicationScores = communicationModule && typeof communicationModule === 'object'
-    ? (communicationModule.normalized_trait_scores
-      || communicationModule.normalized
-      || communicationModule.result?.normalized_trait_scores
-      || communicationModule.result?.normalized)
-    : null;
-  const hasCommunicationScores = communicationScores && typeof communicationScores === 'object'
-    ? ['driver', 'analytical', 'expressive', 'amiable'].some((key) => Number.isFinite(Number(communicationScores[key])))
-    : false;
-  const hasExplicitCommMetrics = /\/COMM:DRV\d+ANC\d+EXP\d+AMB\d+/.test(iam);
-  const hasMalformedCommSegment = /\/COMM(?::|$)/.test(iam) && !hasExplicitCommMetrics;
-  const needsCommRefresh = hasCommunicationScores && !hasExplicitCommMetrics;
-  const canReuseExistingIam = Boolean(iam) && !hasMalformedCommSegment && !needsCommRefresh;
-  if (canReuseExistingIam) return iam;
-
-  try {
-    const scored = personalityScoresFromModule(profile?.scores, profile?.modules?.ipip);
-    const modules = filterDisabledModules({
-      ...(profile && profile.modules && typeof profile.modules === 'object' ? profile.modules : {}),
-      base: profile && profile.base && typeof profile.base === 'object' ? profile.base : undefined,
-      state: profile?.modules?.state,
-      skills: Array.isArray(profile?.modules?.skills?.filtered)
-        ? profile.modules.skills.filtered
-        : profile?.modules?.skills
-    });
-    const derived = buildIam(scored, modules);
-    if (derived && derived.code) {
-      iam = derived.code;
-      profile.iam = { code: derived.code, version: derived.version || '0.1' };
-    }
-  } catch (e) {
-    // Keep export resilient and fall back to placeholder.
-  }
-
-  return iam;
-}
-
 function withModuleMetadata(moduleData, metadata) {
   if (!moduleData || typeof moduleData !== 'object' || Array.isArray(moduleData)) return moduleData;
   return {
@@ -180,27 +124,10 @@ function withModuleMetadata(moduleData, metadata) {
   };
 }
 
-function filterDisabledModules(modules) {
-  if (!modules || typeof modules !== 'object') return {};
-
-  const nextModules = { ...modules };
-  for (const key of ['ipip', 'aesthetics', 'music', 'delivery', 'communication', 'state']) {
-    if (nextModules[key] && typeof nextModules[key] === 'object' && nextModules[key].disabled === true) {
-      delete nextModules[key];
-    }
-  }
-
-  if (modules.skills && typeof modules.skills === 'object' && !Array.isArray(modules.skills) && modules.skills.disabled === true) {
-    delete nextModules.skills;
-  }
-
-  return nextModules;
-}
-
 function removeDuplicateExportSections(contextFile) {
   const sanitizedContextFile = sanitizeContextFile(contextFile);
-  const profile = sanitizedContextFile?.profile && typeof sanitizedContextFile.profile === 'object'
-    ? { ...sanitizedContextFile.profile }
+  const sourceProfile = sanitizedContextFile?.profile && typeof sanitizedContextFile.profile === 'object'
+    ? sanitizedContextFile.profile
     : {};
 
   function normalizeSkillsForStorage(skillsModule) {
@@ -217,45 +144,89 @@ function removeDuplicateExportSections(contextFile) {
         if (item && typeof item === 'object' && Number.isFinite(Number(item.raw_score))) {
           return Number(item.raw_score);
         }
+        if (item && typeof item === 'object' && Number.isFinite(Number(item.normalized_score))) {
+          return Number(item.normalized_score);
+        }
         return null;
       })
       .filter((item) => item !== null);
 
-    return {
+    const out = {
       responses,
-      completed: skillsModule.completed === true,
-      disabled: skillsModule.disabled === true,
-      last_updated: skillsModule.last_updated
+      disabled: skillsModule.disabled === true
     };
-  }
-
-  function normalizeModuleDisabledFlags(modules) {
-    if (!modules || typeof modules !== 'object') return modules;
-    const normalizedModules = { ...modules };
-    for (const [key, value] of Object.entries(normalizedModules)) {
-      if (!value || typeof value !== 'object' || Array.isArray(value)) continue;
-      normalizedModules[key] = {
-        ...value,
-        disabled: value.disabled === true
-      };
+    if (skillsModule.testAnswers && typeof skillsModule.testAnswers === 'object') {
+      out.testAnswers = cloneContextValue(skillsModule.testAnswers);
     }
-    return normalizedModules;
+    if (typeof skillsModule.note === 'string' && skillsModule.note.trim()) {
+      out.note = skillsModule.note;
+    }
+    return out;
   }
 
-  // `iam` is emitted as the top-level first field in storage JSON.
-  if (profile.iam) delete profile.iam;
-
-  // `preferences.skills` duplicates module-level skill responses.
-  if (profile.preferences && typeof profile.preferences === 'object') {
-    delete profile.preferences.skills;
-    if (Object.keys(profile.preferences).length === 0) delete profile.preferences;
+  function normalizeStateForStorage(stateModule) {
+    if (!stateModule || typeof stateModule !== 'object') return null;
+    const state = stateModule.state && typeof stateModule.state === 'object'
+      ? stateModule.state
+      : stateModule.result && typeof stateModule.result === 'object'
+        ? stateModule.result
+        : stateModule;
+    const out = {};
+    if (Number.isFinite(Number(state.bandwidth))) out.bandwidth = Math.max(0, Math.min(100, Math.round(Number(state.bandwidth))));
+    if (state.mode === 'divergent' || state.mode === 'convergent') out.mode = state.mode;
+    if (state.horizon === 'now' || state.horizon === 'long') out.horizon = state.horizon;
+    if (state.stakes === 'critical' || state.stakes === 'casual') out.stakes = state.stakes;
+    if (state.humor === 'none' || state.humor === 'low' || state.humor === 'normal' || state.humor === 'high') out.humor = state.humor;
+    if (state.domain === 'home' || state.domain === 'work') out.domain = state.domain;
+    out.disabled = stateModule.disabled === true;
+    if (typeof stateModule.note === 'string' && stateModule.note.trim()) {
+      out.note = stateModule.note;
+    }
+    return out;
   }
 
-  if (profile.modules && typeof profile.modules === 'object' && profile.modules.skills) {
-    profile.modules = { ...profile.modules, skills: normalizeSkillsForStorage(profile.modules.skills) };
+  function normalizeModuleForStorage(moduleKey, moduleValue) {
+    if (!moduleValue || typeof moduleValue !== 'object') return null;
+    if (moduleKey === 'state') return normalizeStateForStorage(moduleValue);
+    if (moduleKey === 'skills') return normalizeSkillsForStorage(moduleValue);
+
+    const responses = Array.isArray(moduleValue.responses)
+      ? moduleValue.responses.map((value) => (Number.isFinite(Number(value)) ? Number(value) : value))
+      : [];
+
+    const out = {
+      responses,
+      disabled: moduleValue.disabled === true
+    };
+    if (typeof moduleValue.note === 'string' && moduleValue.note.trim()) {
+      out.note = moduleValue.note;
+    }
+    return out;
   }
-  if (profile.modules && typeof profile.modules === 'object') {
-    profile.modules = normalizeModuleDisabledFlags(profile.modules);
+
+  const profile = {};
+
+  if (sourceProfile.base && typeof sourceProfile.base === 'object') {
+    const base = { ...sourceProfile.base };
+    delete base.skills;
+    delete base.communication_style;
+    delete base.favorites;
+    if (Object.keys(base).length > 0) {
+      profile.base = base;
+    }
+  }
+
+  if (sourceProfile.modules && typeof sourceProfile.modules === 'object') {
+    const modules = {};
+    for (const [moduleKey, moduleValue] of Object.entries(sourceProfile.modules)) {
+      const normalized = normalizeModuleForStorage(moduleKey, moduleValue);
+      if (normalized && typeof normalized === 'object') {
+        modules[moduleKey] = normalized;
+      }
+    }
+    if (Object.keys(modules).length > 0) {
+      profile.modules = modules;
+    }
   }
 
   const out = {
@@ -270,26 +241,8 @@ function removeDuplicateExportSections(contextFile) {
 
 export function toIamDataStorageObject(contextFile) {
   const sanitizedContextFile = sanitizeContextFile(contextFile);
-  const profile = sanitizedContextFile && sanitizedContextFile.profile ? sanitizedContextFile.profile : {};
-  // Only emit top-level iam when at least one module is completed
-  const modulesObj = sanitizedContextFile?.profile?.modules;
-  let hasCompletedModule = false;
-  if (modulesObj && typeof modulesObj === 'object') {
-    for (const k of Object.keys(modulesObj)) {
-      const m = modulesObj[k];
-      if (m && typeof m === 'object' && m.completed === true) {
-        hasCompletedModule = true;
-        break;
-      }
-    }
-  }
-  const iam = hasCompletedModule ? (deriveIamFromProfile(profile) || 'I-AM string unavailable') : undefined;
   const cleaned = removeDuplicateExportSections(sanitizedContextFile);
-
-  const out = (typeof iam === 'string' && iam.length)
-    ? { iam, ...cleaned }
-    : { ...cleaned };
-  return out;
+  return { ...cleaned };
 }
 
 export function toIamDataStorageJson(contextFile) {
@@ -331,7 +284,8 @@ export function toContextFile(scored, moduleResponses = {}) {
     }
     base.profile.modules.aesthetics = Object.assign(
       { responses: aestResp || [], last_updated: now, completed: Array.isArray(aestResp) ? aestResp.length >= 1 : false },
-      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.aesthetics)
+      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.aesthetics),
+      (moduleResponses.aesthetics && typeof moduleResponses.aesthetics.note === 'string') ? { note: moduleResponses.aesthetics.note } : {}
     );
   }
 
@@ -343,7 +297,8 @@ export function toContextFile(scored, moduleResponses = {}) {
     }
     base.profile.modules.music = Object.assign(
       { responses: musicResp || [], last_updated: now, completed: Array.isArray(musicResp) ? musicResp.length >= 1 : false },
-      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.music)
+      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.music),
+      (moduleResponses.music && typeof moduleResponses.music.note === 'string') ? { note: moduleResponses.music.note } : {}
     );
   }
 
@@ -355,7 +310,21 @@ export function toContextFile(scored, moduleResponses = {}) {
     }
     base.profile.modules.delivery = Object.assign(
       { responses: deliveryResp || [], last_updated: now, completed: Array.isArray(deliveryResp) ? deliveryResp.length >= 1 : false },
-      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.delivery)
+      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.delivery),
+      (moduleResponses.delivery && typeof moduleResponses.delivery.note === 'string') ? { note: moduleResponses.delivery.note } : {}
+    );
+  }
+
+  if (moduleResponses.delivery2) {
+    const delivery2Resp = Array.isArray(moduleResponses.delivery2) ? moduleResponses.delivery2 : (moduleResponses.delivery2.responses || []);
+    let computed = (!Array.isArray(moduleResponses.delivery2) && moduleResponses.delivery2.result) ? moduleResponses.delivery2.result : null;
+    if (!computed && typeof bundledScoreDelivery2 === 'function') {
+      try { computed = bundledScoreDelivery2(delivery2Resp); } catch (e) { computed = null; }
+    }
+    base.profile.modules.delivery2 = Object.assign(
+      { responses: delivery2Resp || [], last_updated: now, completed: Array.isArray(delivery2Resp) ? delivery2Resp.length >= 1 : false },
+      withModuleMetadata(withoutRawScores(computed || {}), moduleResponses.delivery2),
+      (moduleResponses.delivery2 && typeof moduleResponses.delivery2.note === 'string') ? { note: moduleResponses.delivery2.note } : {}
     );
   }
 
@@ -370,13 +339,16 @@ export function toContextFile(scored, moduleResponses = {}) {
       try { computed = bundledScoreCommunication(commResp); } catch (e) { computed = null; }
     }
     if (computed) {
-      base.profile.modules.communication = withModuleMetadata({
-        responses: computed.responses || commResp || [],
-        raw_trait_scores: computed.raw_trait_scores || {},
-        normalized_trait_scores: computed.normalized_trait_scores || {},
-        completed: computed.completed === true,
-        last_updated: computed.last_updated || now
-      }, moduleResponses.communication);
+      base.profile.modules.communication = Object.assign(
+        withModuleMetadata({
+          responses: computed.responses || commResp || [],
+          raw_trait_scores: computed.raw_trait_scores || {},
+          normalized_trait_scores: computed.normalized_trait_scores || {},
+          completed: computed.completed === true,
+          last_updated: computed.last_updated || now
+        }, moduleResponses.communication),
+        (moduleResponses.communication && typeof moduleResponses.communication.note === 'string') ? { note: moduleResponses.communication.note } : {}
+      );
     }
   }
 
@@ -388,14 +360,17 @@ export function toContextFile(scored, moduleResponses = {}) {
       try { computed = bundledScoreSkills(responses); } catch (e) { computed = null; }
     }
     if (computed) {
-      base.profile.modules.skills = withModuleMetadata({
-        responses: computed.fullAssessment || [],
-        filtered: computed.filtered || [],
-        normalized: computed.normalized || [],
-        ...(provided.testAnswers ? { testAnswers: provided.testAnswers } : {}),
-        completed: responses.length >= 35,
-        last_updated: now
-      }, provided);
+      base.profile.modules.skills = Object.assign(
+        withModuleMetadata({
+          responses: computed.fullAssessment || [],
+          filtered: computed.filtered || [],
+          normalized: computed.normalized || [],
+          ...(provided.testAnswers ? { testAnswers: provided.testAnswers } : {}),
+          completed: responses.length >= 35,
+          last_updated: now
+        }, provided),
+        (provided && typeof provided.note === 'string') ? { note: provided.note } : {}
+      );
       base.profile.preferences = base.profile.preferences || {};
       base.profile.preferences.skills = (computed.filtered || []).map((item) => ({
         name: item.name,
@@ -407,7 +382,12 @@ export function toContextFile(scored, moduleResponses = {}) {
   }
 
   if (moduleResponses.base && typeof moduleResponses.base === 'object') {
-    base.profile.base = { ...moduleResponses.base };
+    // Exclude fields from Base module that are no longer collected/exported
+    const filteredBase = { ...moduleResponses.base };
+    delete filteredBase.skills;
+    delete filteredBase.communication_style;
+    delete filteredBase.favorites;
+    base.profile.base = filteredBase;
   }
 
   if (moduleResponses.state && typeof moduleResponses.state === 'object') {
@@ -422,26 +402,13 @@ export function toContextFile(scored, moduleResponses = {}) {
         mode: providedState.mode === 'divergent' ? 'divergent' : 'convergent',
         horizon: providedState.horizon === 'now' ? 'now' : 'long',
         stakes: providedState.stakes === 'critical' ? 'critical' : 'casual',
+        humor: providedState.humor === 'none' || providedState.humor === 'low' || providedState.humor === 'normal' || providedState.humor === 'high' ? providedState.humor : 'normal',
+        domain: providedState.domain === 'home' ? 'home' : 'work',
         completed: true,
         last_updated: now
       }, moduleResponses.state);
     }
   }
-
-  // Recompute IAM where possible
-  try {
-    const iamScored = personalityScoresFromModule(base.profile?.scores, base.profile?.modules?.ipip);
-    const iamInput = filterDisabledModules({
-      ...base.profile.modules,
-      base: base.profile.base,
-      state: base.profile.modules?.state,
-      skills: Array.isArray(base.profile.modules?.skills?.filtered)
-        ? base.profile.modules.skills.filtered
-        : base.profile.modules?.skills
-    });
-    const iamObj = buildIam(iamScored, iamInput);
-    if (iamObj && iamObj.code) base.profile.iam = { code: iamObj.code, version: iamObj.version || '0.1' };
-  } catch (e) { /* ignore */ }
 
   return base;
 }
@@ -450,6 +417,7 @@ export function toContextFile(scored, moduleResponses = {}) {
 let externalAesthetics = (typeof bundledScoreAesthetics === 'function') ? bundledScoreAesthetics : null;
 let externalMusic = (typeof bundledScoreMusic === 'function') ? bundledScoreMusic : null;
 let externalDelivery = (typeof bundledScoreDelivery === 'function') ? bundledScoreDelivery : null;
+let externalDelivery2 = (typeof bundledScoreDelivery2 === 'function') ? bundledScoreDelivery2 : null;
 let externalCommunication = (typeof bundledScoreCommunication === 'function') ? bundledScoreCommunication : null;
 let externalSkills = (typeof bundledScoreSkills === 'function') ? bundledScoreSkills : null;
 
@@ -465,6 +433,11 @@ export function scoreMusicIfAvailable(responses){
 
 export function scoreDeliveryIfAvailable(responses){
   if (typeof externalDelivery === 'function') return externalDelivery(responses);
+  return null;
+}
+
+export function scoreDelivery2IfAvailable(responses){
+  if (typeof externalDelivery2 === 'function') return externalDelivery2(responses);
   return null;
 }
 

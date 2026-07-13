@@ -5,7 +5,7 @@
 [![Svelte](https://img.shields.io/badge/Svelte-5.x-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev/)
 [![Tests](https://img.shields.io/badge/tests-vitest-6E9F18)](https://vitest.dev/)
 [![Schema](https://img.shields.io/badge/contract-JSON%20Schema-1f6feb)](specs/001-personality-context-site/contextfile.schema.json)
-[![I-AM String Spec](https://img.shields.io/badge/I--AM%20string-spec%20v0.7-0A66C2)](specs/personality-specs/personality_code.spec.md)
+[![I-AM String Spec](https://img.shields.io/badge/I--AM%20string-spec%20IAM--v0.2-0A66C2)](specs/personality-specs/personality_code.spec.md)
 
 ## Overview
 
@@ -19,6 +19,9 @@ This project is experimental. The core format and scoring pipeline are implement
 
 - Status: Active development (experimental I-AM string format and scoring iteration).
 - Stability: I-AM string core format and module scoring are implemented and test-covered; segment/version behavior may continue to evolve.
+- Current runtime format: `IAM-v0.2` long-form segments (for example `PERSONALITY`, `AESTHETIC`, `MUSIC`, `COMMUNICATION`, `DELIVERY`, `DELIVERY2`, `SKILLS`, `STATE`).
+- Current note encoding: `SEGMENT:anchors[item1;item2;item3]:...` (space-free anchor tokens, semicolon-separated).
+- Current ordering rule: `STATE` is always first after `BASE` when present.
 - Current storage output: `.iam.json` (machine-readable export and storage artifact).
 - Contribution focus: I-AM string usage quality, scorer correctness, pluggable modules, bug squash 🐛
 

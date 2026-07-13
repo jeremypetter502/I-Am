@@ -1,7 +1,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { buildIam, buildCareerSegment, normalizeSoc8 } from '../../src/lib/iam/iam.js';
-describe('Career segment (v0.4)', () => {
+describe('Career segment', () => {
   it('normalizes O*NET SOC code to 8 digits', () => {
     expect(normalizeSoc8('15-1252')).toBe('15125200');
     expect(normalizeSoc8('15-1252.01')).toBe('15125201');
@@ -19,10 +19,10 @@ describe('Career segment (v0.4)', () => {
       { index: 2, normalized_score: 0 }, // should be omitted
     ];
     const seg = buildCareerSegment(soc8, skills);
-    expect(seg).toBe('CAR:15125200S0190S1899S2485S3360');
+    expect(seg).toBe('SKL:15125200S0190S1899S2485S3360');
   });
 
-  it('buildIam returns only Career segment if only base.onet and skills present', () => {
+  it('buildIam returns long-form career payload when only base.onet and skills are present', () => {
     const modules = {
       base: { onet: { soc_code: '15-1252', title: 'Software Developers' } },
       skills: [
@@ -33,11 +33,12 @@ describe('Career segment (v0.4)', () => {
       ]
     };
     const iam = buildIam({}, modules);
-    expect(iam.version).toBe('0.4');
-    expect(iam.code).toBe('/CAR:15125200S0190S1899S2485S3360');
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code.startsWith('IAM-v0.2')).toBe(true);
+    expect(iam.code).toContain('/SKILL:15125200S0190S1899S2485S3360');
   });
 
-  it('prefixes IAM with first name, birth year, gender, culture, and timezone abbreviation when present', () => {
+  it('includes BASE prefix with first name, birth year, gender, culture, and timezone abbreviation when present', () => {
     const scored = { normalized: { O: 83, C: 60, E: 45, A: 78, N: 33 } };
     const modules = {
       base: {
@@ -50,28 +51,28 @@ describe('Career segment (v0.4)', () => {
     };
 
     const iam = buildIam(scored, modules);
-    expect(iam.version).toBe('0.6');
-    expect(iam.code).toBe('IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33');
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code).toContain('IAM-v0.2/BASE:Jeremy,1975,Male,en-US,EST');
+    expect(iam.code).toContain('/PERSONALITY:openness83,conscientiousness60,extraversion45,agreeableness78,neuroticism33');
   });
 });
 
 describe('iam builder', () => {
-  it('uses version 0.1 without communication segment', () => {
+  it('uses LF version without communication segment', () => {
     const scored = { normalized: { O: 70, C: 60, E: 50, A: 40, N: 30 } };
     const iam = buildIam(scored, {});
-    expect(iam.version).toBe('0.1');
-    expect(iam.code.startsWith('IAM/0.1')).toBe(true);
-    expect(iam.code.includes('/COMM:')).toBe(false);
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code.startsWith('IAM-v0.2')).toBe(true);
+    expect(iam.code.includes('/COMMUNICATION:')).toBe(false);
   });
 
-  it('omits OCEAN segment when personality scores are not present', () => {
+  it('omits PERSONALITY segment when personality scores are not present', () => {
     const iam = buildIam({ normalized: { O: 0, C: 0, E: 0, A: 0, N: 0 } }, {});
-    expect(iam.version).toBe('0.1');
-    expect(iam.code).toBe('IAM/0.1');
-    expect(iam.code.includes('O0C0E0A0N0')).toBe(false);
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code).toBe('IAM-v0.2/PERSONALITY:openness0,conscientiousness0,extraversion0,agreeableness0,neuroticism0');
   });
 
-  it('appends communication segment and bumps to 0.2', () => {
+  it('appends communication segment in long form', () => {
     const scored = { normalized: { O: 70, C: 60, E: 50, A: 40, N: 30 } };
     const modules = {
       communication: {
@@ -84,12 +85,12 @@ describe('iam builder', () => {
       }
     };
     const iam = buildIam(scored, modules);
-    expect(iam.version).toBe('0.2');
-    expect(iam.code.startsWith('IAM/0.2')).toBe(true);
-    expect(iam.code.includes('/COMM:DRV85ANC40EXP20AMB15')).toBe(true);
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code.startsWith('IAM-v0.2')).toBe(true);
+    expect(iam.code.includes('/COMMUNICATION:driver85,analytical40,expressive20,amiable15')).toBe(true);
   });
 
-  it('appends canonical STATE segment and bumps version to 0.6', () => {
+  it('appends STATE segment in long form', () => {
     const scored = { normalized: { O: 70, C: 60, E: 50, A: 40, N: 30 } };
     const modules = {
       state: {
@@ -100,8 +101,8 @@ describe('iam builder', () => {
       }
     };
     const iam = buildIam(scored, modules);
-    expect(iam.version).toBe('0.6');
-    expect(iam.code).toBe('IAM/0.6:O70C60E50A40N30/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical');
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code).toContain('/STATE:bandwidth30,mode:Convergent,horizon:Now,stakes:Critical');
   });
 
   it('keeps aesthetics segment when career data is present', () => {
@@ -121,11 +122,11 @@ describe('iam builder', () => {
     };
 
     const iam = buildIam(scored, modules);
-    expect(iam.code).toContain('/AES:MIN80CLR35WRM60MOT45IMG70');
-    expect(iam.code).toContain('/CAR:15125200S0190');
+    expect(iam.code).toContain('/AESTHETIC:minimalism80,colorfulness35,warmth60,motion45,texture70');
+    expect(iam.code).toContain('/SKILL:15125200S0190');
   });
 
-  it('appends delivery segment and bumps version to 0.7', () => {
+  it('appends delivery segment in long form', () => {
     const scored = { normalized: { O: 70, C: 60, E: 50, A: 40, N: 30 } };
     const modules = {
       delivery: {
@@ -149,9 +150,30 @@ describe('iam builder', () => {
     };
 
     const iam = buildIam(scored, modules);
-    expect(iam.version).toBe('0.7');
-    expect(iam.code.startsWith('IAM/0.7')).toBe(true);
-    expect(iam.code).toContain('/DELIVERY:DEF72PEER41CHL66DNS58AUD34STR77ABS68FMT62VBS81EMP64CND52HMR49AUT74BUR37');
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code.startsWith('IAM-v0.2')).toBe(true);
+    expect(iam.code).toContain('/DELIVERY:def72,peer41,chl66,dns58,aud34,str77,abs68,fmt62,vbs81,emp64,cnd52,hmr49,aut74,bur37');
+  });
+
+  it('appends delivery2 segment in long form', () => {
+    const scored = { normalized: { O: 70, C: 60, E: 50, A: 40, N: 30 } };
+    const modules = {
+      delivery2: {
+        normalized: {
+          str: 75,
+          dns: 50,
+          frm: 62,
+          fmt: 88,
+          emp: 55,
+          aut: 70
+        }
+      }
+    };
+
+    const iam = buildIam(scored, modules);
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code.startsWith('IAM-v0.2')).toBe(true);
+    expect(iam.code).toContain('/DELIVERY2:str75,dns50,frm62,fmt88,emp55,aut70');
   });
 });
 

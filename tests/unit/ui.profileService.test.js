@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 const { scoreAndExport, sanitizeContextFile } = require('../../src/ui/services/profileService');
-const { toIamDataStorageObject } = require('../../src/ui/services/profileService');
 
 describe('UI profileService', () => {
   it('produces a ContextFile from 50 responses', () => {
@@ -84,7 +83,7 @@ describe('UI profileService', () => {
 
     expect(ctx.profile.modules.music).toBeTruthy();
     expect(ctx.profile.modules.music.disabled).toBe(true);
-    expect(ctx.profile.iam.code.includes('/MEL')).toBe(false);
+    expect(ctx.profile.iam).toBeUndefined();
   });
 
   it('preserves disabled skills in storage JSON export', () => {
@@ -113,7 +112,7 @@ describe('UI profileService', () => {
 
     expect(ctx.profile.modules.ipip).toBeTruthy();
     expect(ctx.profile.modules.ipip.disabled).toBe(true);
-    expect(ctx.profile.iam.code.includes('O')).toBe(false);
+    expect(ctx.profile.iam).toBeUndefined();
     expect(ctx.profile.modules.ipip.responses).toHaveLength(50);
   });
 
@@ -148,74 +147,5 @@ describe('UI profileService', () => {
     expect(ctx.profile.modules.communication.disabled).toBe(false);
   });
 
-  it('rebuilds malformed COMM segments when communication metrics are available', () => {
-    const profile = {
-      profile: {
-        iam: { code: 'IAM/0.2:O50C50E50A50N50/COMM:' },
-        scores: {
-          openness: 50,
-          conscientiousness: 50,
-          extraversion: 50,
-          agreeableness: 50,
-          neuroticism: 50
-        },
-        modules: {
-          ipip: {
-            responses: Array(50).fill(3),
-            disabled: false
-          },
-          communication: {
-            responses: Array(20).fill(3),
-            normalized_trait_scores: {
-              driver: 40,
-              analytical: 45,
-              expressive: 50,
-              amiable: 55
-            },
-            completed: true,
-            disabled: false
-          }
-        }
-      }
-    };
-
-    const out = toIamDataStorageObject(profile);
-    expect(out.iam.includes('/COMM:DRV40ANC45EXP50AMB55')).toBe(true);
-  });
-
-  it('adds COMM metrics when existing IAM is missing communication segment', () => {
-    const profile = {
-      profile: {
-        iam: { code: 'IAM/0.1:O50C50E50A50N50' },
-        scores: {
-          openness: 50,
-          conscientiousness: 50,
-          extraversion: 50,
-          agreeableness: 50,
-          neuroticism: 50
-        },
-        modules: {
-          ipip: {
-            responses: Array(50).fill(3),
-            disabled: false
-          },
-          communication: {
-            responses: Array(20).fill(3),
-            normalized_trait_scores: {
-              driver: 80,
-              analytical: 35,
-              expressive: 65,
-              amiable: 20
-            },
-            completed: true,
-            disabled: false
-          }
-        }
-      }
-    };
-
-    const out = toIamDataStorageObject(profile);
-    expect(out.iam.includes('/COMM:DRV80ANC35EXP65AMB20')).toBe(true);
-  });
 });
 
