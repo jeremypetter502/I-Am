@@ -53,11 +53,13 @@ describe('State updates retain existing module exports', () => {
     expect(slider).toBeTruthy();
     slider.value = '30';
     await fireEvent.input(slider);
+    await fireEvent.click(getAllByRole('button').find((btn) => btn.textContent?.trim() === 'High'));
 
     await waitFor(() => {
       const profile = JSON.parse(localStorage.getItem('iam_profile'));
       expect(profile.profile.modules.aesthetics).toBeTruthy();
       expect(profile.profile.modules.state.bandwidth).toBe(30);
+      expect(profile.profile.modules.state.humor).toBe('high');
     });
   });
 });

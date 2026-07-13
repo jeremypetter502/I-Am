@@ -1,0 +1,7 @@
+{
+  "AES": "AESTHETIC",
+  "PERSONALITY": "PERSONALITY",
+  "DELIVERY": "DELIVERY",
+  "DELIVERY2": "DELIVERY2",
+  "NOTES": "This file maps compact segment identifiers to full LF segment names. Add or edit entries as new modules are introduced."
+}

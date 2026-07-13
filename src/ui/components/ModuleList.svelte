@@ -3,9 +3,11 @@
 
   const moduleMeta = {
     ipip: { emoji: '🧠', label: 'Personality', accent: 'violet' },
+    values: { emoji: '💡', label: 'Values', accent: 'teal' },
     aesthetics: { emoji: '🎨', label: 'Aesthetics', accent: 'teal' },
     music: { emoji: '🎵', label: 'Music', accent: 'amber' },
     delivery: { emoji: '🔎', label: 'Delivery', accent: 'teal' },
+    delivery2: { emoji: '🧭', label: 'Delivery v2', accent: 'violet' },
     skills: { emoji: '🛠️', label: 'Skills Assessment', accent: 'teal' },
     state: { emoji: '⚡', label: 'State', accent: 'amber' },
     extended: { emoji: '✨', label: 'Extended', accent: 'slate' }

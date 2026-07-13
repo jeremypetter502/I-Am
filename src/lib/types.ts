@@ -67,6 +67,24 @@ export interface DeliveryModule {
 	last_updated: string;
 }
 
+export interface Delivery2Scores {
+	str: number;
+	dns: number;
+	frm: number;
+	fmt: number;
+	emp: number;
+	aut: number;
+}
+
+export interface Delivery2Module {
+	responses: number[];
+	raw: Delivery2Scores;
+	normalized: Delivery2Scores;
+	completed: boolean;
+	last_updated: string;
+	disabled?: boolean;
+}
+
 // Backwards-compatible aliases
 export type LensScores = DeliveryScores;
 export type LensModule = DeliveryModule;
@@ -74,12 +92,14 @@ export type LensModule = DeliveryModule;
 export type StateMode = 'convergent' | 'divergent';
 export type StateHorizon = 'now' | 'long';
 export type StateStakes = 'critical' | 'casual';
+export type StateHumor = 'none' | 'low' | 'normal' | 'high';
 
 export interface StateModule {
 	bandwidth: number;
 	mode: StateMode;
 	horizon: StateHorizon;
 	stakes: StateStakes;
+	humor: StateHumor;
 	completed?: boolean;
 	last_updated?: string;
 }

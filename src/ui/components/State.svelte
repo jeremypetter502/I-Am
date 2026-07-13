@@ -79,6 +79,24 @@
         <button class:active={state.stakes === 'casual'} on:click={() => updateState({ stakes: 'casual' })}>Casual</button>
       </div>
     </div>
+
+      <div class="field">
+        <p>Humor</p>
+        <div class="choice-row group-box">
+          <button class:active={state.humor === 'none'} on:click={() => updateState({ humor: 'none' })}>None</button>
+          <button class:active={state.humor === 'low'} on:click={() => updateState({ humor: 'low' })}>Low</button>
+          <button class:active={state.humor === 'normal'} on:click={() => updateState({ humor: 'normal' })}>Normal</button>
+          <button class:active={state.humor === 'high'} on:click={() => updateState({ humor: 'high' })}>High</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <p>Domain</p>
+        <div class="choice-row group-box">
+          <button class:active={state.domain === 'work'} on:click={() => updateState({ domain: 'work' })}>Work</button>
+          <button class:active={state.domain === 'home'} on:click={() => updateState({ domain: 'home' })}>Home</button>
+        </div>
+      </div>
   </div>
 </section>
 

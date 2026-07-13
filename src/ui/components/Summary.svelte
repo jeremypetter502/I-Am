@@ -23,6 +23,7 @@
           <span><b>AES</b>: Aesthetic Preferences (MIN=Minimalism, CLR=Colorfulness, WRM=Warmth, MOT=Motion, IMG=Imagery, TYP=Typography, LAY=Layout)</span><br>
           <span><b>MUS</b>: Music Preferences (MEL=Mellow, SOP=Sophisticated, UNP=Unpretentious, INT=Intense, CON=Contemporary)</span><br>
           <span><b>DELIVERY</b>: Unified interaction preferences (DEF, PEER, CHL, DNS, AUD, STR, ABS, FMT, VBS, EMP, CND, HMR, AUT, BUR)</span><br>
+          <span><b>DELIVERY2</b>: Delivery v2 preferences (STR, DNS, FRM, FMT, EMP, AUT)</span><br>
           <span><b>COM</b>: Communication Style (DRV=Driver, ANC=Analytical, EXP=Expressive, AMB=Amiable)</span><br>
           <span><b>CAR</b>: Career/Skills (CAR=O*NET SOC code, Sxx=Skill index, proficiency)</span><br>
           <span><b>STATE</b>: Dynamic state (bandwidth, mode, horizon, stakes)</span>

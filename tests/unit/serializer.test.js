@@ -173,5 +173,45 @@ describe('Serializer + schema', () => {
 
     expect(sample.profile.modules.state.disabled).toBe(true);
   });
+
+  it('serializes and re-imports delivery2 as an optional separate module', async () => {
+    const sample = toContextFile(
+      {
+        id: 'delivery2-rt',
+        summary: 'delivery2 round trip',
+        traits: {
+          raw: { O: 20, C: 24, E: 28, A: 32, N: 36 },
+          normalized: { O: 10, C: 20, E: 30, A: 40, N: 50 }
+        }
+      },
+      {
+        ipipResponses: Array(50).fill(3),
+        delivery2: {
+          responses: Array(24).fill(4),
+          raw: { str: 4, dns: 4, frm: 4, fmt: 4, emp: 4, aut: 4 },
+          normalized: { str: 75, dns: 75, frm: 75, fmt: 75, emp: 75, aut: 75 },
+          completed: true,
+          disabled: false,
+          last_updated: '2026-06-12T00:00:00Z'
+        }
+      }
+    );
+
+    const schema = JSON.parse(fs.readFileSync('specs/001-personality-context-site/contextfile.schema.json','utf8'));
+    const ajv = new Ajv({ allErrors: true, strict:false }); addFormats(ajv);
+    const valid = ajv.validate(schema, sample);
+    if (!valid) console.error(ajv.errors);
+    expect(valid).toBe(true);
+    expect(sample.profile.modules.delivery2.responses).toHaveLength(24);
+
+    const filePath = path.join(os.tmpdir(), `delivery2-rt-${Date.now()}.json`);
+    fs.writeFileSync(filePath, JSON.stringify(sample, null, 2), 'utf8');
+
+    const imported = await importJson(filePath);
+    const root = resolveRoot(imported);
+    expect(root.modules.delivery2).toBeTruthy();
+    expect(root.modules.delivery2.responses).toHaveLength(24);
+    expect(root.modules.delivery2.disabled).toBe(false);
+  });
 });
 

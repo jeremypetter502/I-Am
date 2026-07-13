@@ -1,0 +1,9 @@
+{
+  "str": "structure",
+  "dns": "density",
+  "frm": "framing",
+  "fmt": "format",
+  "emp": "empathy",
+  "aut": "autonomy",
+  "notes": "Delivery v2 metric mappings: map short codes to full lowercase metric names used in Long Form I-AM output."
+}

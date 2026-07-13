@@ -174,9 +174,7 @@
         <option value="other">Other</option>
       </select>
     </label>
-    <label class="full">Skills<textarea rows="2" value={form.skills || ''} placeholder="JavaScript, UX research, data analysis" on:input={(e) => updateField('skills', e)}></textarea></label>
-    <label class="full">Communication style<textarea rows="2" value={form.communication_style || ''} placeholder="concise / detailed" on:input={(e) => updateField('communication_style', e)}></textarea></label>
-    <label class="full">Favorites<textarea rows="2" value={form.favorites || ''} placeholder="Favorite music, movies, colors, things to do, etc." on:input={(e) => updateField('favorites', e)}></textarea></label>
+    <!-- Removed: Skills, Communication style, Favorites (no longer collected in Base module) -->
     <label class="full">Short bio<textarea rows="2" maxlength="280" value={form.short_bio || ''} on:input={(e) => updateField('short_bio', e)}></textarea></label>
   </div>
 

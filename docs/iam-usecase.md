@@ -1,5 +1,17 @@
 # Use Cases
 
+## Current Spec Context
+
+These use cases assume the current runtime I-AM format:
+
+- Prefix: `IAM-v0.2`
+- Optional `BASE` segment
+- `STATE` always appears first after `BASE` when present
+- Optional note anchors use `SEGMENT:anchors[item1;item2;item3]:...`
+- `SKILLS` labels may use one or two words joined by underscore for disambiguation
+
+See [I-AM format overview](iam.md) for the latest segment syntax details.
+
 ## Software
 **Question:**
 "I need to plan the next sprints work for a refactor. How should I prioritize it?"

@@ -3,7 +3,7 @@ const { toIamDataStorageObject, toIamDataStorageJson, scoreAndExport } = require
 
 describe('IAM JSON export', () => {
 
-  it('exports storage JSON with iam as top-level first field and no duplicate sections', () => {
+  it('exports storage JSON with raw module answers and no duplicate sections', () => {
     const stale = {
       profile: {
         iam: {
@@ -83,11 +83,10 @@ describe('IAM JSON export', () => {
     const payload = JSON.parse(jsonText);
     const topLevelKeys = Object.keys(payload);
 
-    expect(topLevelKeys[0]).toBe('iam');
-    expect(payload.iam.startsWith('IAM/0.7')).toBe(true);
+    expect(topLevelKeys.includes('profile')).toBe(true);
     expect(payload.profile.modules.ipip.responses).toEqual([3, 3]);
     expect(payload.profile.modules.ipip.disabled).toBe(false);
-    expect(payload.profile.modules.delivery.normalized.aut).toBe(72);
+    expect(payload.profile.modules.delivery.responses).toHaveLength(30);
     expect(payload.profile.modules.delivery.disabled).toBe(false);
     expect(payload.profile.modules.skills.responses).toEqual([8]);
     expect(payload.profile.modules.skills.disabled).toBe(false);
@@ -98,7 +97,7 @@ describe('IAM JSON export', () => {
     expect(payload.raw_responses).toBeUndefined();
   });
 
-  it('derives IAM code when profile.iam is missing', () => {
+  it('does not derive or persist top-level iam in storage payloads', () => {
     const contextWithoutIam = {
       profile: {
         scores: {
@@ -127,13 +126,11 @@ describe('IAM JSON export', () => {
     };
 
     const payload = toIamDataStorageObject(contextWithoutIam);
-    expect(typeof payload.iam).toBe('string');
-    expect(payload.iam.includes('IAM/')).toBe(true);
-    expect(payload.iam.includes('O53C50E50A55N50')).toBe(true);
-    expect(payload.iam.includes('IAM code unavailable')).toBe(false);
+    expect(payload.iam).toBeUndefined();
+    expect(payload.profile.modules.skills.responses).toEqual([20]);
   });
 
-  it('derives IAM with canonical STATE segment when state module exists', () => {
+  it('stores canonical state raw answers for round-trip', () => {
     const contextWithoutIam = {
       profile: {
         scores: {
@@ -156,22 +153,57 @@ describe('IAM JSON export', () => {
     };
 
     const payload = toIamDataStorageObject(contextWithoutIam);
-    expect(typeof payload.iam).toBe('string');
-    expect(payload.iam.includes('/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical')).toBe(true);
+    expect(payload.iam).toBeUndefined();
+    expect(payload.profile.modules.state.bandwidth).toBe(30);
+    expect(payload.profile.modules.state.mode).toBe('convergent');
+    expect(payload.profile.modules.state.horizon).toBe('now');
+    expect(payload.profile.modules.state.stakes).toBe('critical');
   });
 
-  it('keeps all answers and scores in storage object generated from scoreAndExport', () => {
+  it('keeps raw module answers in storage object generated from scoreAndExport', () => {
     const context = scoreAndExport(Array(50).fill(3), {
       music: Array(20).fill(2),
       delivery: Array(30).fill(4)
     });
     const storage = toIamDataStorageObject(context);
 
-    expect(storage.iam).toBeTruthy();
+    expect(storage.iam).toBeUndefined();
     expect(storage.profile.modules.ipip.responses).toHaveLength(50);
     expect(storage.profile.modules.music.responses).toHaveLength(20);
     expect(storage.profile.modules.delivery.responses).toHaveLength(30);
-    expect(storage.profile.modules.delivery.normalized).toBeTruthy();
+    expect(storage.profile.modules.delivery.normalized).toBeUndefined();
+  });
+
+  it('exports module notes in iam.json storage payload', () => {
+    const context = {
+      profile: {
+        modules: {
+          music: {
+            responses: [1, 2, 3],
+            note: 'Use analog synth references.',
+            disabled: false
+          },
+          state: {
+            bandwidth: 42,
+            mode: 'convergent',
+            horizon: 'now',
+            stakes: 'critical',
+            note: 'Preparing for a high-stakes launch.',
+            disabled: false
+          },
+          skills: {
+            responses: [{ raw_score: 8 }],
+            note: 'Focus on systems thinking.',
+            disabled: false
+          }
+        }
+      }
+    };
+
+    const payload = toIamDataStorageObject(context);
+    expect(payload.profile.modules.music.note).toBe('Use analog synth references.');
+    expect(payload.profile.modules.state.note).toBe('Preparing for a high-stakes launch.');
+    expect(payload.profile.modules.skills.note).toBe('Focus on systems thinking.');
   });
 });
 

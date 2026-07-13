@@ -14,6 +14,7 @@ type SerializerOptions = {
   lastUpdated?: string;
   baseContext?: Record<string, unknown>;
   communication?: Record<string, unknown>;
+  delivery2?: Record<string, unknown>;
   skills?: unknown;
   state?: Record<string, unknown>;
   rawResponses?: Record<string, unknown>;
@@ -67,6 +68,13 @@ export function toContextFile(input: SerializerInput, options: SerializerOptions
     };
   }
 
+  if (options.delivery2 && typeof options.delivery2 === 'object') {
+    (profile.modules as Record<string, unknown>).delivery2 = {
+      ...options.delivery2,
+      disabled: options.delivery2.disabled === true
+    };
+  }
+
   if (options.skills && typeof options.skills === 'object') {
     (profile.modules as Record<string, unknown>).skills = Array.isArray(options.skills)
       ? [...options.skills]
@@ -74,12 +82,15 @@ export function toContextFile(input: SerializerInput, options: SerializerOptions
   }
 
   if (options.state && typeof options.state === 'object') {
-    const source = options.state as Record<string, unknown>;
+    const source = ((options.state as Record<string, unknown>).state && typeof (options.state as Record<string, unknown>).state === 'object')
+      ? (options.state as Record<string, unknown>).state as Record<string, unknown>
+      : options.state as Record<string, unknown>;
     (profile.modules as Record<string, unknown>).state = {
       bandwidth: Number.isFinite(Number(source.bandwidth)) ? Math.max(0, Math.min(100, Math.round(Number(source.bandwidth)))) : 50,
       mode: source.mode === 'divergent' ? 'divergent' : 'convergent',
       horizon: source.horizon === 'now' ? 'now' : 'long',
       stakes: source.stakes === 'critical' ? 'critical' : 'casual',
+      humor: source.humor === 'none' || source.humor === 'low' || source.humor === 'normal' || source.humor === 'high' ? source.humor : 'normal',
       disabled: source.disabled === true,
       completed: source.completed === undefined ? true : Boolean(source.completed),
       last_updated: source.last_updated || now

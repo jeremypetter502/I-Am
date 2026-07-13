@@ -207,6 +207,37 @@ describe('importer', () => {
     expect(root.modules.ipip.disabled).toBe(false);
     expect(root.modules.music.disabled).toBe(false);
   });
+
+  it('preserves module notes on import', async () => {
+    const filePath = path.join(os.tmpdir(), `importer-notes-${Date.now()}.json`);
+    const payload = {
+      schema_version: '0.1',
+      generated_at: new Date().toISOString(),
+      profile: {
+        modules: {
+          music: {
+            responses: [1, 2, 3],
+            note: 'Imported music note'
+          },
+          state: {
+            bandwidth: 30,
+            mode: 'convergent',
+            horizon: 'now',
+            stakes: 'critical',
+            domain: 'work',
+            note: 'Imported state note'
+          }
+        }
+      }
+    };
+
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2), 'utf8');
+    const result = await importJson(filePath);
+    const root = resolveRoot(result);
+
+    expect(root.modules.music.note).toBe('Imported music note');
+    expect(root.modules.state.note).toBe('Imported state note');
+  });
 });
 
 

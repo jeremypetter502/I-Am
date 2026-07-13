@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IAM Generator Input",
+  "type": "object",
+  "required": ["format", "profile"],
+  "properties": {
+    "format": {
+      "type": "string",
+      "enum": ["compact", "long_form"]
+    },
+    "lfVersion": {
+      "type": "string",
+      "pattern": "^LF\\.\\d+\\.\\d+$",
+      "description": "Version identifier for LF outputs, e.g. LF.0.1"
+    },
+    "profile": {
+      "type": "object",
+      "description": "User profile object containing modules and scores. Must match existing serializer output shape.
+      Example: { modules: { AESTHETIC: {...}, PERSONALITY: {...} } }"
+    },
+    "options": {
+      "type": "object",
+      "properties": {
+        "includeDisabled": { "type": "boolean" }
+      }
+    }
+  }
+}

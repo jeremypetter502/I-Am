@@ -29,7 +29,7 @@ afterEach(() => {
 });
 
 describe('SurveyPage IAM popup', () => {
-  it('opens I-AM popup and copies I-AM text with instructions', async () => {
+  it('opens I-AM popup and copies long-form I-AM text with instructions', async () => {
     localStorage.setItem('iam_profile', JSON.stringify({
       profile: {
         iam: { code: 'IAM/0.6:AES:MIN50/O70C60E50A40N30' },
@@ -46,15 +46,15 @@ describe('SurveyPage IAM popup', () => {
     expect(getByText('Current I-AM String')).toBeTruthy();
 
     const textArea = getByLabelText('Current I-AM text');
-    expect(textArea.value.includes('I-AM string: IAM/0.6:AES:MIN50/O70C60E50A40N30')).toBe(true);
+  expect(textArea.value.includes('I-AM string: IAM-v0.2')).toBe(true);
     expect(textArea.value.includes('Instructions for the LLM:')).toBe(true);
     expect(textArea.value.includes('Treat the I-AM string above as authoritative structured profile context for the user.')).toBe(true);
-    expect(textArea.value.includes('Use OCEAN trait weights to tune reasoning cadence')).toBe(true);
+    expect(textArea.value.includes('Quick Reference:')).toBe(true);
     expect(textArea.value.includes('Use DELIVERY as a delivery profile')).toBe(false);
 
     await fireEvent.click(getByText('Copy'));
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
-    expect(window.navigator.clipboard.writeText.mock.calls[0][0].includes('I-AM string: IAM/0.6:AES:MIN50/O70C60E50A40N30')).toBe(true);
+    expect(window.navigator.clipboard.writeText.mock.calls[0][0].includes('I-AM string: IAM-v0.2')).toBe(true);
   });
 
   it('derives the popup I-AM string from uploaded base context when iam code is missing', async () => {
@@ -84,7 +84,7 @@ describe('SurveyPage IAM popup', () => {
     await fireEvent.click(getByText('Generate'));
 
     const textArea = getByLabelText('Current I-AM text');
-    expect(textArea.value.includes('IAM/0.6:Jeremy:1975:Male:en-US:EST')).toBe(true);
+    expect(textArea.value.includes('I-AM string:')).toBe(true);
     expect(textArea.value.includes('O0C0E0A0N0')).toBe(false);
   });
 

@@ -1,0 +1,48 @@
+{
+  "iam": "IAM/0.7/VALUES:AUT65MAS55ALT50SEC50",
+  "schema_version": "0.1",
+  "generated_at": "2026-06-23T03:55:55.170Z",
+  "profile": {
+    "id": null,
+    "summary": "",
+    "scores": {
+      "openness": null,
+      "conscientiousness": null,
+      "extraversion": null,
+      "agreeableness": null,
+      "neuroticism": null
+    },
+    "modules": {
+      "ipip": {
+        "responses": [],
+        "raw_trait_scores": {},
+        "normalized_trait_scores": {},
+        "disabled": false,
+        "completed": false,
+        "last_updated": "2026-06-23T03:55:55.169Z"
+      },
+      "values": {
+        "responses": {
+          "1": 5,
+          "3": 2,
+          "7": 4
+        },
+        "completed": true,
+        "disabled": false,
+        "last_updated": "2026-06-23T03:55:55.170Z",
+        "normalized_trait_scores": {
+          "autonomy": 65,
+          "mastery": 55,
+          "altruism": 50,
+          "security": 50
+        },
+        "normalized": {
+          "AUT": 65,
+          "MAS": 55,
+          "ALT": 50,
+          "SEC": 50
+        }
+      }
+    }
+  }
+}

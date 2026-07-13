@@ -1,0 +1,29 @@
+{
+  "schema_version": "0.1",
+  "generated_at": "2026-06-23T04:03:38.113Z",
+  "profile": {
+    "id": null,
+    "summary": "",
+    "scores": {
+      "openness": null,
+      "conscientiousness": null,
+      "extraversion": null,
+      "agreeableness": null,
+      "neuroticism": null
+    },
+    "modules": {
+      "ipip": {
+        "responses": [
+          2,
+          4,
+          1
+        ],
+        "raw_trait_scores": {},
+        "normalized_trait_scores": {},
+        "disabled": false,
+        "completed": false,
+        "last_updated": "2026-06-23T04:03:38.111Z"
+      }
+    }
+  }
+}

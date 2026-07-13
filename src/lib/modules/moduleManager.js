@@ -18,6 +18,7 @@ const MODULE_DEFINITIONS = [
   { key: 'aesthetics', label: 'Aesthetics', expectedLength: 32 },
   { key: 'music', label: 'Music', expectedLength: 20 },
   { key: 'delivery', label: 'Delivery', expectedLength: 30 },
+  { key: 'delivery2', label: 'Delivery v2', expectedLength: 24 },
   { key: 'communication', label: 'Communication', expectedLength: 20 }
 ];
 

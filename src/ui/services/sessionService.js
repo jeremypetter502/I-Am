@@ -23,6 +23,7 @@ function resolveExpectedLength(moduleName, data, existingModule) {
   if (typeof existingModule?.expectedLength === 'number' && existingModule.expectedLength > 0) return existingModule.expectedLength;
   if (moduleName === 'ipip') return 50;
   if (moduleName === 'delivery') return 30;
+  if (moduleName === 'delivery2') return 24;
   if (Array.isArray(data.responses) && data.responses.length > 0) return data.responses.length;
   if (Array.isArray(existingModule?.responses) && existingModule.responses.length > 0) return existingModule.responses.length;
   return 0;
@@ -49,7 +50,9 @@ function normalizeStatePayload(value) {
     bandwidth: Number.isFinite(bandwidth) ? Math.max(0, Math.min(100, Math.round(bandwidth))) : 50,
     mode: value.mode === 'divergent' ? 'divergent' : 'convergent',
     horizon: value.horizon === 'now' ? 'now' : 'long',
-    stakes: value.stakes === 'critical' ? 'critical' : 'casual'
+    stakes: value.stakes === 'critical' ? 'critical' : 'casual',
+    humor: value.humor === 'none' || value.humor === 'low' || value.humor === 'normal' || value.humor === 'high' ? value.humor : 'normal',
+    domain: value.domain === 'home' ? 'home' : 'work'
   };
 }
 
@@ -87,7 +90,9 @@ export function saveProgress(moduleName, data) {
     const disabled = data.disabled === undefined
       ? normalizeDisabledFlag(existingModule.disabled)
       : normalizeDisabledFlag(data.disabled);
-    stored.modules[moduleName] = Object.assign({}, stored.modules[moduleName] || {}, {
+    const hasIncomingNote = typeof data.note === 'string';
+    const normalizedIncomingNote = hasIncomingNote ? String(data.note).trim() : undefined;
+    const nextModule = Object.assign({}, stored.modules[moduleName] || {}, {
       responses: nextResponses,
       ...(normalizedTestAnswers || fallbackTestAnswers ? { testAnswers: normalizedTestAnswers || fallbackTestAnswers } : {}),
       ...(normalizedState || fallbackState ? { state: normalizedState || fallbackState } : {}),
@@ -98,6 +103,14 @@ export function saveProgress(moduleName, data) {
       last_updated: now,
       completed: explicitComplete || (expectedLength > 0 && answered >= expectedLength)
     });
+    if (hasIncomingNote) {
+      if (normalizedIncomingNote) {
+        nextModule.note = normalizedIncomingNote;
+      } else {
+        delete nextModule.note;
+      }
+    }
+    stored.modules[moduleName] = nextModule;
     stored.updated_at = now;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
     return true;

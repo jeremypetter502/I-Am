@@ -50,6 +50,7 @@ export function importJson(input) {
   if (profile.modules.state && typeof profile.modules.state === 'object') {
     const state = profile.modules.state;
     profile.modules.state = {
+      ...state,
       bandwidth: Number.isFinite(Number(state.bandwidth)) ? Math.max(0, Math.min(100, Math.round(Number(state.bandwidth)))) : 50,
       mode: state.mode === 'divergent' ? 'divergent' : 'convergent',
       horizon: state.horizon === 'now' ? 'now' : 'long',
@@ -57,6 +58,19 @@ export function importJson(input) {
       completed: state.completed === undefined ? true : Boolean(state.completed),
       disabled: state.disabled === true,
       last_updated: state.last_updated
+    };
+  }
+  if (profile.modules.delivery2 && typeof profile.modules.delivery2 === 'object') {
+    const delivery2 = profile.modules.delivery2;
+    profile.modules.delivery2 = {
+      ...delivery2,
+      responses: Array.isArray(delivery2.responses)
+        ? delivery2.responses.map((value) => {
+            const numeric = Number(value);
+            return Number.isFinite(numeric) ? numeric : null;
+          })
+        : [],
+      disabled: delivery2.disabled === true
     };
   }
   for (const [moduleKey, moduleValue] of Object.entries(profile.modules)) {
