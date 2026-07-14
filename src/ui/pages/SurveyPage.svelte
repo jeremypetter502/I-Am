@@ -53,6 +53,7 @@
   function formatInlineMarkdown(text) {
     if (!text) return '';
     return String(text)
+      .replace(/\[([^\]]+)\]\((\/[^)\s]*|https?:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>')
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em>$1</em>')
       .replace(/_([^_]+)_/g, '<em>$1</em>')
@@ -1815,7 +1816,7 @@
         <input
           class="module-note"
           type="text"
-          placeholder="Details and examples that represent this module."
+          placeholder="Add details and examples that represent you for this module."
           bind:value={moduleNotes[active]}
           on:input={() => {
             try {
@@ -2715,6 +2716,16 @@
     color: var(--iam-text-primary);
     opacity: 0.9;
     font-style: italic;
+  }
+  .popup-card :global(a) {
+    color: var(--iam-teal);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+  }
+  .popup-card :global(a:hover),
+  .popup-card :global(a:focus-visible) {
+    color: #67e8f9;
   }
 
   .module-help-summary {

@@ -14,6 +14,6 @@ Privacy is the headliner here. **Absolutely zero information is stored on our se
 
 **Ready to rock? Let’s build your I-AM string!**
 
-If you are interested in the details and code for this project, see the [README](/readme) page.
+If you are interested in the details and code for this project, see the [README](/readme) page or checkout the [repo](https://github.com/jeremypetter502/I-Am).
 
 
