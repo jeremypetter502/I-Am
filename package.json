@@ -9,7 +9,7 @@
     "lint": "eslint . --ext .js,.ts",
     "format": "prettier --write .",
     "dev:ui": "vite --config vite.config.mjs",
-    "build:ui": "node ./node_modules/vite/dist/node/cli.js build --config vite.config.mjs",
+    "build:ui": "vite build --config vite.config.mjs",
     "preview:ui": "vite preview --config vite.config.mjs"
   },
   "devDependencies": {
