@@ -64,6 +64,8 @@
     --iam-text-secondary: #94A3B8;
     --iam-button-hover: rgba(255, 255, 255, 0.1);
     --iam-button-active: scale(0.95);
+    /* Prefer dark rendering on platforms that may auto-switch themes */
+    color-scheme: dark;
   }
 
   :global(body) {
@@ -106,7 +108,9 @@
   }
 
   :global(.question-meta .question-text) {
-    color: var(--iam-text-primary) !important;
+    color: var(--iam-text-primary, #F8FAFC) !important;
+    /* Subtle shadow to improve legibility on devices with unexpected background/theme behavior */
+    text-shadow: 0 1px 0 rgba(0,0,0,0.35);
   }
 
   :global(.state-card p),
@@ -142,12 +146,12 @@
 
   :global(.answer-chip) {
     box-sizing: border-box !important;
-    width: 4.5rem !important;
-    height: 4.5rem !important;
-    min-width: 4.5rem !important;
-    min-height: 4.5rem !important;
-    max-width: 4.5rem !important;
-    max-height: 4.5rem !important;
+    width: 3.2rem !important;
+    height: 3.2rem !important;
+    min-width: 3.2rem !important;
+    min-height: 3.2rem !important;
+    max-width: 3.2rem !important;
+    max-height: 3.2rem !important;
     flex-shrink: 0 !important;
     flex-grow: 0 !important;
     aspect-ratio: 1 / 1 !important;

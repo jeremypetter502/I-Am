@@ -347,14 +347,21 @@
 
   @media (max-width: 560px) {
     .answers {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      justify-items: center;
     }
     .answer-chip {
-      min-height: 70px;
-      padding: 10px;
+      width: 3.1rem !important;
+      height: 3.1rem !important;
+      min-width: 3.1rem !important;
+      min-height: 3.1rem !important;
+      padding: 0;
+      margin: 0.3rem !important;
     }
     .value {
-      font-size: 1.1rem;
+      font-size: 1rem;
+      line-height: 1;
     }
     .nav {
       justify-content: stretch;
@@ -369,6 +376,20 @@
   @media (max-width: 480px) {
     .question-card {
       gap: 12px;
+    }
+    .answers {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .answer-chip {
+      width: 2.85rem !important;
+      height: 2.85rem !important;
+      min-width: 2.85rem !important;
+      min-height: 2.85rem !important;
+      margin: 0.2rem !important;
+    }
+    .value {
+      font-size: 0.95rem;
     }
     .scale-note {
       font-size: 0.85rem;
