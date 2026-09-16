@@ -313,8 +313,8 @@
   let completionPopup = null;
   let showMainResetDialog = false;
   let surveyResetKey = 0;
-  let currentModuleDisabled = false;
   let showModuleActionButtons = false;
+  let moduleSelection = {};
   let touchedModules = { base: false, ipip: false, aesthetics: false, music: false, delivery: false, delivery2: false, skills: false, communication: false, state: false };
   let moduleProgress = {
     base: { answered: 0, expected: 1 },
@@ -480,8 +480,7 @@
   $: activeMeta = moduleOrder.find((mod) => mod.key === active) || moduleOrder[0];
   $: fallbackExportProfile = buildFallbackExportProfile();
   $: exportProfile = fallbackExportProfile || partialProfile || storedProfile;
-  $: iamInstructionSections = getIamInstructionSections(currentIamCode, generatedIamProfile || exportProfile);
-  $: iamPopupText = buildIamPopupText(currentIamCode, iamInstructionSections, (generatedIamProfile || exportProfile)?.profile?.base || baseContext);
+  $: iamPopupText = buildIamPopupText(currentIamCode);
   $: canGenerateIam = completedCount > 0;
   $: canSaveProfile = completedCount > 0 || !!exportProfile;
   $: moduleProgressLabels = Object.fromEntries(moduleOrder.map((mod) => {
@@ -494,8 +493,9 @@
   $: activeStatusLabel = active === 'state' ? 'Baseline' : (completedModules[active] ? 'Completed' : 'Active');
   $: activeModuleHelp = MODULE_HELP[active] || MODULE_HELP.base;
   $: selectedModuleHelp = MODULE_HELP[moduleHelpKey] || MODULE_HELP.base;
-  $: currentModuleDisabled = isModuleDisabled(active);
   $: showModuleActionButtons = !['base', 'state'].includes(active);
+  $: selectableModules = moduleOrder.filter((mod) => !isFoundationalModule(mod.key));
+  $: selectedModuleCount = selectableModules.filter((mod) => moduleSelection[mod.key] !== false).length;
 
   function setActiveModule(nextModule) {
     if (!nextModule || nextModule === active) return;
@@ -684,105 +684,8 @@
     }
   }
 
-  function getIamInstructionSections(iamCode, profileFile) {
-    const code = String(iamCode || '');
-    const hasToken = (pattern) => pattern.test(code);
-    const disabled = (moduleKey) => profileFile?.profile?.modules?.[moduleKey]?.disabled === true;
-    return {
-      personality: !disabled('ipip') && (Boolean(completedModules.ipip) || hasToken(/(?:^|\/)PERSONALITY:/i) || hasToken(/(?:^|\/)O\d+C\d+E\d+A\d+N\d+(?:\/|$)/)),
-      aesthetics: !disabled('aesthetics') && (Boolean(completedModules.aesthetics) || hasToken(/(?:^|\/)AESTHETIC(?:\([^)]+\))?:/i) || hasToken(/\/AES:[A-Z0-9]+/)),
-      music: !disabled('music') && (Boolean(completedModules.music) || hasToken(/(?:^|\/)MUSIC(?:\([^)]+\))?:/i) || hasToken(/\/MUS:[A-Z0-9]+/)),
-      delivery: !disabled('delivery') && (Boolean(completedModules.delivery) || hasToken(/(?:^|\/)DELIVERY(?:\([^)]+\))?:/i) || hasToken(/\/DELIVERY:[A-Z0-9]+/)),
-      delivery2: !disabled('delivery2') && (Boolean(completedModules.delivery2) || hasToken(/(?:^|\/)DELIVERY2(?:\([^)]+\))?:/i) || hasToken(/\/DELIVERY2\/[A-Z0-9]+/)),
-      communication: !disabled('communication') && (Boolean(completedModules.communication) || hasToken(/(?:^|\/)COMMUNICATION(?:\([^)]+\))?:/i) || hasToken(/\/COMM:DRV\d+ANC\d+EXP\d+AMB\d+/)),
-      career: !disabled('skills') && (Boolean(completedModules.skills) || hasToken(/\/(?:SKILL|SKILLS)(?:\([^)]+\))?:/i) || hasToken(/\/(?:CAR|SKL)(?:\([^)]+\))?:\d{8}(?:S\d{4})*/)),
-      state: !disabled('state') && (Boolean(completedModules.state) || hasToken(/\/STATE:[^/]+/))
-    };
-  }
-
-  function buildBaseContextLinesForIam(base) {
-    const source = base && typeof base === 'object' ? base : {};
-    const lines = [];
-    const pushIfPresent = (label, value) => {
-      if (value == null) return;
-      const text = String(value).trim();
-      if (!text) return;
-      lines.push(`- ${label}: ${text}`);
-    };
-
-    // Exclude fields already encoded in the I-AM string: name, birth_year, gender, locale, timezone.
-    pushIfPresent('Birth Month', source.birth_month);
-    pushIfPresent('Birth Day', source.birth_day);
-    pushIfPresent('Company', source.company);
-    pushIfPresent('Years Experience', source.years_experience);
-    pushIfPresent('Education Level', source.education_level);
-    // Skills, Communication Style, and Favorites are no longer exported from Base module
-    pushIfPresent('Short Bio', source.short_bio);
-
-    return lines;
-  }
-
-  function buildIamPopupText(iamCode, sections, base) {
-    const enabled = sections || {};
-    const sectionInstructionBodies = [];
-    const quickReference = [];
-
-    if (enabled.personality) {
-      sectionInstructionBodies.push('Use OCEAN trait weights to tune reasoning cadence, assertiveness, novelty, and reassurance style.');
-      quickReference.push('OCEAN: Big Five trait scores (O=Openness, C=Conscientiousness, E=Extraversion, A=Agreeableness, N=Neuroticism)');
-    }
-    if (enabled.aesthetics) {
-      sectionInstructionBodies.push('Use aesthetic preferences to choose visual examples, formatting density, and presentation style that feel native to the user.');
-      quickReference.push('AES: Aesthetic Preferences (MIN=Minimalism, CLR=Colorfulness, WRM=Warmth, MOT=Motion, IMG=Imagery, TYP=Typography, LAY=Layout)');
-    }
-    if (enabled.music) {
-      sectionInstructionBodies.push('Use music preference factors to align tone and creative framing with the user\'s preferred energy and mood profile.');
-      quickReference.push('MUS: Music Preferences (MEL=Mellow, SOP=Sophisticated, UNP=Unpretentious, INT=Intense, CON=Contemporary)');
-    }
-    if (enabled.delivery) {
-      sectionInstructionBodies.push('Use DELIVERY as a delivery profile: tune directness (DEF/PEER/CHL), structure and density (DNS/STR/FMT), depth and verbosity (ABS/VBS), and social tone (EMP/CND/HMR).');
-      sectionInstructionBodies.push('For high BUR, include governance and risk caveats; for high AUT, prioritize self-serve execution steps and ownership-friendly options.');
-      sectionInstructionBodies.push('Treat AUD as a signal to favor spoken-friendly phrasing (short clauses, clear transitions, lower jargon density) when possible.');
-      quickReference.push('DELIVERY: Unified interaction preferences (DEF, PEER, CHL, DNS, AUD, STR, ABS, FMT, VBS, EMP, CND, HMR, AUT, BUR)');
-    }
-    if (enabled.communication) {
-      sectionInstructionBodies.push('Use communication traits to calibrate directness, detail level, and relationship tone in every response.');
-      quickReference.push('COM: Communication Style (DRV=Driver, ANC=Analytical, EXP=Expressive, AMB=Amiable)');
-    }
-    if (enabled.career) {
-      sectionInstructionBodies.push('Use career and skills context to prioritize recommendations that match validated strengths and role-adjacent options.');
-      quickReference.push('CAR: Career/Skills (CAR=O*NET SOC code, Sxx=O*NET Skill index, proficiency)');
-    }
-    if (enabled.state) {
-      sectionInstructionBodies.push('Use STATE as immediate runtime context for urgency, rigor, and decision framing in this session.');
-      quickReference.push('STATE: Dynamic state (bandwidth, mode, horizon, stakes)');
-    }
-
-    const sectionInstructions = sectionInstructionBodies.map((line, idx) => `${idx + 6}. ${line}`);
-
-    const additionalBaseContextLines = buildBaseContextLinesForIam(base);
-
-    const parts = [
-      `I-AM string: ${iamCode || 'I-AM string unavailable'}`,
-      '',
-      'Instructions for the LLM:',
-      '1. Treat the I-AM string above as authoritative structured profile context for the user.',
-      '2. Use it to adapt tone, communication style, preferences, and response framing.',
-      '3. Do not rewrite, compress, or reinterpret the I-AM string unless explicitly asked to explain it.',
-      '4. If additional context conflicts with the I-AM string, prefer the most recent user instruction while retaining it as the baseline profile.',
-      '5. Apply the I-AM guidance silently in your responses instead of repeatedly restating the profile.',
-      ...sectionInstructions,
-      '',
-      ...(quickReference.length
-        ? ['Quick Reference:', ...quickReference]
-        : ['Quick Reference: No completed I-AM sections detected yet.'])
-    ];
-
-    if (additionalBaseContextLines.length) {
-      parts.push('', 'Additional Base Context:', ...additionalBaseContextLines);
-    }
-
-    return parts.join('\n');
+  function buildIamPopupText(iamCode) {
+    return String(iamCode || 'I-AM string unavailable').trim();
   }
 
   async function copyIamText() {
@@ -1524,45 +1427,54 @@
     persistCurrentProfile();
   }
 
-  function toggleCurrentModuleDisabled(event) {
-    if (!showModuleActionButtons) return;
-    const existing = resumeData?.modules?.[active] || {};
-    const currentDisabled = Object.prototype.hasOwnProperty.call(existing, 'disabled')
-      ? existing.disabled === true
-      : isModuleDisabled(active);
-    const nextDisabled = typeof event?.currentTarget?.checked === 'boolean'
-      ? event.currentTarget.checked
-      : !currentDisabled;
+  function setModuleDisabled(moduleKey, nextDisabled) {
+    const existing = resumeData?.modules?.[moduleKey] || {};
     resumeData = {
       ...(resumeData || {}),
       modules: {
         ...((resumeData && resumeData.modules) ? resumeData.modules : {}),
-        [active]: {
+        [moduleKey]: {
           ...existing,
           responses: Array.isArray(existing.responses) ? existing.responses.slice(0) : [],
           disabled: nextDisabled
         }
       }
     };
-    if (moduleResults[active] && typeof moduleResults[active] === 'object') {
+    if (moduleResults[moduleKey] && typeof moduleResults[moduleKey] === 'object') {
       moduleResults = {
         ...moduleResults,
-        [active]: {
-          ...moduleResults[active],
+        [moduleKey]: {
+          ...moduleResults[moduleKey],
           disabled: nextDisabled
         }
       };
     }
-    sessionService.saveProgress(active, {
+    sessionService.saveProgress(moduleKey, {
       responses: Array.isArray(existing.responses) ? existing.responses : [],
-      testAnswers: active === 'skills' ? (existing.testAnswers || {}) : undefined,
-      state: active === 'state' ? existing.state : undefined,
+      testAnswers: moduleKey === 'skills' ? (existing.testAnswers || {}) : undefined,
+      state: moduleKey === 'state' ? existing.state : undefined,
       current: existing.current || 0,
-      expectedLength: existing.expectedLength || moduleOrder.find((mod) => mod.key === active)?.expectedLength || 0,
+      expectedLength: existing.expectedLength || moduleOrder.find((mod) => mod.key === moduleKey)?.expectedLength || 0,
       completed: existing.completed === true,
       disabled: nextDisabled
     });
+  }
+
+  function applySelectedModulesAndRegenerate() {
+    for (const mod of selectableModules) {
+      const included = moduleSelection[mod.key] !== false;
+      const existing = resumeData?.modules?.[mod.key];
+      if (!included) {
+        // Explicitly exclude from generation, creating a stub entry if the module was never started.
+        setModuleDisabled(mod.key, true);
+      } else if (existing && typeof existing === 'object' && existing.disabled === true) {
+        // Only clear a previously-set disabled flag; don't touch modules that were never started.
+        setModuleDisabled(mod.key, false);
+      }
+    }
     persistCurrentProfile();
+    generateIamFromCurrentSelection();
+    iamCopyStatus = '';
   }
 
   $: activeIsFoundational = isFoundationalModule(active);
@@ -1709,8 +1621,15 @@
 
   function openGeneratePopup() {
     iamCopyStatus = '';
+    moduleSelection = Object.fromEntries(
+      selectableModules.map((mod) => [mod.key, !isModuleDisabled(mod.key)])
+    );
     generateIamFromCurrentSelection();
     showIamPopup = true;
+  }
+
+  function toggleModuleSelection(moduleKey, checked) {
+    moduleSelection = { ...moduleSelection, [moduleKey]: checked };
   }
 
 </script>
@@ -1796,16 +1715,6 @@
           {#key active}
             <div class="module-action-row">
               <button class="mini-btn topbar-btn module-action-btn" type="button" on:click={openModuleResetDialog}>Reset</button>
-              <label class="mini-btn topbar-btn module-action-btn disable-toggle" aria-pressed={currentModuleDisabled}>
-                <span>Disable</span>
-                <input
-                  class="disable-checkbox-input"
-                  type="checkbox"
-                  checked={currentModuleDisabled}
-                  on:change={toggleCurrentModuleDisabled}
-                  aria-label="Disable this module"
-                />
-              </label>
             </div>
           {/key}
         {/if}
@@ -1945,12 +1854,28 @@
         <p class="panel-eyebrow">Current profile</p>
         <h3 id="iam-popup-title">Current I-AM String</h3>
         <p>This block includes model-facing instructions that travel with the current I-AM string.</p>
+        <details class="module-select-dropdown">
+          <summary class="module-select-summary">Modules to include ({selectedModuleCount}/{selectableModules.length}) ▾</summary>
+          <div class="module-select-list">
+            {#each selectableModules as mod (mod.key)}
+              <label class="module-select-item">
+                <input
+                  type="checkbox"
+                  checked={moduleSelection[mod.key] !== false}
+                  on:change={(event) => toggleModuleSelection(mod.key, event.currentTarget.checked)}
+                />
+                <span>{mod.emoji} {mod.label}</span>
+              </label>
+            {/each}
+          </div>
+        </details>
         <textarea class="iam-popup-text" readonly bind:value={iamPopupText} aria-label="Current I-AM text"></textarea>
         {#if iamCopyStatus}
           <p class="iam-copy-status">{iamCopyStatus}</p>
         {/if}
         <div class="panel-actions">
           <button class="primary" on:click={copyIamText}>Copy</button>
+          <button class="primary" on:click={applySelectedModulesAndRegenerate}>Regenerate</button>
           <button class="primary" on:click={() => showIamPopup = false}>Close</button>
         </div>
       </div>
@@ -2402,14 +2327,43 @@
     margin: 0;
   }
 
-  .disable-toggle {
+  .module-select-dropdown {
+    width: 100%;
+    margin-top: 4px;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .module-select-summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--iam-text-primary);
+  }
+
+  .module-select-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .module-select-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 6px 12px;
+    padding: 0 12px 12px;
+  }
+
+  .module-select-item {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
+    font-size: 0.9rem;
   }
 
-  .disable-checkbox-input {
+  .module-select-item input {
     width: 14px;
     height: 14px;
     accent-color: currentColor;

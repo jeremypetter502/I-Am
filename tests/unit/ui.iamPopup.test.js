@@ -29,7 +29,7 @@ afterEach(() => {
 });
 
 describe('SurveyPage IAM popup', () => {
-  it('opens I-AM popup and copies long-form I-AM text with instructions', async () => {
+  it('opens I-AM popup and copies only the raw I-AM string', async () => {
     localStorage.setItem('iam_profile', JSON.stringify({
       profile: {
         iam: { code: 'IAM/0.6:AES:MIN50/O70C60E50A40N30' },
@@ -38,23 +38,22 @@ describe('SurveyPage IAM popup', () => {
       }
     }));
 
-    // simulate a completed module so Generate becomes available
     localStorage.setItem('iam_inprogress_v1', JSON.stringify({ modules: { music: { responses: [1,1,1], current: 3, expectedLength: 3, answered: 3, completed: true } } }));
     const { getByText, getByLabelText } = render(SurveyPage);
 
-  await fireEvent.click(getByText('Generate'));
+    await fireEvent.click(getByText('Generate'));
     expect(getByText('Current I-AM String')).toBeTruthy();
 
     const textArea = getByLabelText('Current I-AM text');
-  expect(textArea.value.includes('I-AM string: IAM-v0.2')).toBe(true);
-    expect(textArea.value.includes('Instructions for the LLM:')).toBe(true);
-    expect(textArea.value.includes('Treat the I-AM string above as authoritative structured profile context for the user.')).toBe(true);
-    expect(textArea.value.includes('Quick Reference:')).toBe(true);
+    expect(textArea.value.includes('IAM-v0.2')).toBe(true);
+    expect(textArea.value.includes('Instructions for the LLM:')).toBe(false);
+    expect(textArea.value.includes('Treat the I-AM string above as authoritative structured profile context for the user.')).toBe(false);
+    expect(textArea.value.includes('Quick Reference:')).toBe(false);
     expect(textArea.value.includes('Use DELIVERY as a delivery profile')).toBe(false);
 
     await fireEvent.click(getByText('Copy'));
     expect(window.navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
-    expect(window.navigator.clipboard.writeText.mock.calls[0][0].includes('I-AM string: IAM-v0.2')).toBe(true);
+    expect(window.navigator.clipboard.writeText.mock.calls[0][0].includes('IAM-v0.2')).toBe(true);
   });
 
   it('derives the popup I-AM string from uploaded base context when iam code is missing', async () => {
@@ -84,11 +83,11 @@ describe('SurveyPage IAM popup', () => {
     await fireEvent.click(getByText('Generate'));
 
     const textArea = getByLabelText('Current I-AM text');
-    expect(textArea.value.includes('I-AM string:')).toBe(true);
+    expect(textArea.value.includes('IAM-v0.2')).toBe(true);
     expect(textArea.value.includes('O0C0E0A0N0')).toBe(false);
   });
 
-  it('includes music instructions when music I-AM segment is present', async () => {
+  it('shows only the code for the music segment without extra instruction blocks', async () => {
     localStorage.setItem('iam_profile', JSON.stringify({
       profile: {
         iam: { code: 'IAM/0.6:O0C0E0A0N0/MUS:MEL25SOP25UNP25INT25CON25' },
@@ -103,9 +102,10 @@ describe('SurveyPage IAM popup', () => {
     await fireEvent.click(getByText('Generate'));
 
     const textArea = getByLabelText('Current I-AM text');
+    expect(textArea.value.includes('IAM')).toBe(true);
     expect(textArea.value.includes('O0C0E0A0N0')).toBe(false);
-    expect(textArea.value.includes('Use music preference factors to align tone and creative framing')).toBe(true);
-    expect(textArea.value.includes('MUS: Music Preferences')).toBe(true);
+    expect(textArea.value.includes('Use music preference factors to align tone and creative framing')).toBe(false);
+    expect(textArea.value.includes('MUS: Music Preferences')).toBe(false);
     expect(textArea.value.includes('Use OCEAN trait weights to tune reasoning cadence')).toBe(false);
   });
 });

@@ -147,17 +147,6 @@ This repository is built as a Svelte 5 + Vite single-page application that takes
 | `npm run lint` | Run ESLint checks |
 | `npm run format` | Run Prettier code formatting |
 
----
-
-## Documentation Index
-
-- [`README.md`](README.md) – Overview, setup guide, and I-AM string concepts.
-- [`specs/personality-specs/personality_code.spec.md`](specs/personality-specs/personality_code.spec.md) – Canonical I-AM string format specification.
-- [`specs/001-personality-context-site/spec.md`](specs/001-personality-context-site/spec.md) – Requirements and survey site traceability.
-- [`specs/questions/`](specs/questions/) – Canonical question banks used to generate scoring data.
-
----
-
 ## Contributing
 
 Contributions are welcome! When contributing:

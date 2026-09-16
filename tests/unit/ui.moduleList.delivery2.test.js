@@ -23,9 +23,16 @@ afterEach(() => {
 
 describe('Delivery v2 module list behavior', () => {
   it('persists a disabled flag for the separate Delivery v2 module', async () => {
-    const { getByText } = render(SurveyPage);
-    await fireEvent.click(getByText('Delivery v2'));
-    await fireEvent.click(getByText('Disable'));
+    localStorage.setItem('iam_inprogress_v1', JSON.stringify({
+      modules: {
+        music: { responses: Array(20).fill(3), current: 20, expectedLength: 20, answered: 20, completed: true }
+      }
+    }));
+
+    const { getByText, getByRole } = render(SurveyPage);
+    await fireEvent.click(getByText('Generate'));
+    await fireEvent.click(getByRole('checkbox', { name: /Delivery v2/ }));
+    await fireEvent.click(getByText('Regenerate'));
 
     await waitFor(() => {
       const saved = JSON.parse(localStorage.getItem('iam_profile'));

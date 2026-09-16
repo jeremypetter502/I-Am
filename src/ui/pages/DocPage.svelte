@@ -101,11 +101,22 @@
     let paragraph = [];
     let listType = null;
     let listItems = [];
+    let badgeBuffer = [];
+
+    const isBadgeToken = (text) => /^(?:!\[[^\]]*\]\([^\)]+\)|\[!\[[^\]]*\]\([^\)]+\)\]\([^\)]+\)|\[[^\]]+\]\([^\)]+\))$/.test(String(text || '').trim());
+    const isMarkdownHr = (text) => /^(?:\*{3,}|-{3,}|_{3,})\s*$/.test(String(text || '').trim());
 
     const flushParagraph = () => {
       if (!paragraph.length) return;
-      out.push(`<p>${applyInlineMarkdown(paragraph.join(' '))}</p>`);
+      const joined = paragraph.join(' ');
+      out.push(`<p>${applyInlineMarkdown(joined)}</p>`);
       paragraph = [];
+    };
+
+    const flushBadgeBuffer = () => {
+      if (!badgeBuffer.length) return;
+      out.push(`<div class="badge-row">${badgeBuffer.map((item) => applyInlineMarkdown(item)).join(' ')}</div>`);
+      badgeBuffer = [];
     };
 
     const flushList = () => {
@@ -124,7 +135,32 @@
       return `<textarea class="doc-codearea" data-lang="${lang}" rows="${lineCount}" readonly wrap="soft">${text}</textarea>`;
     };
 
-    for (const rawLine of lines) {
+    const parseTableRow = (line) =>
+      String(line || '')
+        .trim()
+        .replace(/^\|/, '')
+        .replace(/\|$/, '')
+        .split('|')
+        .map((cell) => cell.trim());
+
+    const isTableDelimiter = (line) => {
+      const cells = String(line || '')
+        .trim()
+        .replace(/^\|/, '')
+        .replace(/\|$/, '')
+        .split('|')
+        .map((cell) => cell.trim());
+      return cells.length > 1 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+    };
+
+    const renderTable = (headerCells, bodyRows) => {
+      const head = headerCells.map((cell) => `<th>${applyInlineMarkdown(cell)}</th>`).join('');
+      const body = bodyRows.map((row) => `<tr>${row.map((cell) => `<td>${applyInlineMarkdown(cell)}</td>`).join('')}</tr>`).join('');
+      return `<table class="doc-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+    };
+
+    for (let index = 0; index < lines.length; index += 1) {
+      const rawLine = lines[index];
       const line = rawLine ?? '';
       const trimmed = line.trim();
 
@@ -143,15 +179,51 @@
       if (/^```/.test(trimmed)) {
         flushParagraph();
         flushList();
+        flushBadgeBuffer();
         inCode = true;
         codeLang = trimmed.replace(/^```/, '').trim();
+        continue;
+      }
+
+      if (trimmed.startsWith('|') && index + 1 < lines.length && isTableDelimiter(lines[index + 1])) {
+        const headerCells = parseTableRow(trimmed);
+        const bodyRows = [];
+        index += 2;
+        while (index < lines.length) {
+          const nextLine = String(lines[index] || '').trim();
+          if (!nextLine.startsWith('|')) break;
+          bodyRows.push(parseTableRow(nextLine));
+          index += 1;
+        }
+        out.push(renderTable(headerCells, bodyRows));
+        index -= 1;
         continue;
       }
 
       if (!trimmed) {
         flushParagraph();
         flushList();
+        flushBadgeBuffer();
         continue;
+      }
+
+      if (isMarkdownHr(trimmed)) {
+        flushParagraph();
+        flushList();
+        flushBadgeBuffer();
+        out.push('<hr />');
+        continue;
+      }
+
+      if (isBadgeToken(trimmed)) {
+        flushParagraph();
+        flushList();
+        badgeBuffer.push(trimmed);
+        continue;
+      }
+
+      if (badgeBuffer.length && !isBadgeToken(trimmed)) {
+        flushBadgeBuffer();
       }
 
       const heading = trimmed.match(/^(#{1,6})\s+(.*)$/);
@@ -186,6 +258,7 @@
 
     flushParagraph();
     flushList();
+    flushBadgeBuffer();
 
     if (inCode) {
       out.push(codeTextarea(codeLines, codeLang));
@@ -358,6 +431,52 @@
     line-height: 1.6;
   }
 
+  .doc-content :global(.badge-row) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 1em;
+  }
+
+  .doc-content :global(.badge-row a),
+  .doc-content :global(.badge-row img) {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1;
+  }
+
+  .doc-content :global(hr) {
+    border: 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.3);
+    margin: 1.25em 0;
+  }
+
+  .doc-content :global(table.doc-table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.45);
+  }
+
+  .doc-content :global(table.doc-table th),
+  .doc-content :global(table.doc-table td) {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+    color: var(--iam-text-secondary);
+  }
+
+  .doc-content :global(table.doc-table th) {
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--iam-text-primary);
+    font-weight: 700;
+  }
+
   .doc-content :global(ul),
   .doc-content :global(ol) {
     margin: 0.3em 0 1em 1.3em;
@@ -402,6 +521,21 @@
     color: #93c5fd;
     text-decoration: underline;
     text-underline-offset: 2px;
+  }
+
+  .doc-content :global(.badge-row) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 1em;
+  }
+
+  .doc-content :global(.badge-row a),
+  .doc-content :global(.badge-row img) {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1;
   }
 
   .doc-content :global(img) {

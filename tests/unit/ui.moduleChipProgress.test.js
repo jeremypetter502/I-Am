@@ -68,17 +68,19 @@ describe('SurveyPage module chip progress', () => {
     expect(queryByText('Completed')).toBeNull();
   });
 
-  it('toggles current module disabled state in saved profile without clearing answers', async () => {
+  it('toggles module disabled state via the Generate popup selection without clearing answers', async () => {
     localStorage.setItem('iam_inprogress_v1', JSON.stringify({
       modules: {
-        ipip: { responses: Array(10).fill(3), current: 4, expectedLength: 50, answered: 10, completed: false }
+        ipip: { responses: Array(10).fill(3), current: 4, expectedLength: 50, answered: 10, completed: false },
+        music: { responses: Array(20).fill(3), current: 20, expectedLength: 20, answered: 20, completed: true }
       }
     }));
 
-    const { container } = render(SurveyPage);
-    const disableButton = container.querySelector('.workspace .module-action-row .disable-toggle');
-    expect(disableButton).not.toBeNull();
-    await fireEvent.click(disableButton);
+    const { getByText, getByRole } = render(SurveyPage);
+
+    await fireEvent.click(getByText('Generate'));
+    await fireEvent.click(getByRole('checkbox', { name: /Personality/ }));
+    await fireEvent.click(getByText('Regenerate'));
 
     await waitFor(() => {
       const saved = JSON.parse(localStorage.getItem('iam_profile'));
@@ -86,9 +88,8 @@ describe('SurveyPage module chip progress', () => {
       expect(saved.profile.modules.ipip.responses).toHaveLength(10);
     });
 
-    const disableToggleAgain = container.querySelector('.workspace .module-action-row .disable-toggle');
-    expect(disableToggleAgain).not.toBeNull();
-    await fireEvent.click(disableToggleAgain);
+    await fireEvent.click(getByRole('checkbox', { name: /Personality/ }));
+    await fireEvent.click(getByText('Regenerate'));
 
     await waitFor(() => {
       const saved = JSON.parse(localStorage.getItem('iam_profile'));
@@ -96,11 +97,18 @@ describe('SurveyPage module chip progress', () => {
     });
   });
 
-  it('persists disabled flag for an unstarted module', async () => {
-    const { getByText } = render(SurveyPage);
+  it('persists disabled flag for an unstarted module via the Generate popup', async () => {
+    localStorage.setItem('iam_inprogress_v1', JSON.stringify({
+      modules: {
+        skills: { responses: Array(35).fill(3), current: 35, expectedLength: 35, answered: 35, completed: true }
+      }
+    }));
 
-    await fireEvent.click(getByText('Music'));
-    await fireEvent.click(getByText('Disable'));
+    const { getByText, getByRole } = render(SurveyPage);
+
+    await fireEvent.click(getByText('Generate'));
+    await fireEvent.click(getByRole('checkbox', { name: /Music/ }));
+    await fireEvent.click(getByText('Regenerate'));
 
     await waitFor(() => {
       const saved = JSON.parse(localStorage.getItem('iam_profile'));
@@ -109,43 +117,43 @@ describe('SurveyPage module chip progress', () => {
     });
   });
 
-  it('keeps checkbox state correct when switching modules', async () => {
+  it('keeps module-selection checkboxes in sync with persisted disabled flags across popup reopens', async () => {
     localStorage.setItem('iam_inprogress_v1', JSON.stringify({
       modules: {
-        ipip: { responses: Array(10).fill(3), current: 4, expectedLength: 50, answered: 10, completed: false }
+        ipip: { responses: Array(10).fill(3), current: 4, expectedLength: 50, answered: 10, completed: false },
+        music: { responses: Array(20).fill(3), current: 20, expectedLength: 20, answered: 20, completed: true }
       }
     }));
 
-    const { container, getByText } = render(SurveyPage);
+    const { getByText, getByRole } = render(SurveyPage);
 
-    const ipipCheckbox = container.querySelector('.workspace .module-action-row .disable-checkbox-input');
-    expect(ipipCheckbox).not.toBeNull();
-    await fireEvent.click(ipipCheckbox);
+    await fireEvent.click(getByText('Generate'));
+    expect(getByRole('checkbox', { name: /Personality/ }).checked).toBe(true);
+    await fireEvent.click(getByRole('checkbox', { name: /Personality/ }));
+    await fireEvent.click(getByText('Regenerate'));
 
     await waitFor(() => {
       const saved = JSON.parse(localStorage.getItem('iam_profile'));
       expect(saved.profile.modules.ipip.disabled).toBe(true);
     });
 
-    await fireEvent.click(getByText('Music'));
-    await waitFor(() => {
-      const checkbox = container.querySelector('.workspace .module-action-row .disable-checkbox-input');
-      expect(checkbox?.checked).toBe(false);
-    });
+    await fireEvent.click(getByText('Close'));
+    await fireEvent.click(getByText('Generate'));
+    expect(getByRole('checkbox', { name: /Personality/ }).checked).toBe(false);
+    expect(getByRole('checkbox', { name: /Music/ }).checked).toBe(true);
 
-    const musicCheckbox = container.querySelector('.workspace .module-action-row .disable-checkbox-input');
-    expect(musicCheckbox).not.toBeNull();
-    await fireEvent.click(musicCheckbox);
+    await fireEvent.click(getByRole('checkbox', { name: /Music/ }));
+    await fireEvent.click(getByText('Regenerate'));
 
     await waitFor(() => {
       const saved = JSON.parse(localStorage.getItem('iam_profile'));
       expect(saved.profile.modules.music.disabled).toBe(true);
+      expect(saved.profile.modules.ipip.disabled).toBe(true);
     });
 
-    await fireEvent.click(getByText('Personality'));
-    await waitFor(() => {
-      const checkbox = container.querySelector('.workspace .module-action-row .disable-checkbox-input');
-      expect(checkbox?.checked).toBe(true);
-    });
+    await fireEvent.click(getByText('Close'));
+    await fireEvent.click(getByText('Generate'));
+    expect(getByRole('checkbox', { name: /Personality/ }).checked).toBe(false);
+    expect(getByRole('checkbox', { name: /Music/ }).checked).toBe(false);
   });
 });

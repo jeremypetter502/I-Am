@@ -1,305 +1,247 @@
-# I-Am Context String (IAM) Specification v0.7
+# I-Am Context String (IAM) Specification
 
 ## Purpose
 
 The I-AM string is a compact, labeled, single-line encoding of a user's personality,
-preferences, skills, and runtime state.
+preferences, skills, and runtime state. The project currently emits a long-form runtime
+string intended for direct model-context injection.
 
 Terminology note:
-- "I-AM" is the product term ("I am" personality context), not an acronym.
-- The wire-encoded string prefix remains `IAM/<version>` for compatibility.
+- "I-AM" is the product term for the user's personal context, not an acronym.
+- The active wire format prefix is `IAM-v0.2`.
 
-It is designed for efficient LLM consumption:
-- Self-documenting (readable labels, no decoder preamble required)
-- Token-efficient compared with equivalent JSON
-- Gracefully degradable (partial profiles are still valid)
-- Backward-compatible across segment additions
+The format is designed for:
+- human readability
+- direct model consumption without a decoder preamble
+- partial-profile compatibility
+- forward-compatible segment additions
 
 ---
 
-## Canonical Format
+## Current Canonical Runtime Format
+
+The active runtime generator emits this shape:
 
 ```
-IAM/<version>[:<prefix_fields>:]OCEAN[/AES:<aes_tokens>][/MUS:<mus_tokens>][/COMM:<comm_tokens>][/CAR:<car_payload>][/DELIVERY:<delivery_tokens>][/STATE:<state_snapshot>]
+IAM-v0.2[/BASE:<prefix_values>]/SEGMENT[:<metric_pairs>][...]/SEGMENT2:<metric_pairs>
 ```
 
-Where:
-- `prefix_fields` are optional identity/context fields present in v0.6+
-- segment separators are `/`
-- all scored values are rounded integers unless explicitly noted
+The current implementation uses long-form segment names and, when a module has a note,
+appends the note as an anchor in parentheses immediately after the segment name:
 
-### Normative Language
+```
+SEGMENT(anchor1, anchor2):metricA75,metricB60
+```
 
-The keywords `MUST`, `MUST NOT`, `SHOULD`, and `MAY` in this document are normative.
+Examples:
 
-### Prefix fields (optional, v0.6+)
+```
+IAM-v0.2/BASE:Ziggy/COMMUNICATION:driver70,analytical85,expressive80,amiable60/PERSONALITY:openness85,conscientiousness75,extraversion80,agreeableness88,neuroticism35/MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contemporary63,unpretentious75/AESTHETIC(2001, Project Hail Mary, Dune, Wes21):minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75/DELIVERY2:structure75,density31,framing50,format44,empathy50,autonomy63/STATE:bandwidth50,mode:Convergent,horizon:Long,stakes:Casual,domain:Work
+```
 
-When available, these appear before OCEAN and are colon-separated:
+### Normative Rules
 
-`first_name:birth_year:gender:culture:timezone_abbrev`
+- The string prefix MUST begin with `IAM-v0.2`.
+- `BASE` is optional and appears first when present.
+- Segment names are long-form labels such as `PERSONALITY`, `MUSIC`, `AESTHETIC`, `DELIVERY2`, `STATE`, and `SKILL`.
+- Optional module anchors are serialized in parentheses after the segment name.
+- Metric pairs are comma-separated and use the form `nameValue`, for example `driver70` or `minimalism67`.
+- A value is normally a rounded integer in the 0-100 range unless otherwise noted.
 
-Any missing values are omitted; ordering remains fixed for values that exist.
+---
 
-Prefix emission rules:
-- Prefix fields MUST be emitted only when at least one prefix value exists.
-- When emitted, values MUST follow this order: `first_name`, `birth_year`, `gender`, `culture`, `timezone_abbrev`.
-- Empty values MUST be omitted rather than serialized as blank placeholders.
+## Module Anchors
+
+Module anchors are not a separate syntax block. They are serialized as parenthetical text
+attached to a segment name when the module has a note or metadata string.
+
+Current pattern:
+
+```
+SEGMENT(anchor1, anchor2, anchor3):metricA50,metricB70
+```
+
+Anchor behavior:
+- The anchor text is taken from the module note metadata.
+- Anchor values are sanitized before emission.
+- Spaces are normalized to single spaces.
+- Characters such as `/`, `:`, `(`, and `)` are stripped or transformed to avoid breaking the string grammar.
+- The note is optional; if no note exists, the segment is emitted without parentheses.
+
+Examples:
+
+```
+MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contemporary63,unpretentious75
+AESTHETIC(2001, Project Hail Mary, Dune, Wes21):minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75
+```
+
+---
+
+## Prefix Segment
+
+The optional `BASE` segment carries identity and context metadata in a fixed order:
+
+`first_name,birth_year,gender,culture,timezone_abbreviation`
+
+Rules:
+- values are emitted only when present
+- ordering is fixed for each value that exists
+- empty values are omitted rather than emitted as blank placeholders
 
 Example:
 
 ```
-IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33
-```
-
----
-
-## Full Example (v0.6)
-
-```
-IAM/0.6:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33/AES:MIN50CLR38WRM75MOT63/MUS:MEL56SOP69UNP69INT69CON50/COMM:DRV75ANC80EXP80AMB55/CAR:15125200S0190S0260S0360S0560S0670S0780S08100S0970S1260S1560S1780S1870S1970S2090S2160S23100S2470S2660S2770S3190S3260S3360S3460S3590/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
-```
-
-## Full Example (v0.7 with Delivery)
-
-```
-IAM/0.7:Jeremy:1975:Male:en-US:EST:O83C60E45A78N33/AES:MIN50CLR38WRM75MOT63/MUS:MEL56SOP69UNP69INT69CON50/COMM:DRV75ANC80EXP80AMB55/CAR:15125200S0190S08100S23100/DELIVERY:DEF38PEER82CHL90DNS86AUD75STR92ABS88FMT79VBS58EMP62CND91HMR46AUT84BUR60/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
+/BASE:Ziggy
+/BASE:Jeremy,1975,Male,en-US,EST
 ```
 
 ---
 
 ## Segment Definitions
 
-### OCEAN - Big Five (IPIP)
+### PERSONALITY
 
-Pattern: `O{oo}C{cc}E{ee}A{aa}N{nn}`
+Pattern:
+
+```
+PERSONALITY:openness{oo},conscientiousness{cc},extraversion{ee},agreeableness{aa},neuroticism{nn}
+```
 
 Interpretation thresholds:
 - `>=65` = HIGH
 - `35-64` = MEDIUM
 - `<35` = LOW
 
----
-
-### AES - Aesthetic Preferences
-
-Pattern: `AES:MIN{mm}CLR{cc}WRM{ww}MOT{mo}[IMG{im}][TYP{ty}][LAY{la}]`
-
-Common tokens:
-- `MIN` minimalism
-- `CLR` colorfulness
-- `WRM` warmth
-- `MOT` motion
-- `IMG` imagery/photos preference
-- `TYP` typography preference
-- `LAY` layout/grid preference
-
-Notes:
-- `IMG`, `TYP`, and `LAY` may be absent in partial outputs.
-
----
-
-### MUS - Music Preferences (STOMP-derived)
-
-Pattern: `MUS:MEL{ml}SOP{sp}UNP{un}INT{in}CON{cn}`
-
-Tokens:
-- `MEL` mellow
-- `SOP` sophisticated
-- `UNP` unpretentious
-- `INT` intense
-- `CON` contemporary
-
----
-
-### COMM - Communication Preferences (Merrill-Reimann)
-
-Pattern: `COMM:DRV{dr}ANC{an}EXP{ex}AMB{am}`
-
-Tokens:
-- `DRV` driver
-- `ANC` analytical
-- `EXP` expressive
-- `AMB` amiable
-
-Note:
-- Communication is serialized with an explicit `COMM` segment marker.
-- If communication scores are present, the `COMM` marker MUST be present.
-
----
-
-### CAR - Career and Standardized Transferable Skills (O*NET-SOC)
-
-Pattern: `CAR:{soc8}(S{skill_idx}{proficiency})*`
-
-Components:
-- `soc8`: normalized 8-digit SOC code (`15-1252` -> `15125200`, `15-1132.00` -> `15113200`)
-- `S{skill_idx}{proficiency}`:
-  - `skill_idx` is `01-35`
-  - `proficiency` is `00-99/100` encoded as two digits
-
-Sparse encoding rules:
-- Skills are ordered by index.
-- Current inclusion threshold is `normalized_score >= 60`.
-
-Example:
-- `CAR:15125200S0190S08100S23100`
-
----
-
-### DELIVERY - Unified Preference Delivery (new in v0.7)
+### AESTHETIC
 
 Pattern:
 
-`DELIVERY:DEF{dd}PEER{pp}CHL{cc}DNS{dn}AUD{au}STR{st}ABS{ab}FMT{fm}VBS{vb}EMP{em}CND{cn}HMR{hm}AUT{at}BUR{br}`
+```
+AESTHETIC(anchor...):minimalism{mm},colorfulness{cc},warmth{ww},motion{mo},...
+```
 
-Delivery combines metrics from one unified questionnaire across REL, CAP, COG, PER, and ENV constructs.
+Common metric names include:
+- `minimalism`
+- `colorfulness`
+- `warmth`
+- `motion`
+- `prefers_clean`
+- `modernity`
+- `aesthetic_importance`
 
-Tokens:
-- REL: `DEF`, `PEER`, `CHL`
-- CAP: `DNS`, `AUD`, `STR`
-- COG: `ABS`, `FMT`, `VBS`
-- PER: `EMP`, `CND`, `HMR`
-- ENV: `AUT`, `BUR`
+### MUSIC
 
-Emission rule:
-- Delivery tokens MUST be emitted in the exact token order shown in the pattern.
+Pattern:
+
+```
+MUSIC(anchor...):mellow{ml},sophisticated{sp},unpretentious{un},intense{in},contemporary{cn}
+```
+
+### COMMUNICATION
+
+Pattern:
+
+```
+COMMUNICATION:driver{dr},analytical{an},expressive{ex},amiable{am}
+```
+
+### DELIVERY and DELIVERY2
+
+Current runtime uses module names that match the implementation:
+
+```
+DELIVERY:<tokenA##,tokenB##,...>
+DELIVERY2:structure{str},density{dns},framing{frm},format{fmt},empathy{emp},autonomy{aut}
+```
+
+The exact token names are implementation-defined, but the runtime output is always a
+labelled segment followed by a metric list.
+
+### STATE
+
+Pattern:
+
+```
+STATE:bandwidth{bb},mode:{Convergent|Divergent},horizon:{Now|Long},stakes:{Critical|Casual},domain:{Work|Home}
+```
+
+State values are canonicalized before serialization and may include runtime context such as:
+- `bandwidth`
+- `mode`
+- `horizon`
+- `stakes`
+- optional `domain`
+- optional `humor`
+
+### SKILL and SKILLS
+
+The codebase also emits skill-oriented segments when career data is present:
+
+```
+SKILL:<soc8>S0190S08100S23100
+SKILLS:analysis90,problem_solving75,critical80,...
+```
+
+`SKILL` is the compact career payload. `SKILLS` is the long-form skill summary that maps
+individual skill names to metric values.
 
 ---
 
-### STATE - Dynamic Runtime User State
+## Segment Ordering
 
-Canonical snapshot pattern:
+The current generator does not rely on a strict fixed ordering for every segment. In practice,
+segments are assembled as a set of named metric blocks and then ordered by aggregate score,
+with ties broken alphabetically.
 
-`STATE:bandwidth{bb},mode:{convergent|divergent},horizon:{now|long},stakes:{critical|casual}`
+The only hard runtime convention is:
+- `BASE` is emitted first when present
+- all other segments are appended in score-sorted order
 
-`STATE` is dynamic and may change per task/session.
-
-Field meanings:
-- `bandwidth` (`0-100`): available cognitive capacity
-- `mode`: convergent (execution/synthesis) or divergent (exploration/ideation)
-- `horizon`: now (immediate) or long (staged/asynchronous)
-- `stakes`: critical (high verification) or casual (lighter verification)
-
-Optional shorthand deltas (transport convenience):
-- `STATE:mode_convergent`
-- `STATE:mode_divergent`
-- `STATE:horizon_now`
-- `STATE:horizon_long`
-- `STATE:stakes_critical`
-- `STATE:stakes_casual`
-
-Canonical persisted I-AM strings SHOULD use full snapshot form.
-
----
-
-## Segment Order
-
-When present, segments follow this order:
-
-`OCEAN -> AES -> MUS -> COMM -> CAR -> DELIVERY -> STATE`
-
-Prefix fields (if present) appear before OCEAN.
-
-Version emission rules:
-- If `DELIVERY` is present, I-AM string version MUST be at least `0.7`.
-- If canonical `STATE` is present and `DELIVERY` is absent, I-AM string version MUST be at least `0.6`.
-- If `CAR` is present without `STATE` and without `DELIVERY`, I-AM string version MUST be at least `0.4`.
+That means the exact ordering can vary by module strength, but the strings remain valid and
+machine-readable as long as each segment is a valid `NAME:...` block.
 
 ---
 
 ## Partial Profiles
 
-Any segment may be omitted if unavailable.
+Any segment may be omitted if that module is unavailable or not scored.
 
 Examples:
 
 ```
-IAM/0.6:O72C88E55A60N22
-IAM/0.6:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45
-IAM/0.6:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45/MUS:MEL40SOP70UNP55INT20CON65
-IAM/0.6:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45/MUS:MEL40SOP70UNP55INT20CON65/COMM:DRV85ANC40EXP20AMB15
-IAM/0.6:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45/MUS:MEL40SOP70UNP55INT20CON65/COMM:DRV85ANC40EXP20AMB15/CAR:15113200S0190S1899S2485S3360
-IAM/0.7:O72C88E55A60N22/AES:MIN80CLR35WRM60MOT45/MUS:MEL40SOP70UNP55INT20CON65/COMM:DRV85ANC40EXP20AMB15/CAR:15113200S0190S1899S2485S3360/DELIVERY:DEF40PEER70CHL80DNS75AUD20STR85ABS78FMT82VBS55EMP62CND74HMR30AUT68BUR52/STATE:bandwidth30,mode:convergent,horizon:now,stakes:critical
-```
-
-Career-only edge case (supported):
-
-```
-/CAR:15125200S0190S23100
-/CAR:15125200S0190S23100/STATE:bandwidth50,mode:convergent,horizon:long,stakes:casual
+IAM-v0.2/BASE:Ziggy/PERSONALITY:openness72,conscientiousness88,extraversion55,agreeableness66,neuroticism22
+IAM-v0.2/BASE:Ziggy/MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contemporary63,unpretentious75
+IAM-v0.2/BASE:Ziggy/COMMUNICATION:driver70,analytical85,expressive80,amiable60/STATE:bandwidth50,mode:Convergent,horizon:Long,stakes:Casual,domain:Work
 ```
 
 ---
 
-## LLM Usage Guidance
+## Legacy Notes
 
-1. Parse segments by labels and separators.
-2. Apply threshold interpretation (`>=65` high, `35-64` medium, `<35` low) for scored fields.
-3. Treat `STATE` as the highest-priority runtime modifier.
-4. Use `CAR` skill signals for domain targeting, not hard capability guarantees.
-5. Treat IAM as probabilistic preference context, not diagnosis or identity proof.
+Older documents and earlier drafts reference compact `IAM/0.x` encodings and a more rigid
+`OCEAN/AES/MUS/COMM/CAR/DELIVERY/STATE` scheme. Those representations are historical and not
+what the active runtime currently emits.
 
----
-
-## Export Artifacts
-
-Canonical export uses one artifact:
-
-- `.iam.json`: machine-readable storage payload for import/export fidelity.
-
-JSON storage rules:
-
-- Top-level `iam` SHOULD be the first key in `.iam.json`.
-- `.iam.json` SHOULD remove duplicate sections that repeat module response payloads.
-- Skill responses in `.iam.json` SHOULD be stored once in `profile.modules.skills.responses`.
-- Derived skill fields (`threshold_status`, `listed_status`, `normalized_score`) SHOULD be omitted from persisted skill responses.
-- IAM career inclusion/proficiency SHOULD be derivable from `raw_score` when `normalized_score` is absent.
+The current canonical implementation is the long-form `IAM-v0.2` format described in this
+specification, including optional module anchors in parentheses.
 
 ---
 
-## Versioning
+## Validation Guidance
 
-| Version | Changes |
-|---------|---------|
-| 0.1 | Initial OCEAN profile |
-| 0.2 | Added communication segment support |
-| 0.4 | Added career segment with standardized O*NET skill mapping and sparse encoding |
-| 0.6 | Added optional identity prefix and expanded canonical STATE (`bandwidth`, `mode`, `horizon`, `stakes`) |
-| 0.7 | Added optional unified `DELIVERY` segment |
+Parsers SHOULD prefer structured parsing over a single monolithic regex because the runtime
+string allows:
+- optional `BASE`
+- optional anchors on segment names
+- dynamic segment ordering
+- optional segment omission
 
----
+A practical parser approach is:
+1. verify the string begins with `IAM-v0.2`
+2. split on `/`
+3. parse each segment into `name` and `payload`
+4. if the name contains parentheses, parse the anchor text before the colon
+5. parse the metric payload as comma-separated `keyValue` tokens
 
-## Validation Regex (practical)
-
-The IAM format has evolved and allows optional prefix fields plus optional segments,
-so parsers SHOULD prefer structured token parsing over one monolithic regex.
-
-If regex validation is required, use staged checks:
-
-1. Header check:
-
-```
-^IAM\/0\.[1-7]:
-```
-
-2. Required OCEAN block exists after optional prefix values:
-
-```
-O\d{1,3}C\d{1,3}E\d{1,3}A\d{1,3}N\d{1,3}
-```
-
-3. Optional segments (in order):
-- `\/MIN...` AES composite
-- `\/MEL...` MUS composite
-- `\/COMM\/DRV...` COMM block
-- `\/CAR\d{8}(S\d{2}\d{2})*` CAR block
-- `\/DELIVERY\/DEF...BUR...` DELIVERY block
-- `\/STATE:...` canonical or shorthand STATE
-
-Validation scope notes:
-- The staged checks above are for canonical `IAM/...` strings.
-- Career-only edge cases (strings beginning with `/CAR...`) are valid transport forms and MUST be handled by decoders separately.
-- Parsers MUST ignore unknown future segments rather than fail hard.
-
-This staged approach is recommended for maintainability and forward compatibility.
+This is the safest and most resilient interpretation of the current production format.
 
