@@ -6,52 +6,10 @@ import { scoreCommunication as bundledScoreCommunication } from '../../lib/score
 import { scoreSkills as bundledScoreSkills } from '../../lib/scorer/skillsScorer.js';
 import { scoreIpip } from '../../lib/scorer/ipipScorer.js';
 import { toContextFile as libToContextFile } from '../../lib/serializer/toContextFile.js';
+import { loadQuestionBank } from './questionBank.js';
 
 export async function loadQuestions() {
-  // Attempt to fetch the question bank at runtime first (dev server static asset).
-  // If that fails (404/CORS/etc), fall back to a Vite raw import so the file is bundled by Vite.
-  const parse = (txt) => {
-    const lines = txt.split(/\r?\n/);
-    // Only keep lines that look like numbered items (e.g., "1. ...") and strip the prefix
-    return lines
-      .map(l => l.trim())
-      .filter(l => /^\d+\./.test(l))
-      .map(l => l.replace(/^\d+\.\s*/, '').trim());
-  };
-
-  try {
-    if (typeof fetch === 'function') {
-      const res = await fetch('/specs/questions/ipip_50_respondent.txt');
-      if (res.ok) {
-        const txt = await res.text();
-        return parse(txt);
-      }
-    }
-  } catch (e) {
-    // continue to fallback
-  }
-
-  // Fallback: import via Vite raw import so the file is available even if fetch path isn't served.
-  try {
-    // In Node test environments, import of text with ?raw may not be supported. Try reading from disk when running under Node.
-    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-      try {
-        const fs = await import('fs');
-        const path = await import('path');
-        const p = path.resolve(process.cwd(), 'specs', 'questions', 'ipip_50_respondent.txt');
-        const txt = await fs.promises.readFile(p, 'utf8');
-        return parse(txt);
-      } catch (fsErr) {
-        // fall through to dynamic import attempt
-      }
-    }
-
-    const mod = await import('../../../specs/questions/ipip_50_respondent.txt?raw');
-    const txt = mod?.default ?? mod;
-    return parse(txt);
-  } catch (e) {
-    throw new Error('Failed to load questions: ' + (e && e.message ? e.message : String(e)));
-  }
+  return loadQuestionBank('ipip_50_respondent.txt');
 }
 
 export function scoreResponses(responses) {

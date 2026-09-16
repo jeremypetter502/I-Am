@@ -46,26 +46,8 @@
   const countAnswered = (values) => values.filter((value) => isAnswered(value)).length;
 
   async function loadQuestions() {
-    const parse = (txt) => txt.split(/\r?\n/).map((l) => l.trim()).filter((l) => /^\d+\./.test(l)).map((l) => l.replace(/^\d+\.\s*/, '').trim());
-    try {
-      if (typeof fetch === 'function') {
-        const res = await fetch('/specs/questions/communication_20.txt');
-        if (res.ok) return parse(await res.text());
-      }
-    } catch (e) {}
-
-    try {
-      const mod = await import('../../../specs/questions/communication_20.txt?raw');
-      return parse(mod?.default ?? mod);
-    } catch (e) {
-      if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-        const fs = await import('fs');
-        const path = await import('path');
-        const p = path.resolve(process.cwd(), 'specs', 'questions', 'communication_20.txt');
-        return parse(await fs.promises.readFile(p, 'utf8'));
-      }
-      throw e;
-    }
+    const { loadQuestionBank } = await import('../services/questionBank.js');
+    return loadQuestionBank('communication_20.txt');
   }
 
   onMount(async () => {

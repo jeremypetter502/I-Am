@@ -45,35 +45,8 @@
   const countAnswered = (values) => values.filter((value) => isAnswered(value)).length;
 
   async function loadModuleQuestions(fileName) {
-    const parse = (txt) => txt
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter((l) => /^\d+\./.test(l))
-      .map((l) => l.replace(/^\d+\.\s*/, '').trim())
-      .map((l) => l.replace(/\s*\[[^\]]+\]/g, '').replace(/\s{2,}/g, ' ').trim());
-    try {
-      if (typeof fetch === 'function') {
-        const res = await fetch('/specs/questions/' + fileName);
-        if (res.ok) {
-          return parse(await res.text());
-        }
-      }
-    } catch (e) {}
-
-    try {
-      const mod = await import('../../../specs/questions/' + fileName + '?raw');
-      const txt = mod?.default ?? mod;
-      return parse(txt);
-    } catch (e) {
-      if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-        const fs = await import('fs');
-        const path = await import('path');
-        const p = path.resolve(process.cwd(), 'specs', 'questions', fileName);
-        const txt = await fs.promises.readFile(p, 'utf8');
-        return parse(txt);
-      }
-      throw e;
-    }
+    const { loadQuestionBank } = await import('../services/questionBank.js');
+    return loadQuestionBank(fileName);
   }
 
   onMount(async () => {
