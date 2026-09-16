@@ -1,10 +1,17 @@
-const QUESTION_TEXT_BY_FILE = typeof import.meta !== 'undefined' && typeof import.meta.glob === 'function'
-  ? Object.fromEntries(
-      Object.entries(
-        import.meta.glob('../../../specs/questions/*.txt', { query: '?raw', import: 'default', eager: true })
-      ).map(([filePath, text]) => [filePath.split('/').pop(), text])
-    )
-  : {};
+// import.meta.glob is a build-time macro: Vite replaces this call expression with a
+// generated object literal at build time. It must be invoked directly (not behind a
+// typeof/feature-detection check) or the replacement never happens and this always
+// evaluates to an empty object at runtime.
+let QUESTION_TEXT_BY_FILE = {};
+try {
+  QUESTION_TEXT_BY_FILE = Object.fromEntries(
+    Object.entries(
+      import.meta.glob('../../../specs/questions/*.txt', { query: '?raw', import: 'default', eager: true })
+    ).map(([filePath, text]) => [filePath.split('/').pop(), text])
+  );
+} catch (_err) {
+  QUESTION_TEXT_BY_FILE = {};
+}
 
 function parseQuestions(txt) {
   return String(txt ?? '')
