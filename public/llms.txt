@@ -1,0 +1,11 @@
+# I-AM Personal Context
+
+> A compact, portable I-AM string format for injecting personal context (communication style, personality, preferences) into AI systems.
+
+Raw Markdown documentation (fetch directly, no HTML rendering):
+
+- [README](https://iampersonalcontext.org/README.md): project overview, I-AM string format, quick start, architecture
+- [I-AM String Format Overview](https://iampersonalcontext.org/docs/iam.md): specification of the I-AM string segments and traits
+- [I-AM Use Cases](https://iampersonalcontext.org/docs/iam-usecase.md): applied use cases for the I-AM string
+- [Developer: Long Form Integration](https://iampersonalcontext.org/docs/developer/iam-lf.md): notes on the long-form I-AM output
+- [Developer: UI Guide](https://iampersonalcontext.org/docs/developer/ui.md): running and building the UI

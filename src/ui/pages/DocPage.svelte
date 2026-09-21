@@ -3,8 +3,54 @@
   export let markdown = '';
   export let sourcePath = '';
   export let routePath = '/';
+  export let mdPath = '';
 
   const REPO_BLOB_BASE = 'https://github.com/jeremypetter502/I-Am/blob/main/';
+  let copyResetTimer;
+
+  async function copyText(value) {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return;
+    }
+
+    const temporaryTextarea = document.createElement('textarea');
+    temporaryTextarea.value = value;
+    temporaryTextarea.setAttribute('readonly', '');
+    temporaryTextarea.style.position = 'absolute';
+    temporaryTextarea.style.left = '-9999px';
+    document.body.appendChild(temporaryTextarea);
+    temporaryTextarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(temporaryTextarea);
+  }
+
+  async function handleDocContentClick(event) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const button = target.closest('[data-copy-code]');
+    if (!button) return;
+
+    const codeArea = button.closest('.doc-code-block')?.querySelector('.doc-codearea');
+    if (!codeArea) return;
+
+    const copyLabel = button.querySelector('.doc-copy-label');
+    const defaultLabel = button.dataset.copyLabel || 'Copy';
+    try {
+      await copyText(codeArea.value);
+      if (copyLabel) copyLabel.textContent = 'Copied';
+      button.setAttribute('aria-label', 'Code block copied');
+      clearTimeout(copyResetTimer);
+      copyResetTimer = setTimeout(() => {
+        if (copyLabel) copyLabel.textContent = defaultLabel;
+        button.setAttribute('aria-label', 'Copy code block');
+      }, 1600);
+    } catch (error) {
+      if (copyLabel) copyLabel.textContent = 'Copy failed';
+      button.setAttribute('aria-label', 'Copy failed');
+    }
+  }
 
   function stripMarkdownSyntax(value) {
     return String(value || '')
@@ -130,9 +176,16 @@
 
     const codeTextarea = (lines, language) => {
       const lineCount = Math.max(3, Math.min(18, (Array.isArray(lines) ? lines.length : 0) + 1));
-      const lang = escapeHtml(language || 'text');
+      const fenceInfo = String(language || '').trim();
+      const titleMatch = fenceInfo.match(/^(.*?)(?:\(([^()]*)\))$/);
+      const lang = escapeHtml((titleMatch ? titleMatch[1] : fenceInfo).trim() || 'text');
+      const rawTitle = (titleMatch?.[2] || '').trim();
+      const isIamBlock = /^IAM:/i.test(rawTitle);
+      const title = escapeHtml(isIamBlock ? rawTitle.replace(/^IAM:\s*/i, '') : rawTitle);
+      const copyLabel = isIamBlock ? 'Copy I-AM' : 'Copy';
+      const copyIcon = isIamBlock ? '<img class="doc-copy-icon" src="/images/iam-icon.png" alt="" aria-hidden="true" />' : '';
       const text = escapeHtml((lines || []).join('\n'));
-      return `<textarea class="doc-codearea" data-lang="${lang}" rows="${lineCount}" readonly wrap="soft">${text}</textarea>`;
+      return `<div class="doc-code-block"><div class="doc-code-toolbar">${title ? `<span class="doc-code-title">${title}</span>` : '<span></span>'}<button type="button" class="doc-copy-button${isIamBlock ? ' doc-copy-button--iam' : ''}" data-copy-code data-copy-label="${copyLabel}" aria-label="Copy code block">${copyIcon}<span class="doc-copy-label">${copyLabel}</span></button></div><textarea class="doc-codearea" data-lang="${lang}" rows="${lineCount}" readonly wrap="soft">${text}</textarea></div>`;
     };
 
     const parseTableRow = (line) =>
@@ -305,6 +358,9 @@
   <meta name="description" content={seoDescription} />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href={canonicalUrl} />
+  {#if mdPath}
+    <link rel="alternate" type="text/markdown" href={mdPath} title="Raw Markdown" />
+  {/if}
 
   <meta property="og:type" content="article" />
   <meta property="og:title" content={seoTitle} />
@@ -326,7 +382,12 @@
       <p class="doc-eyebrow">Documentation</p>
       <h1>{title}</h1>
       {#if sourcePath}
-        <p class="doc-source">Source: {sourcePath}</p>
+        <p class="doc-source">
+          Source: {sourcePath}
+          {#if mdPath}
+            &nbsp;·&nbsp;<a href={mdPath}>View raw Markdown</a>
+          {/if}
+        </p>
       {/if}
     </div>
     <nav class="doc-nav" aria-label="Docs navigation">
@@ -334,10 +395,11 @@
       <a href="/readme">README</a>
       <a href="/iam">I-AM Format</a>
       <a href="/iam-usecase">Use Cases</a>
+      <a href="/examples">Examples</a>
     </nav>
   </header>
 
-  <article class="doc-card doc-content">
+  <article class="doc-card doc-content" on:click={handleDocContentClick}>
     {@html html}
   </article>
 </section>
@@ -494,13 +556,39 @@
     overflow-y: hidden;
   }
 
+  .doc-content :global(.doc-code-block) {
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 8px;
+    background: rgba(2, 6, 23, 0.72);
+  }
+
+  .doc-content :global(.doc-code-toolbar) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 34px;
+    padding: 5px 8px 5px 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+    background: rgba(15, 23, 42, 0.9);
+  }
+
+  .doc-content :global(.doc-code-title) {
+    min-width: 0;
+    overflow: hidden;
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .doc-content :global(.doc-codearea) {
     width: 100%;
     max-width: 100%;
     display: block;
-    background: rgba(2, 6, 23, 0.72);
-    border: 1px solid rgba(148, 163, 184, 0.22);
-    border-radius: 12px;
+    border: 0;
+    border-radius: 0;
     padding: 12px;
     color: #cbd5e1;
     resize: vertical;
@@ -509,6 +597,35 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Courier New', monospace;
     font-size: 0.92em;
     box-sizing: border-box;
+  }
+
+  .doc-content :global(.doc-copy-button) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-width: 58px;
+    padding: 5px 9px;
+    border: 1px solid rgba(148, 163, 184, 0.32);
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.92);
+    color: #e2e8f0;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .doc-content :global(.doc-copy-icon) {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+  }
+
+  .doc-content :global(.doc-copy-button:hover),
+  .doc-content :global(.doc-copy-button:focus-visible) {
+    background: #1d4ed8;
+    border-color: #60a5fa;
+    outline: none;
   }
 
   .doc-content :global(code) {

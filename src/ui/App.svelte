@@ -5,11 +5,13 @@
   import readmeMd from '../../README.md?raw';
   import iamMd from '../../docs/iam.md?raw';
   import iamUsecaseMd from '../../docs/iam-usecase.md?raw';
+  import exampleIamMd from '../../docs/example-iam.md?raw';
 
   const docRoutes = {
-    '/readme': { title: 'README', markdown: readmeMd, sourcePath: 'README.md', routePath: '/readme' },
-    '/iam': { title: 'I-AM String Format Overview', markdown: iamMd, sourcePath: 'docs/iam.md', routePath: '/iam' },
-    '/iam-usecase': { title: 'I-AM Use Cases', markdown: iamUsecaseMd, sourcePath: 'docs/iam-usecase.md', routePath: '/iam-usecase' }
+    '/readme': { title: 'README', markdown: readmeMd, sourcePath: 'README.md', routePath: '/readme', mdPath: '/README.md' },
+    '/iam': { title: 'I-AM String Format Overview', markdown: iamMd, sourcePath: 'docs/iam.md', routePath: '/iam', mdPath: '/docs/iam.md' },
+    '/iam-usecase': { title: 'I-AM Use Cases', markdown: iamUsecaseMd, sourcePath: 'docs/iam-usecase.md', routePath: '/iam-usecase', mdPath: '/docs/iam-usecase.md' },
+    '/examples': { title: 'I-AM String Examples', markdown: exampleIamMd, sourcePath: 'docs/example-iam.md', routePath: '/examples', mdPath: '/docs/example-iam.md' }
   };
 
   function normalizePath(value) {
@@ -40,6 +42,7 @@
       markdown={activeDoc.markdown}
       sourcePath={activeDoc.sourcePath}
       routePath={activeDoc.routePath}
+      mdPath={activeDoc.mdPath}
     />
   {:else}
     <SurveyPage />
