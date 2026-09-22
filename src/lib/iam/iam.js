@@ -102,7 +102,7 @@ function namedSegment(baseName, moduleObj) {
 // --- Career Segment Generator (v0.4) ---
 // O*NET 8-digit SOC + S01–S35 skills, sparse encoding
 import { skillPositionMap } from './skillPositionMap.js';
-import { LfMappings } from './lfMappings.js';
+import { scoreSkills } from '../scorer/skillsScorer.js';
 
 function pad2(n) {
   const v = Math.round(Number(n) || 0);
@@ -207,18 +207,15 @@ function buildStatePairs(stateObj) {
 
 // Long-form IAM builder
 function buildIamLongForm(scored, modules, options) {
-  const mappings = new LfMappings();
   const segItems = [];
 
   const pushSegment = (fullName, metricsObj) => {
     if (!metricsObj || typeof metricsObj !== 'object') return;
     const pairs = [];
-    const baseFullName = String(fullName || '').replace(/\(.*\)$/, '');
     for (const [k, v] of Object.entries(metricsObj)) {
       if (v == null) continue;
       const num = Math.round(Number(v) || 0);
-      const metricName = mappings.mapMetric(baseFullName, k) || String(k).toLowerCase();
-      pairs.push(`${metricName}${num}`);
+      pairs.push(`${String(k).toLowerCase()}${num}`);
     }
     if (pairs.length) {
       const aggScore = computeAggregateFromNormalized(metricsObj);
@@ -292,18 +289,24 @@ function buildIamLongForm(scored, modules, options) {
       ? skillsSourceLf
       : Array.isArray(skillsSourceLf?.filtered)
         ? skillsSourceLf.filtered
-        : Array.isArray(skillsSourceLf?.responses)
-          ? skillsSourceLf.responses
-          : Array.isArray(skillsSourceLf?.fullAssessment)
-            ? skillsSourceLf.fullAssessment
+        : Array.isArray(skillsSourceLf?.fullAssessment)
+          ? skillsSourceLf.fullAssessment
+          // Raw Likert responses (0-10 per skill) aren't scored skill objects yet — score them
+          // so each entry carries the correct `index`/`normalized_score` for this position.
+          : Array.isArray(skillsSourceLf?.responses)
+            ? scoreSkills(skillsSourceLf.responses).fullAssessment
             : [];
     const skillsModuleObjLf = (modules && modules.skills && typeof modules.skills === 'object' && !Array.isArray(modules.skills)) ? modules.skills : {};
-    const carCompactLf = (soc8Lf || (skillsLf && skillsLf.length)) ? buildCareerSegment(soc8Lf, skillsLf, skillsModuleObjLf) : '';
+    // The SKL/SKILL career segment requires a valid O*NET SOC code, but the SKILLS
+    // metrics segment below should still be emitted whenever skill responses exist.
+    const carCompactLf = soc8Lf ? buildCareerSegment(soc8Lf, skillsLf, skillsModuleObjLf) : '';
     if (carCompactLf) {
       // Convert compact SKL prefix to long-form SKILL (keep any parentheses note)
       const skillPrefix = namedSegment('SKILL', skillsModuleObjLf);
       const carLf = carCompactLf.replace(/^SKL(?:\([^)]+\))?/, skillPrefix);
       code += `/${carLf}`;
+    }
+    if (skillsLf && skillsLf.length) {
       // Also include a SKILLS long-form metrics segment: map each skill title to a single-word label
       try {
         const posNameMap = new Map(skillPositionMap.map((entry) => [Number(entry.index.replace(/^S/, '')), entry.name]));

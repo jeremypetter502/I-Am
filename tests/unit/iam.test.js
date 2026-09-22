@@ -160,12 +160,12 @@ describe('iam builder', () => {
     const modules = {
       delivery2: {
         normalized: {
-          str: 75,
-          dns: 50,
-          frm: 62,
-          fmt: 88,
-          emp: 55,
-          aut: 70
+          structure: 75,
+          density: 50,
+          framing: 62,
+          format: 88,
+          empathy: 55,
+          autonomy: 70
         }
       }
     };
@@ -173,7 +173,7 @@ describe('iam builder', () => {
     const iam = buildIam(scored, modules);
     expect(iam.version).toBe('LF.0.2');
     expect(iam.code.startsWith('IAM-v0.2')).toBe(true);
-    expect(iam.code).toContain('/DELIVERY2:str75,dns50,frm62,fmt88,emp55,aut70');
+    expect(iam.code).toContain('/DELIVERY2:structure75,density50,framing62,format88,empathy55,autonomy70');
   });
 });
 

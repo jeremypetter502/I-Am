@@ -6,6 +6,14 @@
   import iamMd from '../../docs/iam.md?raw';
   import iamUsecaseMd from '../../docs/iam-usecase.md?raw';
   import exampleIamMd from '../../docs/example-iam.md?raw';
+  import UsageResultsPage from './pages/UsageResultsPage.svelte';
+  import { parseUsageMarkdown } from './services/usageResults.js';
+
+  const usageModules = import.meta.glob('../../docs/usage/**/*.md', { eager: true, query: '?raw', import: 'default' });
+  const usageSessions = Object.entries(usageModules).map(([path, markdown]) => {
+    const filename = path.split('/').pop() || '';
+    return parseUsageMarkdown(markdown, filename.replace(/\.md$/i, ''));
+  });
 
   const docRoutes = {
     '/readme': { title: 'README', markdown: readmeMd, sourcePath: 'README.md', routePath: '/readme', mdPath: '/README.md' },
@@ -33,10 +41,14 @@
   });
 
   $: activeDoc = docRoutes[currentPath] || null;
+  $: usageSlug = currentPath.startsWith('/usage/') ? decodeURIComponent(currentPath.slice('/usage/'.length)) : null;
+  $: activeUsage = usageSlug ? usageSessions.find((session) => session.sourceId === usageSlug) || null : undefined;
 </script>
 
 <div class="app-shell">
-  {#if activeDoc}
+  {#if usageSlug}
+    <UsageResultsPage session={activeUsage} />
+  {:else if activeDoc}
     <DocPage
       title={activeDoc.title}
       markdown={activeDoc.markdown}

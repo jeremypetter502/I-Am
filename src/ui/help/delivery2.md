@@ -12,12 +12,12 @@ Delivery v2 is a separate opt-in module that captures how you want information p
 
 ## Key Metrics Produced
 
-- `STR` - structure and explicit organization
-- `DNS` - concise versus expanded explanation density
-- `FRM` - formality and professional register
-- `FMT` - strictness around requested output format
-- `EMP` - emotional acknowledgement and reassurance
-- `AUT` - initiative and proactive next steps
+- `structure` - structure and explicit organization
+- `density` - concise versus expanded explanation density
+- `framing` - formality and professional register
+- `format` - strictness around requested output format
+- `empathy` - emotional acknowledgement and reassurance
+- `autonomy` - initiative and proactive next steps
 
 ## Metric Meaning
 

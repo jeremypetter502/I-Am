@@ -188,8 +188,8 @@ describe('Serializer + schema', () => {
         ipipResponses: Array(50).fill(3),
         delivery2: {
           responses: Array(24).fill(4),
-          raw: { str: 4, dns: 4, frm: 4, fmt: 4, emp: 4, aut: 4 },
-          normalized: { str: 75, dns: 75, frm: 75, fmt: 75, emp: 75, aut: 75 },
+          raw: { structure: 4, density: 4, framing: 4, format: 4, empathy: 4, autonomy: 4 },
+          normalized: { structure: 75, density: 75, framing: 75, format: 75, empathy: 75, autonomy: 75 },
           completed: true,
           disabled: false,
           last_updated: '2026-06-12T00:00:00Z'

@@ -8,6 +8,7 @@ Please note that all names, traits, and persona combinations in these profiles a
 
 ---
 
+
 ## Profile: The Focused Systems Architect ("Alex")
 
 ```text(IAM:Alex)
@@ -15,6 +16,7 @@ IAM-v0.2/BASE:Alex,1988,NonBinary,en-US,PST/STATE:bandwidth30,mode:Convergent,ho
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/Alex.jpg" align="left" alt="Alex" width="200" margin="10" border="1">
 Alex is a pragmatist who prioritizes precision, efficiency, and structural integrity. They work in software architecture and thrive on high-density information with minimal noise.
 
 * **Current Operational State:** Operating under severe time and attention constraints (bandwidth30), Alex needs immediate solutions (mode:Convergent, horizon:Short) for high-stakes workplace decisions (stakes:High, domain:Work). The STATE segment is placed immediately after BASE to prioritize real-time processing requirements.
@@ -23,12 +25,15 @@ Alex is a pragmatist who prioritizes precision, efficiency, and structural integ
 
 * **AI Output Adaptation:** An AI processing this context will eliminate introductory pleasantries, format outputs into strict, dense bullet points or architectural code snippets (structure90, density85), prioritize logical correctness, and grant Alex full decision autonomy without excessive hand-holding (autonomy80, empathy30).
 
+---
+
 ## Profile: The Visionary Creative Strategist ("Maya")
 ```text(IAM:Maya)
 IAM-v0.2/BASE:Maya,1994,Female,en-GB,GMT/STATE:bandwidth85,mode:Divergent,horizon:Long,stakes:Casual,domain:Personal,humor:Playful/PERSONALITY:openness95,extraversion85,agreeableness80,conscientiousness55,neuroticism30/COMMUNICATION:expressive92,amiable78,driver50,analytical35/DELIVERY2:empathy85,framing80,autonomy75,format60,structure30,density25/AESTHETIC(Memphis Design, Wes Anderson, Everything Everywhere All At Once):colorfulness92,aesthetic_importance95,warmth88,modernity80,motion75,prefers_clean30,minimalism20/MUSIC(FKA Twigs, Glass Animals, Bon Iver):contemporary90,unpretentious85,sophisticated70,intense65,mellow60/SKILLS:storytelling95,branding90,creative_direction88
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/Maya.jpg" align="left" alt="Maya" width="200" margin="10" border="1">
 Maya is an expressive, highly creative visual strategist who uses AI as an expansive brainstorming partner. She prefers conceptual exploration over rigid step-by-step procedures.
 
 * **Current Operational State:** Experiencing high mental bandwidth (bandwidth85) and looking for broad conceptual exploration (mode:Divergent, horizon:Long) in a low-stress setting (stakes:Casual, humor:Playful).
@@ -37,12 +42,15 @@ Maya is an expressive, highly creative visual strategist who uses AI as an expan
 
 * **AI Output Adaptation:** An AI agent consuming this token will generate open-ended, narrative ideas rather than rigid schemas (structure30, density25). Outputs will use warm, engaging language (empathy85, framing80), offer multiple hypothetical paths, and encourage lateral thinking.
 
+---
+
 ## Profile: The Empathetic Educator & Mentor ("David")
 ```text(IAM:David)
 IAM-v0.2/BASE:David,1982,Male,en-US,CST/STATE:bandwidth65,mode:Convergent,horizon:Long,stakes:High,domain:Work,humor:Warm/PERSONALITY:agreeableness95,conscientiousness80,openness75,extraversion60,neuroticism20/COMMUNICATION:amiable90,analytical70,expressive55,driver30/DELIVERY2:empathy95,framing75,structure70,format70,autonomy50,density40/AESTHETIC(Scandinavian Design, Mid-Century Modern, Nature):warmth90,prefers_clean80,aesthetic_importance70,colorfulness55,minimalism50,modernity50,motion30/MUSIC(Norah Jones, Chet Baker, Iron & Wine):mellow90,unpretentious90,sophisticated75,contemporary50,intense15/SKILLS:active_listening95,conflict_resolution90,pedagogy85
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/David.jpg" align="left" alt="David"" width="200" margin="10" border="1">
 David is a supportive, methodical educator who values psychological safety, clarity, and scaffolded learning. He balances analytical rigor with deep interpersonal warmth.
 
 * **Current Operational State:** Operating with moderate focus (bandwidth65) on a high-stakes professional development task (stakes:High, domain:Work), seeking structured guidance that yields long-term learning (horizon:Long, mode:Convergent).
@@ -58,6 +66,7 @@ IAM-v0.2/BASE:Victor,1980,Male,en-US,EST/STATE:bandwidth80,mode:Convergent,horiz
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/Victor.jpg" align="left" alt="Victor" width="200" margin="10" border="1">
 Victor is exceptionally gifted intellectually but extremely blunt, impatient, and challenging in interpersonal interactions. He demands extreme technical depth and views conversational filler or emotional cushioning as incompetence.
 
 * **Current Operational State:** Processing a high-complexity research objective (domain:Work, stakes:High) with substantial focus (bandwidth80), seeking sharp, unambiguous logic (mode:Convergent, horizon:Long). Per protocol, the dynamic STATE segment follows BASE directly.   
@@ -73,7 +82,7 @@ IAM-v0.2/BASE:Sloane,2001,Female,en-US,PST/STATE:bandwidth20,mode:Divergent,hori
 ```
 
 ### Profile Overview
-
+<img src="public/images/profiles/Sloane.jpg" align="left" alt="Sloane" width="200" margin="10" border="1">
 Sloane generates wildly original, non-linear ideas but lacks organizational discipline, persistence, and execution bandwidth. She relies on AI to handle low-level structure while she supplies high-level artistic vision.
 
 * **Current Operational State:** Operating under extremely low cognitive energy (bandwidth20) in a relaxed environment (stakes:Casual, humor:Sarcastic), seeking expansive brainstorming (mode:Divergent).   
@@ -89,6 +98,7 @@ IAM-v0.2/BASE:Elena,1991,Female,en-CA,EST/STATE:bandwidth40,mode:Convergent,hori
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/Elena.jpg" align="left" alt="Elena" width="200" margin="10" border="1">
 Elena is hyper-organized, meticulous, and intensely anxious about edge cases. She refuses to ship work until every metric hits near-perfection (95%+ target accuracy), frequently running into analysis paralysis.   
 
 * **Current Operational State:** Experiencing cognitive depletion from overthinking (bandwidth40), facing an immediate deadline (horizon:Short, stakes:High), and needing precise verification (mode:Convergent).   
@@ -104,6 +114,7 @@ IAM-v0.2/BASE:Arthur,1968,Male,en-GB,GMT/STATE:bandwidth60,mode:Convergent,horiz
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/Arthur.jpg" align="left" alt="Elena" width="200" margin="10" border="1">
 Arthur is a thorough, risk-conscious professional who relies on proven standards, established precedent, and formal structures rather than novel or untested methods.
 
 * **Current Operational State:** Reviewing long-term governance and compliance policies (domain:Work, horizon:Long) where errors carry significant consequences (stakes:High).
@@ -119,6 +130,7 @@ IAM-v0.2/BASE:Chloe,1996,Female,en-US,CST/STATE:bandwidth80,mode:Divergent,horiz
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/Chloe.jpg" align="left" alt="Elena" width="200" margin="10" border="1">
 Chloe is an outgoing, highly persuasive communicator who excels at building community enthusiasm, pitching ideas, and driving external engagement.
 
 * **Current Operational State:** Brainstorming promotional strategies (mode:Divergent, domain:Work) with high mental energy (bandwidth80) in a collaborative, low-stress environment (stakes:Casual, humor:Witty).
@@ -134,6 +146,7 @@ IAM-v0.2/BASE:Hannah,1993,Female,en-CA,PST/STATE:bandwidth45,mode:Convergent,hor
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/Hannah.jpg" align="left" alt="Elena" width="200" margin="10" border="1">
 Hannah is deeply empathetic and considerate, but experiences significant anxiety around workplace friction, direct confrontation, or hurting others' feelings.
 
 * **Current Operational State:** Drafting sensitive interpersonal communications (domain:Personal, stakes:High) while managing emotional strain (bandwidth45, neuroticism82).
@@ -144,11 +157,12 @@ Hannah is deeply empathetic and considerate, but experiences significant anxiety
 
 ## Profile: The Easygoing Minimalist ("Sam")
 
-```text(IAM:Hannah)
+```text(IAM:Sam)
 IAM-v0.2/BASE:Sam,1985,NonBinary,en-US,MST/STATE:bandwidth70,mode:Convergent,horizon:Short,stakes:Casual,domain:Personal/PERSONALITY:agreeableness75,openness50,conscientiousness50,extraversion40,neuroticism15/COMMUNICATION:analytical60,amiable60,driver40,expressive20/DELIVERY2:autonomy70,density40,structure40,format30,framing30,empathy20/AESTHETIC(Utilitarian, Plain Text, Neutral):prefers_clean70,minimalism60,warmth40,modernity40,aesthetic_importance20,colorfulness10,motion10/MUSIC(Classic Country, Ambient):unpretentious85,mellow80,sophisticated40,contemporary30,intense10/SKILLS:practical_repairs85,logistics_coordination80,simple_troubleshooting78
 ```
 
 ### Profile Overview
+<img src="public/images/profiles/Sam.jpg" align="left" alt="Elena" width="200" margin="10" border="1">
 Sam is a calm, low-maintenance pragmatic realist who values straightforward, unadorned answers without elaborate presentation or complex theoretical frameworks.
 
 * **Current Operational State:** Looking for practical, everyday information (stakes:Casual, domain:Personal) with steady focus (bandwidth70).

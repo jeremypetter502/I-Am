@@ -7,12 +7,12 @@ describe('delivery2Scorer', () => {
     const result = scoreDelivery2(responses);
 
     expect(result.count).toBe(24);
-    expect(result.raw.str).toBe(4);
-    expect(result.normalized.str).toBe(75);
-    expect(result.raw.dns).toBe(3);
-    expect(result.normalized.dns).toBe(50);
-    expect(result.raw.aut).toBe(3);
-    expect(result.normalized.aut).toBe(50);
+    expect(result.raw.structure).toBe(4);
+    expect(result.normalized.structure).toBe(75);
+    expect(result.raw.density).toBe(3);
+    expect(result.normalized.density).toBe(50);
+    expect(result.raw.autonomy).toBe(3);
+    expect(result.normalized.autonomy).toBe(50);
   });
 
   it('keeps all metric outputs within expected ranges', () => {

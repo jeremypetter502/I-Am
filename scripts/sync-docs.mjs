@@ -10,9 +10,7 @@ const files = [
   { src: 'README.md', dest: 'public/README.md' },
   { src: 'docs/iam.md', dest: 'public/docs/iam.md' },
   { src: 'docs/iam-usecase.md', dest: 'public/docs/iam-usecase.md' },
-  { src: 'docs/example-iam.md', dest: 'public/docs/example-iam.md' },
-  { src: 'docs/developer/iam-lf.md', dest: 'public/docs/developer/iam-lf.md' },
-  { src: 'docs/developer/ui.md', dest: 'public/docs/developer/ui.md' }
+  { src: 'docs/example-iam.md', dest: 'public/docs/example-iam.md' }
 ];
 
 for (const { src, dest } of files) {

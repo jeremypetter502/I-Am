@@ -68,12 +68,12 @@ export interface DeliveryModule {
 }
 
 export interface Delivery2Scores {
-	str: number;
-	dns: number;
-	frm: number;
-	fmt: number;
-	emp: number;
-	aut: number;
+	structure: number;
+	density: number;
+	framing: number;
+	format: number;
+	empathy: number;
+	autonomy: number;
 }
 
 export interface Delivery2Module {

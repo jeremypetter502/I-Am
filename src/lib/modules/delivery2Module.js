@@ -6,4 +6,4 @@ export const DELIVERY2_MODULE_DEFINITION = {
   helpKey: 'delivery2'
 };
 
-export const DELIVERY2_METRICS = ['str', 'dns', 'frm', 'fmt', 'emp', 'aut'];
+export const DELIVERY2_METRICS = ['structure', 'density', 'framing', 'format', 'empathy', 'autonomy'];

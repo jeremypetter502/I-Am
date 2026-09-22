@@ -273,8 +273,7 @@
     AES: { MIN: 'minimalism', CLR: 'colorfulness', WRM: 'warmth', MOT: 'motion', IMG: 'imagery', TYP: 'typography', LAY: 'layout' },
     MUS: { MEL: 'mellow', SOP: 'sophisticated', UNP: 'unpretentious', INT: 'intense', CON: 'contemporary' },
     COMM: { DRV: 'driver', ANC: 'analytical', EXP: 'expressive', AMB: 'amiable' },
-    DELIVERY: { DEF: 'deference', PEER: 'peer', CHL: 'challenge', DNS: 'density', AUD: 'audience', STR: 'structure', ABS: 'abstraction', FMT: 'format', VBS: 'verbosity', EMP: 'empathy', CND: 'candor', HMR: 'humor', AUT: 'autonomy', BUR: 'burden' },
-    DELIVERY2: { STR: 'structure', DNS: 'density', FRM: 'framing', FMT: 'format', EMP: 'empathy', AUT: 'autonomy' }
+    DELIVERY: { DEF: 'deference', PEER: 'peer', CHL: 'challenge', DNS: 'density', AUD: 'audience', STR: 'structure', ABS: 'abstraction', FMT: 'format', VBS: 'verbosity', EMP: 'empathy', CND: 'candor', HMR: 'humor', AUT: 'autonomy', BUR: 'burden' }
   };
 
   const INTRO_HELP = parseIntroHelpMarkdown(introHelpMd);
