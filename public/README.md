@@ -19,7 +19,7 @@ AI systems suffer from context fragmentation. Every time you start a new chat se
 
 The **I-AM string** is the primary output of this project. It condenses multi-dimensional psychometrics, preferences, aesthetic baselines, and real-time state into a single slash-delimited context token string:
 
-```text
+```text(IAM:Ziggy)
 IAM-v0.2/BASE:Ziggy/COMMUNICATION:driver70,analytical85,expressive80,amiable60/PERSONALITY:openness85,conscientiousness75,extraversion80,agreeableness88,neuroticism35/MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contemporary63,unpretentious75/AESTHETIC(2001, Project Hail Mary, Dune, Wes21):minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75/DELIVERY2:structure75,density31,framing50,format44,empathy50,autonomy63/STATE:bandwidth50,mode:Convergent,horizon:Long,stakes:Casual,domain:Work
 ```
 
@@ -126,7 +126,7 @@ This repository is built as a Svelte 5 + Vite single-page application that takes
 ```
 
 ### Data Pipeline Flow
-```text
+```text(Pipeline)
 [ User Survey ] ──> [ .iam.json State File ] ──> [ Scorer Pipeline ] ──> [ Generated I-AM String ]
 ```
 

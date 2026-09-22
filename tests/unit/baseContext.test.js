@@ -16,7 +16,7 @@ describe('baseContext helpers', () => {
     expect(invalid.errors.some((e) => e.includes('soc_code'))).toBe(true);
   });
 
-  it('normalizes and trims base context text', () => {
+  it('normalizes supported base context text and removes retired fields', () => {
     const normalized = normalizeBaseContext({
       name: '  Jeremy Doe  ',
       birth_month: ' 2 ',
@@ -36,7 +36,7 @@ describe('baseContext helpers', () => {
     expect(normalized.gender).toBe('male');
     expect(normalized.job_title).toBe('Engineer');
     expect(normalized.company).toBe('Acme');
-    expect(normalized.skills).toBe('JavaScript, Design');
+    expect(normalized.skills).toBeUndefined();
     expect(normalized.years_experience).toBe(4);
   });
 
@@ -52,13 +52,13 @@ describe('baseContext helpers', () => {
     expect(invalid.errors.some((e) => e.includes('birth_year'))).toBe(true);
   });
 
-  it('validates length bounds for name and skills', () => {
+  it('validates the name length bound and ignores retired skills', () => {
     const invalid = validateBaseContext({
       name: 'x'.repeat(121),
       skills: 'y'.repeat(401)
     });
     expect(invalid.valid).toBe(false);
     expect(invalid.errors.some((e) => e.includes('name'))).toBe(true);
-    expect(invalid.errors.some((e) => e.includes('skills'))).toBe(true);
+    expect(invalid.errors.some((e) => e.includes('skills'))).toBe(false);
   });
 });

@@ -73,7 +73,9 @@ describe('sessionService', () => {
       bandwidth: 100,
       mode: 'divergent',
       horizon: 'now',
-      stakes: 'critical'
+      stakes: 'critical',
+      humor: 'normal',
+      domain: 'work'
     });
   });
 

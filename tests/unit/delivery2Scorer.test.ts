@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { scoreDelivery2 } from '../../src/lib/scorer/delivery2Scorer.ts';
+import { scoreDelivery2 } from '../../src/lib/scorer/delivery2Scorer.js';
 
 describe('delivery2Scorer', () => {
   it('scores all-strongly-agree responses into bounded metric values', () => {

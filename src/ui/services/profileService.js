@@ -1,7 +1,7 @@
 import { scoreAesthetics as bundledScoreAesthetics } from '../../lib/scorer/aestheticsScorer.js';
 import { scoreMusic as bundledScoreMusic } from '../../lib/scorer/musicScorer.js';
 import { scoreDelivery as bundledScoreDelivery } from '../../lib/scorer/deliveryScorer.js';
-import { scoreDelivery2 as bundledScoreDelivery2 } from '../../lib/scorer/delivery2Scorer.ts';
+import { scoreDelivery2 as bundledScoreDelivery2 } from '../../lib/scorer/delivery2Scorer.js';
 import { scoreCommunication as bundledScoreCommunication } from '../../lib/scorer/communicationScorer.js';
 import { scoreSkills as bundledScoreSkills } from '../../lib/scorer/skillsScorer.js';
 import { scoreIpip } from '../../lib/scorer/ipipScorer.js';

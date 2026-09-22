@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { scoreDelivery2 } from '../../src/lib/scorer/delivery2Scorer.ts';
+import { scoreDelivery2 } from '../../src/lib/scorer/delivery2Scorer.js';
 
 describe('delivery2 validation', () => {
   it('defaults missing and invalid responses to neutral', () => {

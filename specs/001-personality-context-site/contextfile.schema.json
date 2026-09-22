@@ -243,6 +243,8 @@
                 "mode": { "type": "string", "enum": ["convergent", "divergent"] },
                 "horizon": { "type": "string", "enum": ["now", "long"] },
                 "stakes": { "type": "string", "enum": ["critical", "casual"] },
+                "humor": { "type": "string", "enum": ["none", "low", "normal", "high"] },
+                "domain": { "type": "string", "enum": ["work", "home"] },
                 "disabled": { "type": "boolean" },
                 "completed": { "type": "boolean" },
                 "last_updated": { "type": "string", "format": "date-time" }

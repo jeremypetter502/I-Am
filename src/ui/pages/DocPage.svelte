@@ -132,8 +132,41 @@
     return out;
   }
 
+  function transformImgAttributes(value) {
+    return String(value || '').replace(/<img\b([^>]*)>/gi, (_match, attrsIn) => {
+      let attrs = attrsIn;
+      const styleParts = [];
+
+      const marginMatch = attrs.match(/\smargin=["']([^"']*)["']/i);
+      if (marginMatch) {
+        attrs = attrs.replace(marginMatch[0], '');
+        const marginValue = parseFloat(marginMatch[1]);
+        if (!Number.isNaN(marginValue)) styleParts.push(`margin:${marginValue}px`);
+      }
+
+      const borderMatch = attrs.match(/\sborder=["']([^"']*)["']/i);
+      if (borderMatch) {
+        attrs = attrs.replace(borderMatch[0], '');
+        const borderValue = parseFloat(borderMatch[1]);
+        if (!Number.isNaN(borderValue)) styleParts.push(`border:${borderValue}px solid rgb(148, 163, 184)`);
+      }
+
+      if (!styleParts.length) return `<img${attrs}>`;
+
+      const existingStyleMatch = attrs.match(/\sstyle=["']([^"']*)["']/i);
+      if (existingStyleMatch) {
+        const combined = `${existingStyleMatch[1].replace(/;\s*$/, '')}; ${styleParts.join('; ')}`;
+        attrs = attrs.replace(existingStyleMatch[0], ` style="${combined}"`);
+      } else {
+        attrs = `${attrs} style="${styleParts.join('; ')}"`;
+      }
+
+      return `<img${attrs}>`;
+    });
+  }
+
   function preprocessMarkdown(value) {
-    return String(value || '')
+    return transformImgAttributes(String(value || ''))
       .replace(/src="(?:\.\.\/|\.\/)?public\//g, 'src="/')
       .replace(/src='(?:\.\.\/|\.\/)?public\//g, "src='/");
   }

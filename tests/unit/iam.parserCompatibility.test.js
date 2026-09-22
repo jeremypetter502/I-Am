@@ -9,16 +9,16 @@ describe('IAM parser compatibility', () => {
     expect(decoded.skills.map((s) => s.index)).toEqual([1, 18, 24, 33]);
   });
 
-  it('returns null for older strings with no career segment', () => {
+  it('returns an empty career payload for strings with no career segment', () => {
     const v01 = decodeCareerSegment('IAM/0.1:O70C60E50A40N30');
     const v02 = decodeCareerSegment('IAM/0.2:O70C60E50A40N30/COMM:DRV85ANC40EXP20AMB15');
     const v03 = decodeCareerSegment('IAM/0.3:O70C60E50A40N30/AES:MIN80');
-    expect(v01).toBe(null);
-    expect(v02).toBe(null);
-    expect(v03).toBe(null);
+    expect(v01).toEqual({ soc8: '', skills: [] });
+    expect(v02).toEqual({ soc8: '', skills: [] });
+    expect(v03).toEqual({ soc8: '', skills: [] });
   });
 
-  it('keeps legacy generation behavior when no career data is present', () => {
+  it('uses long-form generation when no career data is present', () => {
     const scored = { normalized: { O: 70, C: 60, E: 50, A: 40, N: 30 } };
     const modules = {
       communication: {
@@ -32,9 +32,9 @@ describe('IAM parser compatibility', () => {
     };
 
     const iam = buildIam(scored, modules);
-    expect(iam.version).toBe('0.2');
-    expect(iam.code).toContain('IAM/0.2');
-    expect(iam.code).toContain('/COMM:DRV85ANC40EXP20AMB15');
+    expect(iam.version).toBe('LF.0.2');
+    expect(iam.code).toContain('IAM-v0.2');
+    expect(iam.code).toContain('/COMMUNICATION:driver85,analytical40,expressive20,amiable15');
   });
 });
 

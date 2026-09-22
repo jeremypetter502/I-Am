@@ -24,7 +24,7 @@ Alex is a pragmatist who prioritizes precision, efficiency, and structural integ
 * **AI Output Adaptation:** An AI processing this context will eliminate introductory pleasantries, format outputs into strict, dense bullet points or architectural code snippets (structure90, density85), prioritize logical correctness, and grant Alex full decision autonomy without excessive hand-holding (autonomy80, empathy30).
 
 ## Profile: The Visionary Creative Strategist ("Maya")
-```text(Maya)
+```text(IAM:Maya)
 IAM-v0.2/BASE:Maya,1994,Female,en-GB,GMT/STATE:bandwidth85,mode:Divergent,horizon:Long,stakes:Casual,domain:Personal,humor:Playful/PERSONALITY:openness95,extraversion85,agreeableness80,conscientiousness55,neuroticism30/COMMUNICATION:expressive92,amiable78,driver50,analytical35/DELIVERY2:empathy85,framing80,autonomy75,format60,structure30,density25/AESTHETIC(Memphis Design, Wes Anderson, Everything Everywhere All At Once):colorfulness92,aesthetic_importance95,warmth88,modernity80,motion75,prefers_clean30,minimalism20/MUSIC(FKA Twigs, Glass Animals, Bon Iver):contemporary90,unpretentious85,sophisticated70,intense65,mellow60/SKILLS:storytelling95,branding90,creative_direction88
 ```
 
@@ -38,7 +38,7 @@ Maya is an expressive, highly creative visual strategist who uses AI as an expan
 * **AI Output Adaptation:** An AI agent consuming this token will generate open-ended, narrative ideas rather than rigid schemas (structure30, density25). Outputs will use warm, engaging language (empathy85, framing80), offer multiple hypothetical paths, and encourage lateral thinking.
 
 ## Profile: The Empathetic Educator & Mentor ("David")
-```text
+```text(IAM:David)
 IAM-v0.2/BASE:David,1982,Male,en-US,CST/STATE:bandwidth65,mode:Convergent,horizon:Long,stakes:High,domain:Work,humor:Warm/PERSONALITY:agreeableness95,conscientiousness80,openness75,extraversion60,neuroticism20/COMMUNICATION:amiable90,analytical70,expressive55,driver30/DELIVERY2:empathy95,framing75,structure70,format70,autonomy50,density40/AESTHETIC(Scandinavian Design, Mid-Century Modern, Nature):warmth90,prefers_clean80,aesthetic_importance70,colorfulness55,minimalism50,modernity50,motion30/MUSIC(Norah Jones, Chet Baker, Iron & Wine):mellow90,unpretentious90,sophisticated75,contemporary50,intense15/SKILLS:active_listening95,conflict_resolution90,pedagogy85
 ```
 
@@ -53,7 +53,7 @@ David is a supportive, methodical educator who values psychological safety, clar
 
 ## Profile: The Brilliant Abrasive Polymath ("Dr. Victor Vane")
 
-```text
+```text(IAM:Victor Vane)
 IAM-v0.2/BASE:Victor,1980,Male,en-US,EST/STATE:bandwidth80,mode:Convergent,horizon:Long,stakes:High,domain:Work/PERSONALITY:openness98,conscientiousness85,neuroticism60,extraversion30,agreeableness25/COMMUNICATION:analytical98,driver80,expressive15,amiable10/DELIVERY2:density95,autonomy90,structure85,format50,framing20,empathy10/AESTHETIC(Brutalism, Cyberpunk, Complex Schematics):minimalism75,modernity90,aesthetic_importance80,prefers_clean60,colorfulness20,warmth10,motion40/MUSIC(Autechre, Ligeti, Meshuggah):sophisticated98,intense90,contemporary85,unpretentious40,mellow10/SKILLS:quantum_computing98,mathematical_modeling95,algorithm_design95
 ```
 
@@ -68,7 +68,7 @@ Victor is exceptionally gifted intellectually but extremely blunt, impatient, an
 
 ## Profile: The Unorthodox Lazy Creative ("Sloane")
 
-```text
+```text(IAM:Slone)
 IAM-v0.2/BASE:Sloane,2001,Female,en-US,PST/STATE:bandwidth20,mode:Divergent,horizon:Long,stakes:Casual,domain:Personal,humor:Sarcastic/PERSONALITY:openness96,agreeableness75,extraversion70,neuroticism45,conscientiousness20/COMMUNICATION:expressive90,amiable70,analytical40,driver15/DELIVERY2:autonomy85,framing80,empathy75,format60,density20,structure15/AESTHETIC(Lo-Fi, Surrealism, Vaporwave):aesthetic_importance90,colorfulness85,warmth80,motion70,modernity65,minimalism30,prefers_clean20/MUSIC(Khruangbin, Aphex Twin, Mac DeMarco):unpretentious95,mellow85,sophisticated80,contemporary75,intense25/SKILLS:concept_generation95,worldbuilding92,visual_storytelling88
 ```
 
@@ -84,7 +84,7 @@ Sloane generates wildly original, non-linear ideas but lacks organizational disc
 
 ## Profile: The Obsessive Perfectionist Systems Planner ("Elena")
 
-```text
+```text(IAM:Elena)
 IAM-v0.2/BASE:Elena,1991,Female,en-CA,EST/STATE:bandwidth40,mode:Convergent,horizon:Short,stakes:High,domain:Work/PERSONALITY:conscientiousness98,neuroticism85,openness70,agreeableness60,extraversion40/COMMUNICATION:analytical96,driver75,amiable50,expressive30/DELIVERY2:structure98,density90,format85,framing70,empathy40,autonomy30/AESTHETIC(Grid Systems, Swiss Style, Minimalist Precision):prefers_clean98,minimalism95,aesthetic_importance85,modernity80,warmth30,colorfulness20,motion10/MUSIC(Philip Glass, Max Richter, Steve Reich):sophisticated92,mellow75,unpretentious70,intense50,contemporary45/SKILLS:process_optimization98,quality_assurance96,risk_analysis92
 ```
 
@@ -96,3 +96,63 @@ Elena is hyper-organized, meticulous, and intensely anxious about edge cases. Sh
 * **Psychometric Baseline:** Near-ceiling conscientiousness (conscientiousness98) combined with high anxiety/neuroticism (neuroticism85) and extreme analytical rigor (analytical96).   
 
 * **AI Output Adaptation:** An AI agent must provide exhaustive structural breakdowns (structure98, format85, density90). Outputs must explicitly detail risk mitigation, validation steps, edge cases, and compliance frameworks to soothe perfectionist anxiety, ensuring 95%+ precision before suggesting next steps. 
+
+## Profile: The Risk-Averse Traditionalist ("Arthur")
+
+```text(IAM:Arthur)
+IAM-v0.2/BASE:Arthur,1968,Male,en-GB,GMT/STATE:bandwidth60,mode:Convergent,horizon:Long,stakes:High,domain:Work/PERSONALITY:conscientiousness95,agreeableness70,neuroticism55,extraversion40,openness25/COMMUNICATION:analytical90,amiable65,driver50,expressive20/DELIVERY2:structure95,format85,density80,framing70,empathy40,autonomy30/AESTHETIC(Classic English, Heritage, Traditional Craft):prefers_clean85,warmth70,aesthetic_importance60,minimalism40,modernity20,colorfulness20,motion10/MUSIC(Classical, Choral, Traditional Folk):sophisticated90,mellow80,unpretentious75,intense20,contemporary15/SKILLS:compliance_auditing95,risk_management92,regulatory_standards90
+```
+
+### Profile Overview
+Arthur is a thorough, risk-conscious professional who relies on proven standards, established precedent, and formal structures rather than novel or untested methods.
+
+* **Current Operational State:** Reviewing long-term governance and compliance policies (domain:Work, horizon:Long) where errors carry significant consequences (stakes:High).
+
+* **Psychometric Baseline:** High conscientiousness (conscientiousness95) paired with low openness to novel or unconventional ideas (openness25), relying heavily on analytical evaluation (analytical90).
+
+* **AI Output Adaptation:** An AI agent consuming this token will ground all answers in recognized industry standards, formal protocols, and historical precedents (structure95, format85). It will avoid suggesting experimental techniques or unverified tools, emphasizing stability and thorough risk mitigation (density80).
+
+## Profile: The High-Energy Social Catalyst ("Chloe")
+
+```text(IAM:Chloe)
+IAM-v0.2/BASE:Chloe,1996,Female,en-US,CST/STATE:bandwidth80,mode:Divergent,horizon:Short,stakes:Casual,domain:Work,humor:Witty/PERSONALITY:extraversion96,agreeableness85,openness80,conscientiousness60,neuroticism30/COMMUNICATION:expressive95,driver80,amiable75,analytical25/DELIVERY2:framing90,empathy85,autonomy80,format70,structure40,density30/AESTHETIC(Pop Art, Bold Typography, Festival Design):colorfulness95,motion85,warmth80,aesthetic_importance85,modernity80,prefers_clean40,minimalism15/MUSIC(Pop, EDM, Funk):contemporary95,intense85,unpretentious80,mellow40,sophisticated35/SKILLS:public_speaking95,growth_marketing92,event_orchestration88
+```
+
+### Profile Overview
+Chloe is an outgoing, highly persuasive communicator who excels at building community enthusiasm, pitching ideas, and driving external engagement.
+
+* **Current Operational State:** Brainstorming promotional strategies (mode:Divergent, domain:Work) with high mental energy (bandwidth80) in a collaborative, low-stress environment (stakes:Casual, humor:Witty).
+
+* **Psychometric Baseline:** Near-ceiling extraversion (extraversion96) and expressive communication (expressive95), complemented by strong interpersonal warmth (agreeableness85).
+
+* **AI Output Adaptation:** The AI will adopt a dynamic, highly engaging tone (framing90, empathy85) focused on storytelling, audience hook creation, and high-impact messaging. It will avoid dry academic formatting or overly dense technical breakdowns (density30).
+
+## Profile: The Conflict-Averse People-Pleaser ("Hannah")
+
+```text(IAM:Hannah)
+IAM-v0.2/BASE:Hannah,1993,Female,en-CA,PST/STATE:bandwidth45,mode:Convergent,horizon:Short,stakes:High,domain:Personal,humor:Gentle/PERSONALITY:agreeableness98,neuroticism82,openness70,conscientiousness65,extraversion45/COMMUNICATION:amiable96,expressive60,analytical45,driver10/DELIVERY2:empathy98,framing90,format75,structure60,density30,autonomy20/AESTHETIC(Cozy Cottagecore, Soft Pastel, Botanical):warmth95,colorfulness65,aesthetic_importance70,prefers_clean60,minimalism40,modernity30,motion10/MUSIC(Indie Folk, Acoustic, Lofi Beats):mellow95,unpretentious90,sophisticated60,contemporary50,intense10/SKILLS:empathetic_listening95,mediation90,tactful_writing88
+```
+
+### Profile Overview
+Hannah is deeply empathetic and considerate, but experiences significant anxiety around workplace friction, direct confrontation, or hurting others' feelings.
+
+* **Current Operational State:** Drafting sensitive interpersonal communications (domain:Personal, stakes:High) while managing emotional strain (bandwidth45, neuroticism82).
+
+* **Psychometric Baseline:** Maxima agreeableness (agreeableness98) and amiable communication (amiable96), offset by extremely low assertiveness/confrontation drive (driver10).
+
+* **AI Output Adaptation:** An AI agent must offer gentle, supportive, and tactful phrasing suggestions (empathy98, framing90). When helping Hannah draft messages or resolve conflicts, the model will prioritize diplomatic phrasing and conflict-de-escalation strategies while coaching her on setting healthy boundaries without feeling harsh (autonomy20).
+
+## Profile: The Easygoing Minimalist ("Sam")
+
+```text(IAM:Hannah)
+IAM-v0.2/BASE:Sam,1985,NonBinary,en-US,MST/STATE:bandwidth70,mode:Convergent,horizon:Short,stakes:Casual,domain:Personal/PERSONALITY:agreeableness75,openness50,conscientiousness50,extraversion40,neuroticism15/COMMUNICATION:analytical60,amiable60,driver40,expressive20/DELIVERY2:autonomy70,density40,structure40,format30,framing30,empathy20/AESTHETIC(Utilitarian, Plain Text, Neutral):prefers_clean70,minimalism60,warmth40,modernity40,aesthetic_importance20,colorfulness10,motion10/MUSIC(Classic Country, Ambient):unpretentious85,mellow80,sophisticated40,contemporary30,intense10/SKILLS:practical_repairs85,logistics_coordination80,simple_troubleshooting78
+```
+
+### Profile Overview
+Sam is a calm, low-maintenance pragmatic realist who values straightforward, unadorned answers without elaborate presentation or complex theoretical frameworks.
+
+* **Current Operational State:** Looking for practical, everyday information (stakes:Casual, domain:Personal) with steady focus (bandwidth70).
+
+* **Psychometric Baseline:** Remarkably low emotional reactivity (neuroticism15) paired with balanced, moderate personality traits and low interest in decorative or aesthetic flourishes (aesthetic_importance20).
+
+* **AI Output Adaptation:** The AI will provide plain, unpretentious answers directly (density40, structure40). It will avoid over-engineered advice, elaborate formatting headers, or hyper-enthusiastic language, delivering balanced information in simple conversational prose (framing30, empathy20).
