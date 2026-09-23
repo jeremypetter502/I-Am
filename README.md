@@ -19,10 +19,10 @@ AI systems suffer from context fragmentation. Every time you start a new chat se
 Use the app to build your personal I-AM string by answering survey questions. The platform captures survey responses into an `.iam.json` state file, runs them through a modular scoring engine, and compiles them into a portable **I-AM string** that any AI agent can consume to adapt its output immediately.
  
 ### Use Pre-Built I-AMs
-Use pre-built I-AM [profiles](/profiles) to experiment with how AI responds to different personalities. You can also combine multiple I-AMs to ask how the personalities relate to each other. For example, What is the best communication method for these two I-AMs.
+Use pre-built I-AM [profiles](https://iampersonalcontext.org/profiles) to experiment with how AI responds to different personalities. You can also combine multiple I-AMs to ask how the personalities relate to each other. For example, What is the best communication method for these two I-AMs.
 
 ### See Usage Testing Results
-Actual usage of the I-AM strings in various AI models can be compared in these [usage examples](\usage\usage-basic). More will be added as experimenting continues.
+Actual usage of the I-AM strings in various AI models can be compared in these [usage examples](https://iampersonalcontext.org/usage/usage-basic/). More will be added as experimenting continues.
 
 ---
 
@@ -49,6 +49,8 @@ IAM-v0.2/BASE:Ziggy/COMMUNICATION:driver70,analytical85,expressive80,amiable60/P
 | **Agent Initialization** | Manually prompt engineering every new model with "speak concisely and act like a senior dev." | Prepend your generated **I-AM string** to system instructions for immediate baseline adaptation. |
 | **Cross-Tool Portability** | Persona settings trapped inside individual proprietary AI chat apps. | Generate one **I-AM string** from your `.iam.json` survey state and use it across any LLM or agent runtime. |
 | **Dynamic Real-Time State** | Static system prompts that ignore your current focus or energy level. | Append dynamic `STATE` traits (`bandwidth`, `mode`, `horizon`, `stakes`) to shift agent output style on the fly. |
+| **Personality Comparison** | Self generated personal context may not capture fundamental behaviors or be correct. Dissimilar data is difficult to map for comparison. | I-AM format is consistent and based on psychometrics. Compare two unique I-AM and ask AI about how they should be communicate or what are shared interests. |
+| **Scaled Analytics** | Complex and dissimilar large texts of data that describe a group of participants. | Standard compact personas. Create a simulation with a set of I-AM personalities and analyze how groups respond to a communication or other stimulus.|
 
 ---
 
