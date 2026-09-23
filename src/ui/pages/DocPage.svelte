@@ -428,7 +428,7 @@
       <a href="/readme">README</a>
       <a href="/iam">I-AM Format</a>
       <a href="/iam-usecase">Use Cases</a>
-      <a href="/examples">Examples</a>
+      <a href="/profiles">Profiles</a>
     </nav>
   </header>
 
@@ -594,6 +594,8 @@
     border: 1px solid rgba(148, 163, 184, 0.22);
     border-radius: 8px;
     background: rgba(2, 6, 23, 0.72);
+    margin-bottom: 1em;
+    margin-top: 1em;
   }
 
   .doc-content :global(.doc-code-toolbar) {

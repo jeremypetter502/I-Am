@@ -5,12 +5,11 @@
 
 ## Why I-AM String
 
-
-- Compact: profile context is encoded in a concise machine-friendly string.
-- Structured: segments follow predictable syntax and can be parsed or explained.
-- Portable: users can move the same profile context between assistants and sessions.
-- Composable: modules are optional and can be enabled/disabled independently.
-- In this project, "I-AM" means "I am" personality context.
+* Compact: profile context is encoded in a concise machine-friendly string.
+* Structured: segments follow predictable syntax and can be parsed or explained.
+* Portable: users can move the same profile context between assistants and sessions.
+* Composable: modules are optional and can be enabled/disabled independently.
+* In this project, "I-AM" means "I am" personality context.
 
 ## Current Canonical Runtime Format
 
@@ -56,7 +55,7 @@ MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contempor
 ## Example I-AM String
 
 ```text
-IAM-v0.2/BASE:Ziggy/COMMUNICATION:driver70,analytical85,expressive80,amiable60/PERSONALITY:openness85,conscientiousness75,extraversion80,agreeableness88,neuroticism35/MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contemporary63,unpretentious75/AESTHETIC(2001, Project Hail Mary, Dune, Wes21):minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75/DELIVERY2:structure75,density31,framing50,format44,empathy50,autonomy63/STATE:bandwidth50,mode:Convergent,horizon:Long,stakes:Casual,domain:Work
+IAM-v0.2/BASE:Ziggy/COMMUNICATION:driver70,analytical85,expressive80,amiable60/PERSONALITY:openness85,conscientiousness75,extraversion80,agreeableness88,neuroticism35/MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contemporary63,unpretentious75/AESTHETIC(2001, Project Hail Mary, Dune, Wes21):minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75/DELIVERY2:structure75,density31,framing50,format44,empathy50,autonomy63/STATE:bandwidth50,mode:Convergent,horizon:Now,stakes:Casual,domain:Home/SKILLS(Data Analytics, SQL, Python, Snowflake, Jupyter):comprehension90,active_listening100,writing70,speaking90,mathematics100,science90,critical90,active_listening80,strategies70,monitoring60,perceptiveness100,coordination80,persuasion70,negotiation70,instructing80,orientation90,problem_solving90,troubleshooting70,operations70,technology80,equipment70,programming70,analysis90,time_management70,management70,management60,management80,problem_identification100,analysis100,evaluation90,judgment70,creativity80
 ```
 
 ## Segment Anatomy (Current)
@@ -153,22 +152,63 @@ Example:
 
 ### 10) SKILL and SKILLS Segments
 
-- `SKILL` (compact career payload):
+The Skills Assessment module scores the 35 O*NET Standardized Transferable Skills (`S01`–`S35`) from raw 0–10 responses. Each skill's `normalized_score` is `raw_score * 10` (0–100 scale).
+
+- `SKILL` (compact career payload, requires a valid 8-digit O*NET SOC code on `BASE.onet.soc_code`; omitted entirely when no SOC code is present):
 
 ```text
 /SKILL:<soc8>S0190S08100S23100
 ```
 
-- `SKILLS` (readable skill metrics):
+- `SKILLS` (readable skill metrics, emitted whenever any skill responses exist, independent of whether a SOC code is set):
 
 ```text
 /SKILLS:analysis90,problem_solving75,critical80,...
 ```
 
-SKILLS naming rule:
+**Inclusion rule:** Only skills with `normalized_score >= 60` (`threshold_status: results_worthy`) are included in both `SKILL` and `SKILLS`. Skills scoring below 60 are omitted from the generated I-AM string entirely — they are never emitted at 0 or with a low value.
 
-- Prefer one-word labels.
-- When labels collide or are ambiguous, use up to two words separated by underscore.
+**Naming rule:** Each skill's O*NET name is reduced to a single-word label (the longest meaningful word in the name, stop-words like `and`/`of`/`the` excluded). A small set of overrides produces clearer two-word labels for otherwise ambiguous single words. Because the reduction is keyword-based, a few distinct skills intentionally collapse to the same label (see table below) — this is expected, not a bug.
+
+**Full skill catalog (S01–S35):**
+
+| Index | O*NET Skill | Category | SKILLS label |
+|---|---|---|---|
+| S01 | Reading Comprehension | Cognitive & Analysis | `comprehension` |
+| S02 | Active Listening | Communication & Interpersonal | `active_listening` |
+| S03 | Writing | Communication & Interpersonal | `writing` |
+| S04 | Speaking | Communication & Interpersonal | `speaking` |
+| S05 | Mathematics | Cognitive & Analysis | `mathematics` |
+| S06 | Science | Cognitive & Analysis | `science` |
+| S07 | Critical Thinking | Cognitive & Analysis | `critical` |
+| S08 | Active Learning | Cognitive & Analysis | `active_listening` |
+| S09 | Learning Strategies | Cognitive & Analysis | `strategies` |
+| S10 | Monitoring | Cognitive & Analysis | `monitoring` |
+| S11 | Social Perceptiveness | Communication & Interpersonal | `perceptiveness` |
+| S12 | Coordination | Communication & Interpersonal | `coordination` |
+| S13 | Persuasion | Communication & Interpersonal | `persuasion` |
+| S14 | Negotiation | Communication & Interpersonal | `negotiation` |
+| S15 | Instructing | Communication & Interpersonal | `instructing` |
+| S16 | Service Orientation | Communication & Interpersonal | `orientation` |
+| S17 | Complex Problem Solving | Cognitive & Analysis | `problem_solving` |
+| S18 | Troubleshooting | Technical & Specialized | `troubleshooting` |
+| S19 | Operations Analysis | Business & Process | `operations` |
+| S20 | Technology Design | Technical & Specialized | `technology` |
+| S21 | Equipment Selection | Business & Process | `equipment` |
+| S22 | Installation | Technical & Specialized | `installation` |
+| S23 | Programming | Technical & Specialized | `programming` |
+| S24 | Quality Control Analysis | Technical & Specialized | `analysis` |
+| S25 | Equipment Maintenance | Technical & Specialized | `maintenance` |
+| S26 | Repairing | Technical & Specialized | `repairing` |
+| S27 | Time Management | Business & Process | `time_management` |
+| S28 | Management of Financial Resources | Business & Process | `management` |
+| S29 | Management of Material Resources | Business & Process | `management` |
+| S30 | Management of Personnel Resources | Leadership & Management | `management` |
+| S31 | Identify Patterns | Cognitive & Analysis | `problem_identification` |
+| S32 | Data Analysis | Cognitive & Analysis | `analysis` |
+| S33 | Systems Evaluation | Cognitive & Analysis | `evaluation` |
+| S34 | Judgment & Decision Making | Cognitive & Analysis | `judgment` |
+| S35 | Creativity & Innovation | Creative & Innovation | `creativity` |
 
 ## Legacy Notes
 

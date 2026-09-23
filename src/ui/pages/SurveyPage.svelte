@@ -1632,7 +1632,7 @@
   }
 
 </script>
-<h1 style="font-size: .7em; width: 100%; text-align: center;">Personal Context Generator (<a href="/readme" target="_blank">Readme</a> - <a href="/iam" target="_blank">Format</a> - <a href="/iam-usecase" target="_blank">Use Case</a> - <a href="/examples" target="_blank">Examples</a>)</h1>
+<h1 style="font-size: .7em; width: 100%; text-align: center;">Personal Context Generator (<a href="/readme" target="_blank">Readme</a> - <a href="/iam" target="_blank">Format</a> - <a href="/iam-usecase" target="_blank">Use Case</a> - <a href="/profiles" target="_blank">Profiles</a>)</h1>
 <section class="survey-shell">
   <div class="survey-hero">
     <div class="hero-toolbar">

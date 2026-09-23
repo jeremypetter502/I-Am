@@ -60,7 +60,7 @@
 
     {#if selectedQuestion}
       <section class="control-card" aria-label="Question selection">
-        <label for="usage-question">Question title</label>
+        <label for="usage-question">Question</label>
         <select id="usage-question" bind:value={selectedQuestionIndex}>
           {#each session.questions as question, index}<option value={index}>{question.title}</option>{/each}
         </select>
@@ -68,7 +68,7 @@
 
       {#if selectedQuestion.questionMarkdown.trim()}
         <section class="question-card" aria-labelledby="actual-question-title">
-          <h2 id="actual-question-title">Question</h2>
+          <h2 id="actual-question-title">Prompt</h2>
           <MarkdownContent markdown={selectedQuestion.questionMarkdown} />
         </section>
       {/if}

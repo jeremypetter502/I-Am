@@ -19,7 +19,7 @@
     '/readme': { title: 'README', markdown: readmeMd, sourcePath: 'README.md', routePath: '/readme', mdPath: '/README.md' },
     '/iam': { title: 'I-AM String Format Overview', markdown: iamMd, sourcePath: 'docs/iam.md', routePath: '/iam', mdPath: '/docs/iam.md' },
     '/iam-usecase': { title: 'I-AM Use Cases', markdown: iamUsecaseMd, sourcePath: 'docs/iam-usecase.md', routePath: '/iam-usecase', mdPath: '/docs/iam-usecase.md' },
-    '/examples': { title: 'I-AM String Examples', markdown: exampleIamMd, sourcePath: 'docs/example-iam.md', routePath: '/examples', mdPath: '/docs/example-iam.md' }
+    '/profiles': { title: 'I-AM String Profiles', markdown: exampleIamMd, sourcePath: 'docs/example-iam.md', routePath: '/profiles', mdPath: '/docs/example-iam.md' }
   };
 
   function normalizePath(value) {

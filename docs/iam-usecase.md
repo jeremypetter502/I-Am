@@ -68,7 +68,7 @@ See [I-AM format overview](iam.md) for the latest segment syntax details.
 **Personalized response style (example):**
 "You would likely enjoy the version that balances novelty with recovery time. A city trip works best if it includes a few planned highlights and some quiet breaks. A nature getaway works best if there is enough structure to prevent the weekend from feeling vague. If you want, I can compare both options based on your energy level and preferred pace."
 
-# Other Potential Uses
+## Other Potential Uses
 
 The I-AM string could be shared with a friend, co-worker, or someone you are meeting for the first time. They could use it to ask the LLM questions about how to better understand and communicate with you.
 

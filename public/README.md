@@ -11,7 +11,18 @@
 
 AI systems suffer from context fragmentation. Every time you start a new chat session or switch to a new AI tool, you are forced to re-explain your communication preferences, working constraints, and personality traits.
 
-**I-AM** solves this with a compact, standardized string format designed for AI context injection. The platform captures survey responses into an `.iam.json` state file, runs them through a modular scoring engine, and compiles them into a portable **I-AM string** that any AI agent can consume to adapt its output immediately.
+**I-AM** solves this with a compact, standardized string format designed for AI context injection.
+
+## Quick Start
+
+### Build your own I-AM
+Use the app to build your personal I-AM string by answering survey questions. The platform captures survey responses into an `.iam.json` state file, runs them through a modular scoring engine, and compiles them into a portable **I-AM string** that any AI agent can consume to adapt its output immediately.
+ 
+### Use Pre-Built I-AMs
+Use pre-built I-AM [profiles](/profiles) to experiment with how AI responds to different personalities. You can also combine multiple I-AMs to ask how the personalities relate to each other. For example, What is the best communication method for these two I-AMs.
+
+### See Usage Testing Results
+Actual usage of the I-AM strings in various AI models can be compared in these [usage examples](\usage\usage-basic). More will be added as experimenting continues.
 
 ---
 
@@ -20,7 +31,7 @@ AI systems suffer from context fragmentation. Every time you start a new chat se
 The **I-AM string** is the primary output of this project. It condenses multi-dimensional psychometrics, preferences, aesthetic baselines, and real-time state into a single slash-delimited context token string:
 
 ```text(IAM:Ziggy)
-IAM-v0.2/BASE:Ziggy/COMMUNICATION:driver70,analytical85,expressive80,amiable60/PERSONALITY:openness85,conscientiousness75,extraversion80,agreeableness88,neuroticism35/MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contemporary63,unpretentious75/AESTHETIC(2001, Project Hail Mary, Dune, Wes21):minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75/DELIVERY2:structure75,density31,framing50,format44,empathy50,autonomy63/STATE:bandwidth50,mode:Convergent,horizon:Long,stakes:Casual,domain:Work/SKILLS(Data Analytics, SQL, Python, Snowflake, Jupyter):comprehension90,active_listening100,writing70,speaking90,mathematics100,science90,critical90,active_listening80,strategies70,monitoring60,perceptiveness100,coordination80,persuasion70,negotiation70,instructing80,orientation90,problem_solving90,troubleshooting70,operations70,technology80,equipment70,programming70,analysis90,time_management70,management70,management60,management80,problem_identification100,analysis100,evaluation90,judgment70,creativity80
+IAM-v0.2/BASE:Ziggy/COMMUNICATION:driver70,analytical85,expressive80,amiable60/PERSONALITY:openness85,conscientiousness75,extraversion80,agreeableness88,neuroticism35/MUSIC(Debussy, Metallica, Skrillex):mellow50,intense81,sophisticated69,contemporary63,unpretentious75/AESTHETIC(2001, Project Hail Mary, Dune, Wes21):minimalism67,colorfulness38,warmth75,prefers_clean50,motion63,modernity75,aesthetic_importance75/DELIVERY2:structure75,density31,framing50,format44,empathy50,autonomy63/STATE:bandwidth50,mode:Convergent,horizon:Now,stakes:Casual,domain:Home/SKILLS(Data Analytics, SQL, Python, Snowflake, Jupyter):comprehension90,active_listening100,writing70,speaking90,mathematics100,science90,critical90,active_listening80,strategies70,monitoring60,perceptiveness100,coordination80,persuasion70,negotiation70,instructing80,orientation90,problem_solving90,troubleshooting70,operations70,technology80,equipment70,programming70,analysis90,time_management70,management70,management60,management80,problem_identification100,analysis100,evaluation90,judgment70,creativity80
 ```
 
 ### How It Works
